@@ -1,6 +1,6 @@
 "Basic"
 {
-	"$basetexture" "ui/destiny2/ogre"
+	"$basetexture" "ui/destiny2/ogre_lowres"
 	"$translucent" 1
 	"$vertexcolor" 1
 	"$vertexalpha" 1

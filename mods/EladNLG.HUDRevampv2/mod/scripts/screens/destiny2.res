@@ -430,7 +430,7 @@ hud_revamp.res
 		"controlSettingsFile"		"resource/ui/destiny_offhand.res"
 	}
 
-	SuperImageBG
+	SuperImageBG //the part that will turn yellow
 	{
 		"ControlName" "ImagePanel"
 		"image" "ui/destiny2/super_empty"
@@ -448,12 +448,30 @@ hud_revamp.res
 		pin_to_sibling_corner	TOP_LEFT
 	}
 
-	SuperImage
+	SuperImage //the actual icon
 	{
 		"ControlName" "ImagePanel"
-		"image" "ui/destiny2/super_empty"
+		"image" "ui/destiny2/frog"
 		"scaleImage" "1"
 		"drawColor" "0 0 0 0" // vanilla label color
+		"visible" "1"
+		"wide" "40"
+		"tall" "40"
+		"enabled"	"1"
+
+		"xpos"			"0"
+		"ypos"			"0"
+		pin_to_sibling  			SuperImageBG
+		pin_corner_to_sibling	CENTER
+		pin_to_sibling_corner	CENTER
+	}
+
+	SuperBorder //the outline
+	{
+		"ControlName" "ImagePanel"
+		"image" "ui/destiny2/super_border"
+		"scaleImage" "1"
+		"drawColor" "255 255 255 255"
 		"visible" "1"
 		"wide" "80"
 		"tall" "80"
