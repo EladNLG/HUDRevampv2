@@ -1,0 +1,160 @@
+///////////////////////////////////////////////////////////
+// Tracker scheme resource file
+//
+// sections:
+//		Colors			- all the colors used by the scheme
+//		BaseSettings	- contains settings for app to use to draw controls
+//		Fonts			- list of all the fonts used by app
+//		Borders			- description of all the borders
+//
+///////////////////////////////////////////////////////////
+Scheme
+{
+	InheritableProperties
+	{
+	}
+	Fonts
+	{
+		OxaniumLight_43
+		{
+			isproportional only
+			1
+			{
+				name			OxaniumLight
+				tall			43
+				antialias 		1
+			}
+		}
+
+		OxaniumBold_56
+		{
+			isproportional only
+			1
+			{
+				name			OxaniumBold
+				tall			56
+				antialias 		1
+			}
+		}
+
+		OxaniumBold_43_DropShadow
+		{
+			isproportional only
+			1
+			{
+				name			OxaniumBold
+				tall			43
+				antialias 		1
+				dropshadow		1
+			}
+		}
+		
+		OxaniumBold_43
+		{
+			isproportional only
+			1
+			{
+				name			OxaniumBold
+				tall			43
+				antialias 		1
+			}
+		}
+
+		OxaniumBold_36
+		{
+			isproportional only
+			1
+			{
+				name			OxaniumBold
+				tall			36
+				antialias 		1
+			}
+		}
+
+		OxaniumBold_27
+		{
+			isproportional only
+			1
+			{
+				name			OxaniumBold
+				tall			27
+				antialias 		1
+			}
+		}
+
+		OxaniumLight_32
+		{
+			isproportional only
+			1
+			{
+				name			OxaniumLight
+				tall			32
+				antialias 		1
+			}
+		}
+
+		OxaniumLight_27
+		{
+			isproportional only
+			1
+			{
+				name			OxaniumLight
+				tall			27
+				antialias 		1
+			}
+		}
+		
+		OxaniumLight_27_ShadowGlow
+		{
+			isproportional only
+			1
+			{
+				name			OxaniumLight
+				tall			27
+				antialias 		1
+				shadowglow		7
+			}
+		}
+
+		OxaniumLight_27_Italic
+		{
+			isproportional only
+			1
+			{
+				name			OxaniumLight
+				tall			27
+				antialias 		1
+				italic			1
+			}
+		}
+
+		OxaniumLight_24
+		{
+			isproportional only
+			1
+			{
+				name			OxaniumLight
+				tall			24
+				antialias 		1
+				outline			1
+			}
+		}
+
+		OxaniumLight_18
+		{
+			isproportional only
+			1
+			{
+				name			OxaniumLight
+				tall			18
+				antialias 		1
+			}
+		}
+	}
+
+	//////////////////// BORDERS //////////////////////////////
+	// describes all the border types
+	Borders
+	{
+	}
+}

@@ -1,0 +1,84 @@
+{
+    "Name": "HUD Revamp v2",
+    "LoadPriority": 6,
+    "Version": "2.0.0",
+    "Description": "pAIN\ntest",
+    "Scripts": [
+        {
+            "Path": "cl_damageindicators.gnut",
+            "RunOn": "CLIENT",
+            "ClientCallback": {
+                "After": "Cl_DamageIndicator_Init"
+            }
+        },
+        {
+            "Path": "client/hud_revamp_layouts.nut",
+            "RunOn": "CLIENT",
+            "ClientCallback": {
+                "After": "HudRevampLayouts_Init"
+            }
+        },
+        {
+            "Path": "client/hud_revamp.nut",
+            "RunOn": "CLIENT",
+            "ClientCallback": {
+                "Before": "HudRevamp_Init"
+            }
+        },
+        {
+            "Path": "client/destiny2.nut",
+            "RunOn": "CLIENT",
+            "ClientCallback": {
+                "Before": "Destiny2_Init"
+            }
+        },
+        {
+            "Path": "ui/hud_revamp_settings.nut",
+            "RunOn": "UI",
+            "UICallback": {
+                "After": "HudRevampSettings_Init"
+            }
+        }
+    ],
+    "Dependencies": {
+        "PLAYER_HAS_MOD_SETTINGS": "Mod Settings",
+        "PLAYER_HAS_ROGUELIKE_MOD": "TF|Roguelike"
+    },
+    "ConVars": [
+        {
+            "Name":"comp_hud_layout",
+            "DefaultValue": "0",
+            "Flags": 16777216
+        },
+        {
+            "Name": "comp_hud_damage_indicator",
+            "DefaultValue": "1",
+            "Flags": 16777216
+        },
+        {
+            "Name": "comp_hud_damage_indicator_duration",
+            "DefaultValue": "1.3",
+            "Flags": 16777216
+        },
+        {
+            "Name": "comp_hud_damage_indicator_fade_time",
+            "DefaultValue": "0.5",
+            "Flags": 16777216
+        },
+        {
+            "Name": "comp_hud_incoming_damage_indicator",
+            "DefaultValue": "1",
+            "Flags": 16777216
+        },
+        {
+            "Name": "comp_hud_incoming_damage_indicator_duration",
+            "DefaultValue": "1.3",
+            "Flags": 16777216
+        },
+        {
+            "Name": "comp_hud_incoming_damage_indicator_fade_time",
+            "DefaultValue": "0.5",
+            "Flags": 16777216
+        }
+    ]
+}

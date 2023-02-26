@@ -1,0 +1,389 @@
+global function ClWeaponStatus_Init
+global function ClWeaponStatus_SetOffhandVisible
+global function ClWeaponStatus_SetWeaponVisible
+global function ClWeaponStatus_GetWeaponHudRui
+global function ClWeaponStatus_RefreshWeaponStatus
+global function GetOffhandCooldownData
+
+const RUI_TEXT_CENTER = $"ui/cockpit_console_text_center.rpak"
+const RUI_TEXT_LEFT = $"ui/cockpit_console_text_top_left.rpak"
+const RUI_TEXT_RIGHT = $"ui/cockpit_console_text_top_right.rpak"
+
+global struct OffhandCooldownData
+{
+	float timeRemaining
+	bool isReady
+	int charges
+	int readyCharges
+	float nextChargeFrac
+}
+
+struct
+{
+	bool isVisible
+	array< void functionref( float ) > updateCallbacks
+	array< void functionref() > startCallbacks
+
+	entity selectedWeapon = null
+	float curHealthAlpha = 0.9
+	float curShieldAlpha = 0.0
+} file
+
+struct {
+	vector healthPos = Vector(0.0, -0.2875, 0.0)
+    vector shieldPos = Vector(0.0, -0.34, 0.0)
+
+    string abilityText = "%.1f"
+
+} settings
+
+void function ClWeaponStatus_Init()
+{
+	if (IsLobby())
+		return
+	AddCallback_OnClientScriptInit( ClWeaponStatus_AddClient )
+	AddCallback_OnSelectedWeaponChanged( OnSelectedWeaponChanged )
+
+	AddCallback_OnPlayerLifeStateChanged( OnLifeStateChanged )
+	AddCallback_PlayerClassChanged( OnPlayerClassChanged )
+
+	AddCallback_KillReplayEnded( OnKillReplayEnded )
+}
+
+void function AddStartCallback( void functionref() callback )
+{
+	file.startCallbacks.append(callback)
+}
+
+void function AddUpdateCallback( void functionref( float ) callback )
+{
+	file.updateCallbacks.append(callback)
+}
+
+void function ClWeaponStatus_RefreshWeaponStatus( entity player )
+{
+
+}
+
+var function ClWeaponStatus_GetWeaponHudRui( entity player, entity weapon )
+{
+	return null
+}
+
+void function ClWeaponStatus_AddClient( entity player )
+{
+	Start()
+	thread UpdateThread()
+}
+
+// BASIC THREADS
+
+void function Start()
+{
+	foreach(void functionref() f in file.startCallbacks){
+		f()
+	}
+}
+
+void function UpdateThread()
+{
+	float time = Time()
+	while (true)
+	{
+		time = Time()
+		WaitFrame()
+		if (IsWatchingKillReplay()) continue
+		foreach(void functionref(float) f in file.updateCallbacks){
+			f(Time() - time)
+		}
+		//while (IsWatchingKillReplay()) { WaitFrame(); }
+	}
+}
+
+float function LerpFloat( float a, float b, float t)
+{
+	t = clamp(t, 0.0, 1.0)
+	return ((b - a) * t) + a
+}
+
+void function OnSelectedWeaponChanged( entity selectedWeapon )
+{
+	foreach(entity w in GetLocalViewPlayer().GetOffhandWeapons()){
+		if (selectedWeapon == w) return
+	}
+	file.selectedWeapon = selectedWeapon
+}
+
+// UTILITY
+
+string function GetAmmoString( entity weapon )
+{
+	string result
+	//RuiSetFloat(file.ruis["ammoDisplay"], "msgAlpha", GetConVarFloat( "comp_hud_ammo_label" ) )
+	if (!weapon.GetWeaponSettingBool( eWeaponVar.ammo_no_remove_from_stockpile ))
+	{
+		if (weapon.GetWeaponSettingInt( eWeaponVar.ammo_clip_size ) <= 1)
+		{
+			//if (file.selectedWeapon == weapon) RuiSetFloat(file.ruis["stockpile"], "msgAlpha", 0.0)
+			return (weapon.GetWeaponPrimaryAmmoCount() + weapon.GetWeaponPrimaryClipCount()).tostring()
+		}
+		if (file.selectedWeapon == weapon) {
+			//RuiSetString(file.ruis["ammoDisplay"], "msgText", "AMMO")
+			//RuiSetFloat(file.ruis["stockpile"], "msgAlpha", 0.9)
+			//RuiSetString(file.ruis["stockpile"], "msgText", weapon.GetWeaponPrimaryAmmoCount().tostring())
+		}
+		else return weapon.GetWeaponPrimaryClipCount().tostring() + "|`1" + weapon.GetWeaponPrimaryAmmoCount().tostring()
+
+		result = weapon.GetWeaponPrimaryClipCount().tostring()
+		int digits = result.len()
+
+		result += "|"
+
+		for (int i = 0; i < digits; i++)
+		{
+			result += " "
+		}
+
+		return result;
+	}
+	else
+	{
+		//if (file.selectedWeapon == weapon) RuiSetFloat(file.ruis["stockpile"], "msgAlpha", 0.0)
+		if (weapon.GetWeaponSettingFloat(eWeaponVar.regen_ammo_refill_rate) > 0.0)
+		{
+			float ammoFrac = float( weapon.GetWeaponPrimaryClipCount() ) / float( weapon.GetWeaponPrimaryClipCountMax() )
+
+			//if (file.selectedWeapon == weapon) RuiSetString(file.ruis["ammoDisplay"], "msgText", "HEAT")
+
+			return int(RoundToNearestInt(100.0 - (ammoFrac * 100.0))).tostring() + "%"
+		}
+		//else if (file.selectedWeapon == weapon) RuiSetString(file.ruis["ammoDisplay"], "msgText", "AMMO")
+	}
+	return weapon.GetWeaponPrimaryClipCount().tostring()
+}
+
+// could be useful, but we are already checking for weapon changed, so?
+void function OnPlayerClassChanged( entity player )
+{
+
+}
+
+// destroy all ruis when dead after doing life checks
+void function OnLifeStateChanged( entity player, int oldLifeState, int newLifeState )
+{
+
+}
+
+void function OnKillReplayEnded()
+{
+
+}
+
+void function GetOffhandCooldownData( OffhandCooldownData data, entity weapon )
+{
+	entity player = weapon.GetWeaponOwner()
+	float altCooldown = 0.0
+	float timeUntilNextCharge = 0.0
+	int maxCharges = 1
+	float minFracToUse = 1
+	bool doNotSetText = false
+	float ammoFrac = 0
+	if (weapon.IsChargeWeapon()) ammoFrac = 1 - weapon.GetWeaponChargeFraction()
+	if (weapon.GetWeaponPrimaryClipCountMax() > 0) ammoFrac = float(weapon.GetWeaponPrimaryClipCount()) / weapon.GetWeaponPrimaryClipCountMax()
+	switch ( weapon.GetWeaponInfoFileKeyField( "cooldown_type" ) )
+	{
+		case "ammo_swordblock":
+			ammoFrac = 0
+			timeUntilNextCharge = 0
+			altCooldown = 0
+			break
+
+		case "shared_energy":
+			int curCost = weapon.GetWeaponCurrentEnergyCost() // 350
+			float energy = float( player.GetSharedEnergyCount() )
+			float maxEnergy = float( player.GetSharedEnergyTotal() ) // 1000
+			float energyRegenRate = player.GetSharedEnergyRegenRate()
+
+			maxCharges = int( maxEnergy ) / curCost
+			minFracToUse = float( curCost ) / maxEnergy
+			int curCharges = int( energy ) / curCost
+			int targetAmmo = (curCharges + 1) * curCost
+			timeUntilNextCharge = (targetAmmo - energy) / energyRegenRate
+			ammoFrac = (energy / curCost / maxCharges)
+
+			// Ability - 2/2 | 2.5s
+			break
+
+		case "shared_energy_drain":
+			float energy = float( player.GetSharedEnergyCount() )
+			float maxEnergy = float( player.GetSharedEnergyTotal() ) // 1000
+			float energyRegenRate = player.GetSharedEnergyRegenRate()
+			maxCharges = 1
+
+			minFracToUse = 0.1
+			timeUntilNextCharge = (maxEnergy - energy) / energyRegenRate
+			ammoFrac = (energy / maxEnergy)
+
+
+			if (player.GetActiveWeapon() == weapon)
+			{
+				timeUntilNextCharge = (energy / maxEnergy) * weapon.GetWeaponSettingFloat( eWeaponVar.charge_time )
+			}
+			break
+
+		case "vortex_drain":
+			// display percentage/cooldown
+			break
+
+		case "charged_shot":
+			float chargeCooldownTime = weapon.GetWeaponSettingFloat( eWeaponVar.charge_cooldown_time )
+			timeUntilNextCharge = (1 - ammoFrac) * chargeCooldownTime
+			ammoFrac = 1 - weapon.GetWeaponChargeFraction()
+			switch (weapon.GetWeaponClassName())
+			{
+				case "mp_titanweapon_shoulder_rockets":
+					minFracToUse = 0.2
+					break;
+				case "mp_titanweapon_vortex_shield":
+					minFracToUse = 0.1
+					break;
+				default:
+					minFracToUse = 1
+			}
+			break
+
+		case "grapple":
+			int ammoClipSize = 100
+			float ammoMinToFire = weapon.GetWeaponSettingFloat( eWeaponVar.grapple_power_required )
+			float grapplePower = player.GetSuitGrapplePower()
+			float grappleRegenRate = 3.0
+
+			if (player.HasPassive( ePassives.PAS_POWER_CELL ))
+			{
+				// AAAAAAAAAAAA
+				grappleRegenRate *= 1.35
+			}
+
+			try
+			{
+				maxCharges = ammoClipSize / int(ammoMinToFire)
+			}
+			catch (ex) { maxCharges = 1 }
+			minFracToUse = ammoMinToFire / ammoClipSize
+			if (ammoMinToFire > 0) maxCharges = ammoClipSize / int( ammoMinToFire )
+			int curCharges = 0;
+			if (ammoMinToFire > 0) curCharges = int( grapplePower ) / int( ammoMinToFire )
+			int targetAmmo = (curCharges + 1) * int( ammoMinToFire )
+			timeUntilNextCharge = (targetAmmo - grapplePower) / grappleRegenRate
+			if (GameRules_GetGameMode() == "econ")
+				timeUntilNextCharge = 0.0
+			if (ammoClipSize == grapplePower) timeUntilNextCharge = 0
+			ammoFrac = grapplePower / ammoClipSize
+
+			break
+
+		case "ammo_instant":
+			int cost = weapon.GetWeaponSettingInt( eWeaponVar.shared_energy_cost )
+			if (cost > 0)
+			{
+				float energy = float( player.GetSharedEnergyCount() )
+				if (energy < cost)
+				{
+					float energyRegenRate = player.GetSharedEnergyRegenRate()
+					float timeUntilNextCharge = (cost - energy) / energyRegenRate
+					if (timeUntilNextCharge > altCooldown)
+						altCooldown = timeUntilNextCharge
+				}
+			}
+		default:
+			float refillRate = weapon.GetWeaponSettingFloat( eWeaponVar.regen_ammo_refill_rate )
+
+			float timeUntilNextAttack = weapon.GetNextAttackAllowedTime() - Time()
+			int ammoClipSize = weapon.GetWeaponSettingInt( eWeaponVar.ammo_clip_size )
+			int ammoMinToFire = weapon.GetWeaponSettingInt( eWeaponVar.ammo_min_to_fire )
+			//RuiSetFloat3( bar["bg"].imageRuis[0], "basicImageColor", <0, 0, 0> )
+			if (timeUntilNextAttack > altCooldown)
+			{
+				altCooldown = timeUntilNextAttack
+			}
+			if ( refillRate > 0 || !weapon.IsChargeWeapon())
+			{
+				//printt( "HUD: ", weapon.GetWeaponClassName(), "using", "refillRate" )
+				// returns MP setting despite it being 1
+				//printt(weapon.GetWeaponSettingString(eWeaponVar.printname), "| max ammo:", ammoClipSize, "min to fire:", ammoMinToFire)
+
+				maxCharges = ammoClipSize / ammoMinToFire
+				minFracToUse = float( ammoMinToFire ) / ammoClipSize
+				int curCharges = weapon.GetWeaponPrimaryClipCount() / ammoMinToFire
+				int targetAmmo = (curCharges + 1) * ammoMinToFire
+				if (refillRate > 0)
+					timeUntilNextCharge = float(targetAmmo - weapon.GetWeaponPrimaryClipCount()) / refillRate
+				else timeUntilNextCharge = 0.0
+				if (ammoClipSize == weapon.GetWeaponPrimaryClipCount()) timeUntilNextCharge = 0
+
+
+			}
+			else
+			{
+				float chargeCooldownTime = weapon.GetWeaponSettingFloat( eWeaponVar.charge_cooldown_time )
+				timeUntilNextCharge = (1 - ammoFrac) * chargeCooldownTime
+				switch (weapon.GetWeaponClassName())
+				{
+					case "mp_titanweapon_shoulder_rockets":
+						minFracToUse = 0.2
+						break;
+					case "mp_titanweapon_vortex_shield":
+						minFracToUse = 0.1
+						break;
+					default:
+						minFracToUse = 1
+				}
+			}
+			if (weapon.GetWeaponSettingFloat( eWeaponVar.fire_duration ) > 0)
+			{
+				if (timeUntilNextAttack > 1 / weapon.GetWeaponSettingFloat( eWeaponVar.fire_rate ))
+				{
+					//RuiSetFloat3( bar["bg"].imageRuis[0], "basicImageColor", <1, 0.5, 0.0> )
+					timeUntilNextCharge = timeUntilNextAttack - 1 / weapon.GetWeaponSettingFloat( eWeaponVar.fire_rate )
+					float fireDuration = 1 / weapon.GetWeaponSettingFloat( eWeaponVar.fire_rate ) +
+						weapon.GetWeaponSettingFloat( eWeaponVar.fire_duration )
+					if (weapon.GetWeaponSettingBool(eWeaponVar.ammo_drains_to_empty_on_fire))
+						ammoFrac = GraphCapped( weapon.GetNextAttackAllowedTime() - Time(), fireDuration, 0, 1, 0 )
+					else
+						ammoFrac = GraphCapped( weapon.GetNextAttackAllowedTime() - Time(), fireDuration, 0, 
+							(weapon.GetWeaponPrimaryClipCount() + weapon.GetWeaponSettingInt( eWeaponVar.ammo_per_shot )) / float(ammoClipSize), ammoFrac )
+				}
+			}
+			break
+	}
+
+	float cooldown = max(timeUntilNextCharge, altCooldown)
+	maxCharges = int( max(1, maxCharges) )
+
+	data.timeRemaining = cooldown
+	data.readyCharges = int( ammoFrac * maxCharges)
+	data.charges = maxCharges
+	data.nextChargeFrac = (ammoFrac * maxCharges) % 1.0
+	data.isReady = ammoFrac < minFracToUse
+
+}
+
+var function GetPlayerSetting( entity player, string setting )
+{
+	return GetPlayerSettingsFieldForClassName( player.GetPlayerSettings(), setting )
+}
+
+void function ClWeaponStatus_SetOffhandVisible( int offhandIndex, bool newState )
+{
+	// ALSO A STUB :D
+}
+
+void function ClWeaponStatus_SetWeaponVisible( bool newState )
+{
+
+}
+
+var function GetRuiForIndex( entity player, int offhandIndex )
+{
+	return null
+}

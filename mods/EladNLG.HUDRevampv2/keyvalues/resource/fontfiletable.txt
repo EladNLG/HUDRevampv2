@@ -1,0 +1,7 @@
+FontFileTable
+{
+	"OxaniumLight"				"resource/Oxanium-Regular.ttf"
+	"OxaniumBold"				"resource/Oxanium-SemiBold.ttf"
+	"DestinyMedium"				"resource/DontSueMe_M.ttf"
+	"DestinyLight"				"resource/DontSueMe_R.ttf"
+}

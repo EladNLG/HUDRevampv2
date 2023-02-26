@@ -1,0 +1,263 @@
+untyped
+global function Cl_DamageIndicator_Init
+global function PlayerDidDamageText
+global function CalculateDivisorForEntity
+// ()
+const vector INCOMING_DAMAGE_TEXT_BEGIN_POS = <0.63, 0.5 - 0.3, 0>
+float OUTGOING_DAMAGE_TEXT_STACKING_FADE_TIME = 0.5
+float OUTGOING_DAMAGE_TEXT_STACKING_DURATION = 1.3
+float OUTGOING_DAMAGE_TEXT_STACKING_STAY_TIME = 0.8
+float OUTGOING_DAMAGE_TEXT_SMALL_FADE_TIME = 0.5
+
+float INCOMING_DAMAGE_TEXT_STACKING_FADE_TIME = 0.5
+float INCOMING_DAMAGE_TEXT_STACKING_DURATION = 1.3
+float INCOMING_DAMAGE_TEXT_STACKING_STAY_TIME = 0.8
+
+var lastOutgoingDamageTextRui = null
+var stackingIncomingDamageTextRui = null
+float lastIncomingDamageTextHitTime = -99.0
+float accumulatedIncomingDamage = 0.0
+
+vector msgPos = <0,0,0>
+var aspectRatioFixTopo
+
+float[2]& screenSize = [1920, 1080]
+
+struct OutgoingDamageData
+{
+	float damage
+	int accumelatedHits
+	float lastHitTime
+	bool isLastHitCrit
+	vector msgPos
+}
+table<entity, OutgoingDamageData> damageIndicators
+
+void function Cl_DamageIndicator_Init()
+{
+	screenSize = GetScreenSize()
+	foreach ( k, v in eDamageSourceId )
+	{
+		AddLocalPlayerTookDamageCallback( v, PlayerTookDamage )
+	}
+	
+	#if MP
+		//ClPilotSpeedometer_Init()
+	#endif
+    float right = (screenSize[1] / 9.0) * 16.0
+	float down = screenSize[1]
+	float xOffset = (screenSize[0] - right) / 2
+	aspectRatioFixTopo = RuiTopology_CreatePlane( <xOffset, 0, 0>, <right, 0, 0>, <0, down, 0>, false )
+    thread Thread_StackingDamageFlyoutText()
+}
+
+void function PlayerTookDamage( float damage, vector pos, int damageType, int damageSourceId, entity attacker )
+{
+	if (!GetLocalViewPlayer().IsTitan() || !GetConVarBool("comp_hud_incoming_damage_indicator")) return
+	if (Time() - lastIncomingDamageTextHitTime > GetConVarFloat("comp_hud_incoming_damage_indicator_duration"))
+		accumulatedIncomingDamage = damage
+	else accumulatedIncomingDamage += damage
+	lastIncomingDamageTextHitTime = Time() // :D
+	RuiSetString( stackingIncomingDamageTextRui, "msgText", format( "-%i", int( accumulatedIncomingDamage ) ) )
+}
+
+void function CreateStackingDamageFlyout( entity s, float damage, bool isCrit, vector msgPos )
+{
+	var rui = RuiCreate( $"ui/cockpit_console_text_top_left.rpak", aspectRatioFixTopo, RUI_DRAW_HUD, 0)
+	RuiSetInt( rui, "maxLines", 1 );
+	RuiSetInt( rui, "lineNum", 0 );
+	RuiSetFloat2( rui, "msgPos", WorldToScreenPos(msgPos) - <0, 0.01, 0> )
+	RuiSetString( rui, "msgText",  RecursiveCommas(damage.tointeger()) )
+	RuiSetFloat3( rui, "msgColor", isCrit ? <0.9, 0.55, 0.3> : <0.9, 0.9, 0.9> )
+	RuiSetFloat( rui, "msgFontSize", 36.0)
+	RuiSetFloat( rui, "msgAlpha", 0.9 )
+	RuiSetFloat( rui, "thicken", 0.0 )
+
+	OutgoingDamageData data
+	data.damage = damage
+	data.isLastHitCrit = isCrit
+	data.accumelatedHits = 1
+	data.msgPos = msgPos
+	data.lastHitTime = Time()
+	damageIndicators[s] <- data
+
+	while (Time() - data.lastHitTime <= OUTGOING_DAMAGE_TEXT_STACKING_STAY_TIME + OUTGOING_DAMAGE_TEXT_STACKING_FADE_TIME)
+	{
+		RuiSetString( rui, "msgText", RecursiveCommas(data.damage.tointeger()) )
+		RuiSetFloat2( rui, "msgPos", WorldToScreenPos(data.msgPos) - <0.0, 0.01, 0> )
+		RuiSetFloat( rui, "msgAlpha", GraphCapped( Time() - data.lastHitTime, OUTGOING_DAMAGE_TEXT_STACKING_STAY_TIME, 
+			OUTGOING_DAMAGE_TEXT_STACKING_STAY_TIME + OUTGOING_DAMAGE_TEXT_STACKING_FADE_TIME, 0.9, 0.0 ) )
+		RuiSetFloat3( rui, "msgColor", data.isLastHitCrit ? <0.9, 0.55, 0.3> : <0.9, 0.9, 0.9> )
+		WaitFrame()
+	}
+	RuiDestroyIfAlive(rui)
+	delete damageIndicators[s]
+}
+
+void function AddSmallDamageTextFlyout(float damage, bool isCrit, vector msgPos)
+{
+	var rui = RuiCreate( $"ui/cockpit_console_text_top_left.rpak", aspectRatioFixTopo, RUI_DRAW_HUD, 0)
+	RuiSetInt( rui, "maxLines", 1 );
+	RuiSetInt( rui, "lineNum", 0 );
+	RuiSetFloat2( rui, "msgPos", WorldToScreenPos(msgPos) - <0, 0.01, 0> )
+	RuiSetString( rui, "msgText",  RecursiveCommas(damage.tointeger()) )
+	RuiSetFloat3( rui, "msgColor", isCrit ? <0.9, 0.55, 0.3> : <0.9, 0.9, 0.9> )
+	RuiSetFloat( rui, "msgFontSize", 24.0)
+	RuiSetFloat( rui, "msgAlpha", 0.5 )
+	RuiSetFloat( rui, "thicken", 0.0 )
+
+	float startTime = Time()
+	
+	while ( Time() - startTime < OUTGOING_DAMAGE_TEXT_SMALL_FADE_TIME )
+	{
+		float alpha = Graph( Time() - startTime, 0, OUTGOING_DAMAGE_TEXT_SMALL_FADE_TIME, 0.5, 0 )
+		vector posOffset = <0, 0.01, 0>
+		posOffset.y += Graph( Time() - startTime, 0, OUTGOING_DAMAGE_TEXT_SMALL_FADE_TIME, 0, -0.05 )
+		RuiSetFloat( rui, "msgAlpha", alpha )
+		RuiSetFloat2( rui, "msgPos", WorldToScreenPos(msgPos) + posOffset )
+		WaitFrame()
+	}
+	RuiDestroyIfAlive(rui)
+}
+
+void function Thread_StackingDamageFlyoutText()
+{
+
+	// incoming damage text
+	stackingIncomingDamageTextRui = RuiCreate( $"ui/cockpit_console_text_top_left.rpak", aspectRatioFixTopo, RUI_DRAW_HUD, 1)
+	RuiSetInt( stackingIncomingDamageTextRui, "maxLines", 1 );
+	RuiSetInt( stackingIncomingDamageTextRui, "lineNum", 0 );
+	RuiSetFloat2( stackingIncomingDamageTextRui, "msgPos", INCOMING_DAMAGE_TEXT_BEGIN_POS )
+	RuiSetFloat( stackingIncomingDamageTextRui, "thicken", 0.0 )
+	RuiSetFloat( stackingIncomingDamageTextRui, "msgFontSize", 40.0)
+	RuiSetFloat3( stackingIncomingDamageTextRui, "msgColor", <0.85, 0.0, 0.0> )
+	RuiSetFloat( stackingIncomingDamageTextRui, "msgAlpha", 0.9 )
+	RuiSetFloat( stackingIncomingDamageTextRui, "thicken", 0.0 )
+
+	while (true)
+	{
+		if (IsValid(GetLocalViewPlayer()))
+		{
+			INCOMING_DAMAGE_TEXT_STACKING_FADE_TIME = GetConVarFloat("comp_hud_incoming_damage_indicator_fade_time")
+			INCOMING_DAMAGE_TEXT_STACKING_DURATION = GetConVarFloat("comp_hud_incoming_damage_indicator_duration")
+			INCOMING_DAMAGE_TEXT_STACKING_STAY_TIME = INCOMING_DAMAGE_TEXT_STACKING_DURATION - INCOMING_DAMAGE_TEXT_STACKING_FADE_TIME
+
+			OUTGOING_DAMAGE_TEXT_STACKING_FADE_TIME = GetConVarFloat("comp_hud_damage_indicator_fade_time")
+			OUTGOING_DAMAGE_TEXT_STACKING_DURATION = GetConVarFloat("comp_hud_damage_indicator_duration")
+			OUTGOING_DAMAGE_TEXT_STACKING_STAY_TIME = OUTGOING_DAMAGE_TEXT_STACKING_DURATION - OUTGOING_DAMAGE_TEXT_STACKING_FADE_TIME
+
+			if (OUTGOING_DAMAGE_TEXT_STACKING_STAY_TIME < 0)
+			{
+				OUTGOING_DAMAGE_TEXT_STACKING_STAY_TIME = 0
+				SetConVarFloat("comp_hud_damage_indicator_duration", OUTGOING_DAMAGE_TEXT_STACKING_DURATION)
+			}
+			
+			// incoming damage text update
+			
+			float timeSinceLastHit = Time() - lastIncomingDamageTextHitTime
+			float alpha = GraphCapped( timeSinceLastHit - INCOMING_DAMAGE_TEXT_STACKING_STAY_TIME, 0, INCOMING_DAMAGE_TEXT_STACKING_FADE_TIME, 0.9, 0)
+			RuiSetFloat( stackingIncomingDamageTextRui, "msgAlpha", alpha )
+			switch (GetLocalViewPlayer().GetPlayerModHealth())
+			{
+				case 12500:
+				case 9000:
+					// 5 segments - 1500 per segment for BT, 2500 for legion/scorch
+					RuiSetFloat2( stackingIncomingDamageTextRui, "msgPos", INCOMING_DAMAGE_TEXT_BEGIN_POS + <0.035, 0, 0> )
+					break;
+				case 10000:
+					RuiSetFloat2( stackingIncomingDamageTextRui, "msgPos", INCOMING_DAMAGE_TEXT_BEGIN_POS )
+					break;
+				case 7500:
+					RuiSetFloat2( stackingIncomingDamageTextRui, "msgPos", INCOMING_DAMAGE_TEXT_BEGIN_POS - <0.035, 0, 0> )
+					break;
+			}
+		}
+
+		WaitFrame()
+	}
+}
+
+vector function WorldToScreenPos( vector position )
+{
+    array pos = expect array( Hud.ToScreenSpace( position ) )
+
+	float aspectRatio = screenSize[0] / screenSize[1]
+	float targetAspectRatio = 1.77777778
+
+    vector result = <float( pos[0] ) / screenSize[0] / aspectRatio * targetAspectRatio, float( pos[1] ) / screenSize[1], 0 >
+    //print(result)
+    return result
+}
+
+string function RecursiveCommas(int n, bool recursed = false)
+{
+    int rest = n % 1000; //"last 3 digits"
+    n /= 1000;  
+
+    if (n > 0) {
+        return RecursiveCommas(n) + "," + format( "%03i", rest ); //printing "begining"
+    }
+    
+    return rest.tostring(); //first chunk of the number
+}
+void function PlayerDidDamageText( float damage, vector damagePosition, entity victim, bool isCrit, bool isIneffective )
+{
+	if (!GetConVarBool("comp_hud_damage_indicator")) return
+
+	float damageScale = 1.0
+	msgPos = victim.GetOrigin() + <0,0,victim.GetBoundingMaxs().z>
+	damageScale *= CalculateDivisorForEntity(victim)
+
+	thread AddSmallDamageTextFlyout( damage * damageScale, isCrit, msgPos )
+	
+	if (victim in damageIndicators)
+	{
+		OutgoingDamageData data = damageIndicators[victim]
+		data.lastHitTime = Time()
+		data.damage += damage * damageScale
+		data.isLastHitCrit = isCrit
+		data.msgPos = msgPos
+	}
+	else 
+	{
+		thread CreateStackingDamageFlyout( victim, damage * damageScale, isCrit, msgPos )
+	}
+}
+
+float function CalculateDivisorForEntity( entity npc )
+{
+	#if !PLAYER_HAS_ROGUELIKE_MOD
+		return 1.0
+	#else
+		if (npc.IsNPC())
+		{
+			try
+			{
+				if (typeof( npc.Dev_GetAISettingByKeyField( "Health" ) ) == "string") return 1.0
+			}
+			catch (ex)
+			{
+				return 1.0
+			}
+		} 
+		else if (!npc.IsPlayer()) return 1.0
+
+		int baseHealth = expect int (npc.IsNPC() ? npc.Dev_GetAISettingByKeyField( "Health" ) : int(npc.GetPlayerModHealth()))
+
+		//printt("BASE HEALTH:", baseHealth)
+		//printt("NEW BASE HEALTH:", baseHealth)
+		//printt("HEALTH PER LEVEL:", int(0.3 * baseHealth))
+		//printt("ROGUELIKE_DIFFICULTY:", roguelikeDifficulty)
+		//printt("HEALTH FROM LEVELS:", int(0.3 * baseHealth) * roguelikeDifficulty)
+		int level = npc.GetTeam() == TEAM_IMC ? roguelikeDifficulty : roguelikeLevel
+		int newBaseHealth = baseHealth + int(0.3 * baseHealth) * level
+		//printt("NEW HEALTH:", newBaseHealth)
+		baseHealth = int(max(min( newBaseHealth, 524287 ),10))
+
+		if (newBaseHealth > baseHealth)
+		{
+			return float(newBaseHealth) / baseHealth
+		}
+		return 1.0
+	#endif
+}	
