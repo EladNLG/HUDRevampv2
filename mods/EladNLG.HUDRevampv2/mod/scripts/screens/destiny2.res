@@ -17,6 +17,21 @@ hud_revamp.res
 		scaleImage		1
 		visible			1
 	}
+
+	Destiny_GameStatePanel
+	{
+		"ControlName"				"CNestedPanel"
+		"classname"					"ModButton"
+		"tall"						"200"
+		"wide"						"1200"
+		"xpos"						"360"
+		"ypos"						"0"
+		"pin_corner_to_sibling"		"TOP_LEFT"
+		"pin_to_sibling_corner"		"TOP_LEFT"
+		"controlSettingsFile"		"resource/ui/destiny_gamestate.res"
+	}
+
+
 	// HEALTHBAR //
 
 	HealthBarBG
@@ -31,7 +46,7 @@ hud_revamp.res
 		"enabled"	"1"
 
 		"xpos"			"710" // can't use rXXX, is relative to screen resolution and not parent panel.
-		"ypos"			"160" // can't use rXXX, is relative to screen resolution and not parent panel.
+		"ypos"			"240" // can't use rXXX, is relative to screen resolution and not parent panel.
 	}
 
 	HealthBar
@@ -56,8 +71,8 @@ hud_revamp.res
 		CircularEnabled 		0
 		CircularClockwise		1
 
-		xpos				-4
-		ypos				-5
+		xpos				2
+		ypos				1
 		wide				492
 		tall				16
 		visible				1
@@ -496,7 +511,7 @@ hud_revamp.res
 		"enabled"	"1"
 
 		"xpos"			"-78"
-		"ypos"			"-31.5"
+		"ypos"			"-31.75"
 		pin_to_sibling  			DestinyLoadoutPanel
 		pin_corner_to_sibling	TOP_LEFT
 		pin_to_sibling_corner	TOP_LEFT
@@ -525,7 +540,7 @@ hud_revamp.res
 		CircularClockwise		1
 
 		xpos				-78
-		ypos				-31.5
+		ypos				-31.75
 		wide				482
 		tall				16
 		visible				1

@@ -143,7 +143,7 @@ void function HudRevamp_Update( var panel )
 
     Hud_SetBarProgress( HudElement("HealthBar", panel), GetHealthFrac(player) )
     Hud_SetBarProgress( SuperBar, PlayerEarnMeter_GetEarnedFrac(player) )
-    if(PlayerEarnMeter_GetEarnedFrac(player) >= 0.1){
+    if(PlayerEarnMeter_GetEarnedFrac(player) >= 1){
         Hud_SetColor( SuperBar, 223, 194, 79, 255 )
         Hud_SetColor( SuperIcon_BG, 223, 194, 79, 255 )
         Hud_SetColor( SuperIcon, 255, 255, 255, 255 )
