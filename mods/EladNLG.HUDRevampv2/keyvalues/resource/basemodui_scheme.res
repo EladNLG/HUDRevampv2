@@ -48,7 +48,7 @@ Scheme
 				dropshadow		1
 			}
 		}
-		
+
 		OxaniumBold_43
 		{
 			isproportional only
@@ -103,7 +103,7 @@ Scheme
 				antialias 		1
 			}
 		}
-		
+
 		OxaniumLight_27_ShadowGlow
 		{
 			isproportional only
@@ -136,7 +136,6 @@ Scheme
 				name			OxaniumLight
 				tall			24
 				antialias 		1
-				outline			1
 			}
 		}
 

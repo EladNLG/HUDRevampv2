@@ -29,10 +29,10 @@ void function OpenMissingDepPopup()
 	dialogData.header = "MISSING REQUIRED DEPENDENCY"
 	dialogData.message = "HUDRevamp requires ModSettings to function. The mod was not found. Please download it."
 	dialogData.image = $"ui/menu/common/dialog_error"
-	AddDialogButton( dialogData, "Retry", void function() { 
+	AddDialogButton( dialogData, "Retry", void function() {
 		ClientCommand("uiscript_reset")
 	} )
-	AddDialogButton( dialogData, "Download", void function() { 
+	AddDialogButton( dialogData, "Download", void function() {
 		LaunchExternalWebBrowser( "https://northstar.thunderstore.io/package/EladNLG/ModSettings/", WEBBROWSER_FLAG_FORCEEXTERNAL )
 		OpenMissingDepPopup()
 	} )

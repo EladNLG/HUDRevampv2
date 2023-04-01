@@ -116,7 +116,7 @@ string function ExpandString( string str )
 }
 
 
-float d2_healthbar_opacity = 1.0
+float lastTimeHealthNotFull = -99
 bool d2_healthbar_needs_update = false
 bool d2_healthbar_updating = false
 
@@ -125,11 +125,12 @@ void function HudRevamp_Update( var panel )
     entity player = GetLocalClientPlayer()
     EarnObject earnGoal = PlayerEarnMeter_GetGoal( player )
     EarnObject earnReward = PlayerEarnMeter_GetReward( player )
+    if (IsSingleplayer())
+    {
+        Hud_SetVisible(HudElement("Destiny_GameStatePanel", panel), false)
+    }
     if (!IsValid(file.selectedWeapon) || file.selectedWeapon.GetWeaponOwner() != GetLocalClientPlayer())
         return
-    HudElement("WeaponIcon", panel).SetImage(
-        GetWeaponInfoFileKeyFieldAsset_Global( file.selectedWeapon.GetWeaponClassName(), "hud_icon" )
-    )
 
     var SuperBar = HudElement("SuperBar", panel)
     var SuperIcon_BG = HudElement("SuperImageBG", panel)
@@ -157,19 +158,13 @@ void function HudRevamp_Update( var panel )
     }
 
     if(GetHealthFrac(player) < 1){
-        d2_healthbar_opacity = 1
-    }
-    else{
-        if(d2_healthbar_opacity > 0){
-            d2_healthbar_opacity -= 0.01
-        }
-        else{
-            d2_healthbar_opacity = 0
-        }
+        lastTimeHealthNotFull = Time()
     }
 
+    float d2_healthbar_opacity = GraphCapped(Time() - lastTimeHealthNotFull, 0, 1, 1, 0)
     Hud_SetColor( HudElement("HealthBar", panel), 255, 255, 255, d2_healthbar_opacity * 255 )
-
+    Hud_SetColor( HudElement("HealthBarBG", panel), 0, 0, 0, d2_healthbar_opacity * 120 )
+    UpdateMainWeapons( player, panel )
 
     int shield = 0
     int maxShield = 0
@@ -200,127 +195,6 @@ void function HudRevamp_Update( var panel )
     }
     catch (ex)
     {}
-    Hud_SetText( HudElement("Health", panel), "") //(GetHealthFrac(player)).tostring() )
-    Hud_SetText( HudElement("MaxHealth", panel), "")//player.GetMaxHealth().tostring() )
-    int weaponIndex = 0
-    array<entity> weapons = player.GetMainWeapons()
-    foreach (int index, entity weapon in weapons)
-        if (weapon == file.selectedWeapon)
-        {
-            weaponIndex = index
-            break
-        }
-    bool hasSecondary = weapons.len() > 1
-    bool hasTertiary = weapons.len() > 2
-
-    var weaponIcon1 = HudElement("WeaponIcon1", panel)
-    var weaponIcon2 = HudElement("WeaponIcon2", panel)
-    var stockpileCount1 = HudElement("AmmoStockpileSecondary", panel)
-    var stockpileCount2 = HudElement("AmmoStockpileTertiary", panel)
-
-    var weaponRibbon0 = HudElement("DestinyPrimaryRibbon", panel)
-    var weaponRibbon1 = HudElement("DestinySecondaryRibbon", panel)
-    var weaponRibbon2 = HudElement("DestinyTertiaryRibbon", panel)
-
-
-    Hud_SetVisible( stockpileCount1, hasSecondary )
-    Hud_SetVisible( stockpileCount2, hasTertiary )
-    Hud_SetVisible( HudElement("DestinySecondarySlot", panel), hasSecondary )
-    Hud_SetVisible( HudElement("DestinySecondaryRibbon", panel), hasSecondary )
-    Hud_SetVisible( HudElement("DestinySecondarySlotDividerRibbon", panel), hasTertiary )
-    Hud_SetVisible( HudElement("DestinyTertiarySlot", panel), hasTertiary )
-    Hud_SetVisible( HudElement("DestinyTertiaryRibbon", panel), hasTertiary )
-
-
-
-    if (weaponIndex == 0)
-    {
-        SetColorForWeaponType( weaponRibbon0, weapons[0] )
-        if(hasSecondary) Hud_SetText( stockpileCount1, GetStowedAmmoString(weapons[1]) )
-        if(hasTertiary) Hud_SetText( stockpileCount2, GetStowedAmmoString(weapons[2]) )
-        if (weapons.len() > 1) {
-
-            weaponIcon1.SetColor( 200, 200, 200, 175 )
-            weaponIcon1.SetImage(
-                GetWeaponInfoFileKeyFieldAsset_WithMods_Global( weapons[1].GetWeaponClassName(), weapons[1].GetMods(), "hud_icon" )
-            )
-            SetColorForWeaponType( weaponRibbon1, weapons[1] )
-
-        }
-        else weaponIcon1.SetColor( 0, 0, 0, 0 )
-        if (weapons.len() > 2) {
-            weaponIcon2.SetColor( 200, 200, 200, 175 )
-            weaponIcon2.SetImage(
-                GetWeaponInfoFileKeyFieldAsset_WithMods_Global( weapons[2].GetWeaponClassName(), weapons[2].GetMods(), "hud_icon" )
-            )
-            SetColorForWeaponType( weaponRibbon2, weapons[2] )
-        }
-        else weaponIcon2.SetColor( 0, 0, 0, 0 )
-
-    }
-    else if (weaponIndex == 1)
-    {
-        SetColorForWeaponType( weaponRibbon0, weapons[1] )
-        SetColorForWeaponType( weaponRibbon1, weapons[0] )
-        if(hasSecondary) Hud_SetText( stockpileCount1, GetStowedAmmoString(weapons[0]) )
-        if(hasTertiary) Hud_SetText( stockpileCount2, GetStowedAmmoString(weapons[2]) )
-        weaponIcon1.SetColor( 200, 200, 200, 175 )
-        weaponIcon1.SetImage(
-            GetWeaponInfoFileKeyFieldAsset_WithMods_Global( weapons[0].GetWeaponClassName(), weapons[0].GetMods(), "hud_icon" )
-        )
-        if (weapons.len() > 2) {
-            weaponIcon2.SetColor( 200, 200, 200, 175 )
-            weaponIcon2.SetImage(
-                GetWeaponInfoFileKeyFieldAsset_WithMods_Global( weapons[2].GetWeaponClassName(), weapons[2].GetMods(), "hud_icon" )
-            )
-            SetColorForWeaponType( weaponRibbon2, weapons[2] )
-        }
-        else weaponIcon2.SetColor( 0, 0, 0, 0 )
-
-    }
-    else if (weaponIndex == 2)
-    {
-        if(hasSecondary) Hud_SetText( stockpileCount1, GetStowedAmmoString(weapons[0]) )
-        if(hasTertiary) Hud_SetText( stockpileCount2, GetStowedAmmoString(weapons[1]) )
-        weaponIcon1.SetColor( 200, 200, 200, 175 )
-        weaponIcon2.SetColor( 200, 200, 200, 175 )
-        weaponIcon1.SetImage(
-            GetWeaponInfoFileKeyFieldAsset_WithMods_Global( weapons[0].GetWeaponClassName(), weapons[0].GetMods(), "hud_icon" )
-        )
-        weaponIcon2.SetImage(
-            GetWeaponInfoFileKeyFieldAsset_WithMods_Global( weapons[1].GetWeaponClassName(), weapons[1].GetMods(), "hud_icon" )
-        )
-        SetColorForWeaponType( weaponRibbon0, weapons[2] )
-        SetColorForWeaponType( weaponRibbon1, weapons[0] )
-        SetColorForWeaponType( weaponRibbon2, weapons[1] )
-    }
-
-    var ammoCount = HudElement("AmmoCount", panel)
-    var stockpileCount0 = HudElement("AmmoStockpilePrimary", panel)
-
-
-    bool displayStockpile = (!file.selectedWeapon.GetWeaponSettingBool(eWeaponVar.ammo_no_remove_from_stockpile) &&
-    file.selectedWeapon.GetWeaponSettingInt(eWeaponVar.ammo_clip_size) > 0) ||
-    file.selectedWeapon.GetLifetimeShotsRemaining() > -1
-
-    Hud_SetVisible( stockpileCount0, true )
-    Hud_SetVisible( ammoCount, true )
-
-    Hud_SetText( ammoCount, GetAmmoString(file.selectedWeapon) )
-    if (displayStockpile)
-    {
-        Hud_SetText( stockpileCount0, GetStockpileString(file.selectedWeapon) )
-    }
-    else{
-        if (!file.selectedWeapon.GetWeaponSettingBool(eWeaponVar.ammo_no_remove_from_stockpile) || file.selectedWeapon.GetLifetimeShotsRemaining() > -1){
-            Hud_SetText( stockpileCount0, "0" )
-        }
-        else{
-            Hud_SetText( stockpileCount0, "∞" )
-        }
-
-
-    }
 
     array<entity> offhands = [ player.GetOffhandWeapon(0), player.GetOffhandWeapon(1), player.GetOffhandWeapon(2) ]
 
@@ -331,6 +205,9 @@ void function HudRevamp_Update( var panel )
             i--
         }
     }
+
+    Hud_SetText( HudElement("Health", panel), "") //(GetHealthFrac(player)).tostring() )
+    Hud_SetText( HudElement("MaxHealth", panel), "")//player.GetMaxHealth().tostring() )
 
     Hud_SetVisible(HudElement( "OffhandRight",  panel ), offhands.len() > 0)
     Hud_SetVisible(HudElement( "OffhandCenter", panel ), offhands.len() > 1)
@@ -360,8 +237,16 @@ void function UpdateOffhand( var panel, entity weapon, int index )
 
     Hud_SetImage( icon, GetWeaponInfoFileKeyFieldAsset_WithMods_Global( weapon.GetWeaponClassName(), weapon.GetMods(), "hud_icon" ) )
 
-    if(file.cooldownData[index].readyCharges >= 1 && file.cooldownData[index].charges >= 2){
+    if(file.cooldownData[index].charges >= 2){
         Hud_SetVisible( chargeBox,  true)
+        if (file.cooldownData[index].readyCharges >= 2)
+        {
+            Hud_SetColor(chargeBox, 255, 150, 50, 255)
+        }
+        else
+        {
+            Hud_SetColor(chargeBox, 50, 50, 50, 150)
+        }
     }
     else{
         Hud_SetVisible( chargeBox,  false)
@@ -372,13 +257,13 @@ void function UpdateOffhand( var panel, entity weapon, int index )
         //Hud_SetText( chargeCount, file.cooldownData[index].readyCharges.tostring() )
 
         //Hud_SetBarProgress( BG, file.cooldownData[index].nextChargeFrac )
-    if(file.cooldownData[index].nextChargeFrac <= 0 && file.cooldownData[index].readyCharges == file.cooldownData[index].charges) {
+    if(file.cooldownData[index].readyCharges >= 1) {
         Hud_SetColor(_BG, 255, 150, 50, 255)
-        Hud_SetColor(BG, 100, 100, 100, 175)
+        Hud_SetColor(BG, 200, 200, 200, 100)
     }
     else{
         Hud_SetColor(_BG, 50, 50, 50, 150)
-        Hud_SetColor(BG, 150, 150, 150, 100)
+        Hud_SetColor(BG, 200, 200, 200, 50)
     }
     //Hud_SetText( chargeCount, file.cooldownData[index].readyCharges.tostring() + "|" + file.cooldownData[index].charges.tostring() )
     Hud_SetText( chargeCount, "" )
@@ -454,5 +339,143 @@ void function SetColorForWeaponType( var element, entity weapon )
             break
         default:
             element.SetColor(255, 255, 255, 255)
+    }
+}
+
+void function UpdateMainWeapons( entity player, var panel )
+{
+
+    int weaponIndex = 0
+    array<entity> weapons = player.GetMainWeapons()
+    foreach (int index, entity weapon in weapons)
+        if (weapon == file.selectedWeapon)
+        {
+            weaponIndex = index
+            break
+        }
+    bool hasPrimary = weapons.len() > 0
+    bool hasSecondary = weapons.len() > 1
+    bool hasTertiary = weapons.len() > 2
+
+    var ammoCount = HudElement("AmmoCount", panel)
+    var stockpileCount0 = HudElement("AmmoStockpilePrimary", panel)
+
+    var weaponIcon1 = HudElement("WeaponIcon1", panel)
+    var weaponIcon2 = HudElement("WeaponIcon2", panel)
+    var stockpileCount1 = HudElement("AmmoStockpileSecondary", panel)
+    var stockpileCount2 = HudElement("AmmoStockpileTertiary", panel)
+
+    var weaponRibbon0 = HudElement("DestinyPrimaryRibbon", panel)
+    var weaponRibbon1 = HudElement("DestinySecondaryRibbon", panel)
+    var weaponRibbon2 = HudElement("DestinyTertiaryRibbon", panel)
+
+
+    Hud_SetVisible( stockpileCount1, hasSecondary )
+    Hud_SetVisible( stockpileCount2, hasTertiary )
+    Hud_SetVisible( HudElement("DestinyPrimarySlotDividerRibbon", panel), hasPrimary )
+    Hud_SetVisible( HudElement("DestinyPrimaryAmmoDividerRibbon", panel), hasPrimary )
+    Hud_SetVisible( HudElement("DestinyPrimarySlot", panel), hasPrimary )
+    Hud_SetVisible( HudElement("WeaponIcon", panel), hasPrimary )
+    Hud_SetVisible( HudElement("DestinySecondarySlot", panel), hasSecondary )
+    Hud_SetVisible( HudElement("DestinySecondaryRibbon", panel), hasSecondary )
+    Hud_SetVisible( HudElement("DestinySecondarySlotDividerRibbon", panel), hasTertiary )
+    Hud_SetVisible( HudElement("DestinyTertiarySlot", panel), hasTertiary )
+    Hud_SetVisible( HudElement("DestinyTertiaryRibbon", panel), hasTertiary )
+
+    Hud_SetVisible(weaponRibbon0, hasPrimary)
+    Hud_SetVisible(ammoCount, hasPrimary)
+    Hud_SetVisible(stockpileCount0, hasPrimary)
+
+    if (!hasPrimary)
+        return
+
+    HudElement("WeaponIcon", panel).SetImage(
+        GetWeaponInfoFileKeyFieldAsset_Global( file.selectedWeapon.GetWeaponClassName(), "hud_icon" )
+    )
+
+    if (weaponIndex == 0)
+    {
+        SetColorForWeaponType( weaponRibbon0, weapons[0] )
+        if(hasSecondary) Hud_SetText( stockpileCount1, GetStowedAmmoString(weapons[1]) )
+        if(hasTertiary) Hud_SetText( stockpileCount2, GetStowedAmmoString(weapons[2]) )
+        if (weapons.len() > 1) {
+
+            weaponIcon1.SetColor( 200, 200, 200, 175 )
+            weaponIcon1.SetImage(
+                GetWeaponInfoFileKeyFieldAsset_WithMods_Global( weapons[1].GetWeaponClassName(), weapons[1].GetMods(), "hud_icon" )
+            )
+            SetColorForWeaponType( weaponRibbon1, weapons[1] )
+
+        }
+        else weaponIcon1.SetColor( 0, 0, 0, 0 )
+        if (weapons.len() > 2) {
+            weaponIcon2.SetColor( 200, 200, 200, 175 )
+            weaponIcon2.SetImage(
+                GetWeaponInfoFileKeyFieldAsset_WithMods_Global( weapons[2].GetWeaponClassName(), weapons[2].GetMods(), "hud_icon" )
+            )
+            SetColorForWeaponType( weaponRibbon2, weapons[2] )
+        }
+        else weaponIcon2.SetColor( 0, 0, 0, 0 )
+
+    }
+    else if (weaponIndex == 1)
+    {
+        SetColorForWeaponType( weaponRibbon0, weapons[1] )
+        SetColorForWeaponType( weaponRibbon1, weapons[0] )
+        if(hasSecondary) Hud_SetText( stockpileCount1, GetStowedAmmoString(weapons[0]) )
+        if(hasTertiary) Hud_SetText( stockpileCount2, GetStowedAmmoString(weapons[2]) )
+        weaponIcon1.SetColor( 200, 200, 200, 175 )
+        weaponIcon1.SetImage(
+            GetWeaponInfoFileKeyFieldAsset_WithMods_Global( weapons[0].GetWeaponClassName(), weapons[0].GetMods(), "hud_icon" )
+        )
+        if (weapons.len() > 2) {
+            weaponIcon2.SetColor( 200, 200, 200, 175 )
+            weaponIcon2.SetImage(
+                GetWeaponInfoFileKeyFieldAsset_WithMods_Global( weapons[2].GetWeaponClassName(), weapons[2].GetMods(), "hud_icon" )
+            )
+            SetColorForWeaponType( weaponRibbon2, weapons[2] )
+        }
+        else weaponIcon2.SetColor( 0, 0, 0, 0 )
+
+    }
+    else if (weaponIndex == 2)
+    {
+        if(hasSecondary) Hud_SetText( stockpileCount1, GetStowedAmmoString(weapons[0]) )
+        if(hasTertiary) Hud_SetText( stockpileCount2, GetStowedAmmoString(weapons[1]) )
+        weaponIcon1.SetColor( 200, 200, 200, 175 )
+        weaponIcon2.SetColor( 200, 200, 200, 175 )
+        weaponIcon1.SetImage(
+            GetWeaponInfoFileKeyFieldAsset_WithMods_Global( weapons[0].GetWeaponClassName(), weapons[0].GetMods(), "hud_icon" )
+        )
+        weaponIcon2.SetImage(
+            GetWeaponInfoFileKeyFieldAsset_WithMods_Global( weapons[1].GetWeaponClassName(), weapons[1].GetMods(), "hud_icon" )
+        )
+        SetColorForWeaponType( weaponRibbon0, weapons[2] )
+        SetColorForWeaponType( weaponRibbon1, weapons[0] )
+        SetColorForWeaponType( weaponRibbon2, weapons[1] )
+    }
+
+
+    bool displayStockpile = (!file.selectedWeapon.GetWeaponSettingBool(eWeaponVar.ammo_no_remove_from_stockpile) &&
+    file.selectedWeapon.GetWeaponSettingInt(eWeaponVar.ammo_clip_size) > 0) ||
+    file.selectedWeapon.GetLifetimeShotsRemaining() > -1
+
+    Hud_SetVisible( stockpileCount0, true )
+    Hud_SetVisible( ammoCount, true )
+
+    Hud_SetText( ammoCount, GetAmmoString(file.selectedWeapon) )
+    if (displayStockpile)
+    {
+        Hud_SetText( stockpileCount0, GetStockpileString(file.selectedWeapon) )
+    }
+    else{
+        if (!file.selectedWeapon.GetWeaponSettingBool(eWeaponVar.ammo_no_remove_from_stockpile) || file.selectedWeapon.GetLifetimeShotsRemaining() > -1){
+            Hud_SetText( stockpileCount0, "0" )
+        }
+        else{
+            Hud_SetText( stockpileCount0, "∞" )
+        }
+
+
     }
 }

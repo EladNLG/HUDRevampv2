@@ -58,8 +58,8 @@ hud_revamp.res
 
 		fgcolor_override	"255 255 255 255"
 		bgcolor_override	"0 0 0 0"
-		Inset				1
-		Margin				1
+		Inset				0
+		Margin				0
 		ProgressDirection			0
 		SegmentFill			1
 		SegmentSize			1000
@@ -71,10 +71,10 @@ hud_revamp.res
 		CircularEnabled 		0
 		CircularClockwise		1
 
-		xpos				2
-		ypos				1
-		wide				492
-		tall				16
+		xpos				0
+		ypos				0
+		wide				494
+		tall				14
 		visible				1
 		//image				vgui/HUD/white
 		//scaleImage			1
@@ -82,8 +82,8 @@ hud_revamp.res
 		//drawColor			"160 160 160 128"
 
 		pin_to_sibling			HealthBarBG
-		pin_corner_to_sibling	LEFT
-		pin_to_sibling_corner	LEFT
+		pin_corner_to_sibling	CENTER
+		pin_to_sibling_corner	CENTER
 	}
 
 	DestinyLoadoutPanel

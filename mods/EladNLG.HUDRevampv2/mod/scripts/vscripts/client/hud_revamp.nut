@@ -1,7 +1,7 @@
 untyped
 global function HudRevamp_Init
 
-struct 
+struct
 {
     entity selectedWeapon
     AnnouncementData toDisplay
@@ -99,7 +99,7 @@ string function CleanString( string str )
     print(str)
     print(newStr)
     return newStr
-} 
+}
 string function ExpandString( string str )
 {
     string newStr = CleanString(str)
@@ -119,7 +119,7 @@ void function HudRevamp_Update( var panel )
     HudElement("WeaponIcon", panel).SetImage(
         GetWeaponInfoFileKeyFieldAsset_Global( file.selectedWeapon.GetWeaponClassName(), "hud_icon" )
     )
-    
+
     Hud_SetBarProgress( HudElement("Bar", panel), GetHealthFrac(player) )
     int shield = 0
     int maxShield = 0
@@ -211,13 +211,13 @@ void function HudRevamp_Update( var panel )
     if (displayStockpile)
     {
         Hud_SetText( stockpileCount, GetStockpileString(file.selectedWeapon) )
-    
+
         Hud_SetText( ammoCount, GetAmmoString(file.selectedWeapon) )
     }
     else Hud_SetText( ammoCountLarge, GetAmmoString(file.selectedWeapon) )
 
     array<entity> offhands = [ player.GetOffhandWeapon(0), player.GetOffhandWeapon(1), player.GetOffhandWeapon(2) ]
-    for (int i = 0; i < offhands.len(); i++) 
+    for (int i = 0; i < offhands.len(); i++)
     {
         if (!IsValid(offhands[i])) {
             offhands.remove(i)
@@ -273,12 +273,12 @@ void function UpdateOffhand( var panel, entity weapon, int index )
 string function GetAmmoString( entity weapon )
 {
 	string result
-	
-    if (weapon.GetWeaponSettingBool(eWeaponVar.ammo_no_remove_from_clip) || 
-        weapon.GetWeaponSettingBool(eWeaponVar.ammo_no_remove_from_stockpile) && 
+
+    if (weapon.GetWeaponSettingBool(eWeaponVar.ammo_no_remove_from_clip) ||
+        weapon.GetWeaponSettingBool(eWeaponVar.ammo_no_remove_from_stockpile) &&
         weapon.GetWeaponSettingInt(eWeaponVar.ammo_clip_size) < 1)
         return "--"
-    
+
     if (weapon.GetWeaponSettingInt(eWeaponVar.ammo_clip_size) < 1)
     {
         return weapon.GetWeaponPrimaryAmmoCount().tostring()
@@ -298,7 +298,7 @@ string function GetAmmoString( entity weapon )
 string function GetStockpileString( entity weapon )
 {
 	string result
-	
+
 		//if (file.selectedWeapon == weapon) RuiSetFloat(file.ruis["stockpile"], "msgAlpha", 0.0)
     if (weapon.GetWeaponSettingFloat(eWeaponVar.regen_ammo_refill_rate) > 0.0)
     {

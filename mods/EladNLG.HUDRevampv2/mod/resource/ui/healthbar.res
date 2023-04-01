@@ -35,8 +35,8 @@ resource/ui/healthbar.res
 		scaleImage			1
 
 		wide				192
-		tall				18  
-		
+		tall				18
+
 		"xpos"			"0"
 		"ypos"			"2"
 
@@ -64,7 +64,7 @@ resource/ui/healthbar.res
 
 		wide				192
 		tall				18
-		
+
 		"xpos"			"0"
 		"ypos"			"0"
 

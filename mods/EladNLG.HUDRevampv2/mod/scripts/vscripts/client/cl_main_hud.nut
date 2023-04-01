@@ -1629,9 +1629,6 @@ bool function ShouldClientHudBeVisible( entity player )
 	if ( IsWatchingReplay() )
 		return false
 
-	if ( IsAlive( player ) )
-		return false
-
 	return true
 }
 

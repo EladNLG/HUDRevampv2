@@ -40,7 +40,7 @@ void function Cl_DamageIndicator_Init()
 	{
 		AddLocalPlayerTookDamageCallback( v, PlayerTookDamage )
 	}
-	
+
 	#if MP
 		//ClPilotSpeedometer_Init()
 	#endif
@@ -80,12 +80,13 @@ void function CreateStackingDamageFlyout( entity s, float damage, bool isCrit, v
 	data.msgPos = msgPos
 	data.lastHitTime = Time()
 	damageIndicators[s] <- data
+	int maxHealth = s.GetMaxHealth()
 
 	while (Time() - data.lastHitTime <= OUTGOING_DAMAGE_TEXT_STACKING_STAY_TIME + OUTGOING_DAMAGE_TEXT_STACKING_FADE_TIME)
 	{
-		RuiSetString( rui, "msgText", RecursiveCommas(data.damage.tointeger()) )
+		RuiSetString( rui, "msgText", RecursiveCommas(data.damage.tointeger()) + "|" + maxHealth )
 		RuiSetFloat2( rui, "msgPos", WorldToScreenPos(data.msgPos) - <0.0, 0.01, 0> )
-		RuiSetFloat( rui, "msgAlpha", GraphCapped( Time() - data.lastHitTime, OUTGOING_DAMAGE_TEXT_STACKING_STAY_TIME, 
+		RuiSetFloat( rui, "msgAlpha", GraphCapped( Time() - data.lastHitTime, OUTGOING_DAMAGE_TEXT_STACKING_STAY_TIME,
 			OUTGOING_DAMAGE_TEXT_STACKING_STAY_TIME + OUTGOING_DAMAGE_TEXT_STACKING_FADE_TIME, 0.9, 0.0 ) )
 		RuiSetFloat3( rui, "msgColor", data.isLastHitCrit ? <0.9, 0.55, 0.3> : <0.9, 0.9, 0.9> )
 		WaitFrame()
@@ -107,7 +108,7 @@ void function AddSmallDamageTextFlyout(float damage, bool isCrit, vector msgPos)
 	RuiSetFloat( rui, "thicken", 0.0 )
 
 	float startTime = Time()
-	
+
 	while ( Time() - startTime < OUTGOING_DAMAGE_TEXT_SMALL_FADE_TIME )
 	{
 		float alpha = Graph( Time() - startTime, 0, OUTGOING_DAMAGE_TEXT_SMALL_FADE_TIME, 0.5, 0 )
@@ -151,9 +152,9 @@ void function Thread_StackingDamageFlyoutText()
 				OUTGOING_DAMAGE_TEXT_STACKING_STAY_TIME = 0
 				SetConVarFloat("comp_hud_damage_indicator_duration", OUTGOING_DAMAGE_TEXT_STACKING_DURATION)
 			}
-			
+
 			// incoming damage text update
-			
+
 			float timeSinceLastHit = Time() - lastIncomingDamageTextHitTime
 			float alpha = GraphCapped( timeSinceLastHit - INCOMING_DAMAGE_TEXT_STACKING_STAY_TIME, 0, INCOMING_DAMAGE_TEXT_STACKING_FADE_TIME, 0.9, 0)
 			RuiSetFloat( stackingIncomingDamageTextRui, "msgAlpha", alpha )
@@ -192,12 +193,12 @@ vector function WorldToScreenPos( vector position )
 string function RecursiveCommas(int n, bool recursed = false)
 {
     int rest = n % 1000; //"last 3 digits"
-    n /= 1000;  
+    n /= 1000;
 
     if (n > 0) {
         return RecursiveCommas(n) + "," + format( "%03i", rest ); //printing "begining"
     }
-    
+
     return rest.tostring(); //first chunk of the number
 }
 void function PlayerDidDamageText( float damage, vector damagePosition, entity victim, bool isCrit, bool isIneffective )
@@ -209,7 +210,7 @@ void function PlayerDidDamageText( float damage, vector damagePosition, entity v
 	damageScale *= CalculateDivisorForEntity(victim)
 
 	thread AddSmallDamageTextFlyout( damage * damageScale, isCrit, msgPos )
-	
+
 	if (victim in damageIndicators)
 	{
 		OutgoingDamageData data = damageIndicators[victim]
@@ -218,7 +219,7 @@ void function PlayerDidDamageText( float damage, vector damagePosition, entity v
 		data.isLastHitCrit = isCrit
 		data.msgPos = msgPos
 	}
-	else 
+	else
 	{
 		thread CreateStackingDamageFlyout( victim, damage * damageScale, isCrit, msgPos )
 	}
@@ -239,19 +240,14 @@ float function CalculateDivisorForEntity( entity npc )
 			{
 				return 1.0
 			}
-		} 
+		}
 		else if (!npc.IsPlayer()) return 1.0
 
 		int baseHealth = expect int (npc.IsNPC() ? npc.Dev_GetAISettingByKeyField( "Health" ) : int(npc.GetPlayerModHealth()))
 
-		//printt("BASE HEALTH:", baseHealth)
-		//printt("NEW BASE HEALTH:", baseHealth)
-		//printt("HEALTH PER LEVEL:", int(0.3 * baseHealth))
-		//printt("ROGUELIKE_DIFFICULTY:", roguelikeDifficulty)
-		//printt("HEALTH FROM LEVELS:", int(0.3 * baseHealth) * roguelikeDifficulty)
-		int level = npc.GetTeam() == TEAM_IMC ? roguelikeDifficulty : roguelikeLevel
+		int level = npc.GetTeam() == TEAM_IMC ? GetRoguelikeDifficulty() : roguelikeLevel
 		int newBaseHealth = baseHealth + int(0.3 * baseHealth) * level
-		//printt("NEW HEALTH:", newBaseHealth)
+
 		baseHealth = int(max(min( newBaseHealth, 524287 ),10))
 
 		if (newBaseHealth > baseHealth)
@@ -260,4 +256,4 @@ float function CalculateDivisorForEntity( entity npc )
 		}
 		return 1.0
 	#endif
-}	
+}

@@ -18,7 +18,7 @@ resource/ui/offhand.res
 
 		wide				72
 		tall				72
-		
+
 		"xpos"			"0"
 		"ypos"			"56"
 	}
@@ -41,7 +41,7 @@ resource/ui/offhand.res
 
 		wide				72
 		tall				72
-		
+
 		"xpos"			"0"
 		"ypos"			"56"
 	}
@@ -55,7 +55,7 @@ resource/ui/offhand.res
 		"wide" "64"
 		"tall" "64"
 		"enabled"	"1"
-		
+
 		"xpos"			"0"
 		"ypos"			"0"
 		pin_to_sibling			BG
@@ -80,7 +80,7 @@ resource/ui/offhand.res
 		//ChangeTime			0.5
 		//ChangeDir			2
 		//ChangeColor			"255 128 64 255"
-		
+
 		CircularEnabled 		1
 		CircularClockwise		1
 
@@ -95,7 +95,7 @@ resource/ui/offhand.res
 		//drawColor			"160 160 160 128"
 
 		zpos				201
-		
+
 		pin_to_sibling			BG
 		pin_corner_to_sibling	BOTTOM
 		pin_to_sibling_corner	TOP
@@ -120,6 +120,6 @@ resource/ui/offhand.res
 
 		pin_to_sibling			Bar
 		pin_corner_to_sibling	CENTER
-		pin_to_sibling_corner	CENTER	
+		pin_to_sibling_corner	CENTER
 	}
 }

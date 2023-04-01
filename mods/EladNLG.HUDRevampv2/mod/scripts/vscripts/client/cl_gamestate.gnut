@@ -254,8 +254,6 @@ void function ClGameStateThink_Prematch( entity player )
 	if ( !DEV_COUNTDOWNTIMER )
 		return
 
-	local timeRemaining = ceil( level.nv.gameStartTime - Time() )
-
 	//player.cv.prematchTimer.Show()
 	//player.cv.prematchTimerGlow.Show()
 	//player.cv.prematchDesc.Show()

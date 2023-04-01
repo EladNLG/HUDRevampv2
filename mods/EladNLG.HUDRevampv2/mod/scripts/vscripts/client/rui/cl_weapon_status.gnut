@@ -350,7 +350,7 @@ void function GetOffhandCooldownData( OffhandCooldownData data, entity weapon )
 					if (weapon.GetWeaponSettingBool(eWeaponVar.ammo_drains_to_empty_on_fire))
 						ammoFrac = GraphCapped( weapon.GetNextAttackAllowedTime() - Time(), fireDuration, 0, 1, 0 )
 					else
-						ammoFrac = GraphCapped( weapon.GetNextAttackAllowedTime() - Time(), fireDuration, 0, 
+						ammoFrac = GraphCapped( weapon.GetNextAttackAllowedTime() - Time(), fireDuration, 0,
 							(weapon.GetWeaponPrimaryClipCount() + weapon.GetWeaponSettingInt( eWeaponVar.ammo_per_shot )) / float(ammoClipSize), ammoFrac )
 				}
 			}
