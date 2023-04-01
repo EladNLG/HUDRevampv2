@@ -4,7 +4,7 @@ global function HudRevampLayouts_Init
 global function HudRevamp_AddLayout
 global function HudRevamp_Announcement
 
-struct 
+struct
 {
     array<string> layouts = []
 	array<entity> screens = []
@@ -12,8 +12,8 @@ struct
 	array<void functionref( var, AnnouncementData )> announcementCallbacks
 } file
 
-void function HudRevamp_AddLayout( string name, 
-	void functionref( var ) updateCallback, 
+void function HudRevamp_AddLayout( string name,
+	void functionref( var ) updateCallback,
 	void functionref( var, AnnouncementData ) announcementCallback )
 {
 	file.layouts.append(name)
@@ -45,7 +45,7 @@ void function InitHUD( entity cockpit )
 	foreach (int index, string layout in file.layouts)
 	{
 		entity mainVGUI = Create_Hud( file.layouts[index], cockpit, player )
-		
+
 		local panel = mainVGUI.s.panel
 		local warpSettings = mainVGUI.s.warpSettings
 		printt("XWARP:", warpSettings.xWarp)
@@ -54,15 +54,15 @@ void function InitHUD( entity cockpit )
 
 		file.screens.append(mainVGUI)
 	}
-    
-	
-	
+
+
+
     thread DestroyOnCockpitEnd( cockpit )
 }
 
 void function DestroyOnCockpitEnd( entity cockpit )
 {
-    OnThreadEnd( 
+    OnThreadEnd(
         function() : ()
         {
 			foreach (entity screen in file.screens)
@@ -75,7 +75,7 @@ void function DestroyOnCockpitEnd( entity cockpit )
 	int ceFlags = GetLocalClientPlayer().GetCinematicEventFlags()
 	bool hideHud = !IsAlive(GetLocalClientPlayer()) || ( ceFlags & CE_FLAG_HIDE_MAIN_HUD ) > 0 || GetLocalViewPlayer() != GetLocalClientPlayer()
 	if (!IsValid(GetLocalViewPlayer()))
-        hideHud = true
+        hideHud = false
 	while ( 1 )
 	{
 		foreach (int index, entity screen in file.screens)
@@ -109,7 +109,7 @@ entity function Create_Hud( string cockpitType, entity cockpit, entity player )
 		yScale = 1.0
 		viewDist = 1.0
 	}
-	
+
 	float COCKPIT_UI_WIDTH = 350
 	float COCKPIT_UI_HEIGHT = 350 / 1.7665
 	origin += AnglesToRight( angles ) * (-COCKPIT_UI_WIDTH / 2)
@@ -117,7 +117,7 @@ entity function Create_Hud( string cockpitType, entity cockpit, entity player )
 
 	angles = AnglesCompose( angles, < 0, -90, 90 > )
 
-	entity vgui = CreateClientsideVGuiScreen( cockpitType, 
+	entity vgui = CreateClientsideVGuiScreen( cockpitType,
 		VGUI_SCREEN_PASS_HUD, origin, angles, COCKPIT_UI_WIDTH, COCKPIT_UI_HEIGHT )
 	vgui.s.panel <- vgui.GetPanel()
 	vgui.s.baseOrigin <- origin
