@@ -75,7 +75,7 @@ void function DestroyOnCockpitEnd( entity cockpit )
 	int ceFlags = GetLocalClientPlayer().GetCinematicEventFlags()
 	bool hideHud = !IsAlive(GetLocalClientPlayer()) || ( ceFlags & CE_FLAG_HIDE_MAIN_HUD ) > 0 || GetLocalViewPlayer() != GetLocalClientPlayer()
 	if (!IsValid(GetLocalViewPlayer()))
-        hideHud = false
+        hideHud = true
 	while ( 1 )
 	{
 		foreach (int index, entity screen in file.screens)

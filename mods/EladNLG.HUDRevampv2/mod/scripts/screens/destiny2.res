@@ -46,7 +46,7 @@ hud_revamp.res
 		"enabled"	"1"
 
 		"xpos"			"710" // can't use rXXX, is relative to screen resolution and not parent panel.
-		"ypos"			"240" // can't use rXXX, is relative to screen resolution and not parent panel.
+		"ypos"			"140" // can't use rXXX, is relative to screen resolution and not parent panel.
 	}
 
 	HealthBar

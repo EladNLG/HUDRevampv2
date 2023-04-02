@@ -15,6 +15,36 @@ Scheme
 	}
 	Fonts
 	{
+		DestinyLight_16
+		{
+			isproportional only
+			1
+			{
+				name			DestinyLight
+				tall			16
+				antialias 		1
+			}
+		}
+		DestinyLight_20
+		{
+			isproportional only
+			1
+			{
+				name			DestinyLight
+				tall			20
+				antialias 		1
+			}
+		}
+		DestinyMedium_20
+		{
+			isproportional only
+			1
+			{
+				name			DestinyMedium
+				tall			20
+				antialias 		1
+			}
+		}
 		OxaniumLight_43
 		{
 			isproportional only
@@ -155,5 +185,54 @@ Scheme
 	// describes all the border types
 	Borders
 	{
+		BoxBorder
+		{
+			inset 	"32 32 32 32"
+			bordertype				scalable_image
+			//backgroundtype			2
+
+			image					"ui/box"
+			src_corner_height		32				// pixels inside the image
+			src_corner_width		32
+			draw_corner_width		32				// screen size of the corners ( and sides ), proportional
+			draw_corner_height 		32
+		}
+		WhiteBorder
+		{
+			inset 	"1 1 1 1"
+
+			Left
+			{
+				1
+				{
+					color 	"255 255 255 50"
+					offset	"0 1"
+				}
+			}
+			Right
+			{
+				1
+				{
+					color 	"255 255 255 50"
+					offset	"1 0"
+				}
+			}
+			Top
+			{
+				1
+				{
+					color 	"255 255 255 50"
+					offset 	"0 0"
+				}
+			}
+			Bottom
+			{
+				1
+				{
+					color 	"255 255 255 50"
+					offset 	"0 0"
+				}
+			}
+		}
 	}
 }

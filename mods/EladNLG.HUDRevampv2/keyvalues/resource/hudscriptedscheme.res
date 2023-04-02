@@ -15,6 +15,36 @@ Scheme
 	}
 	Fonts
 	{
+		DestinyLight_16
+		{
+			isproportional only
+			1
+			{
+				name			DestinyLight
+				tall			16
+				antialias 		1
+			}
+		}
+		DestinyLight_20
+		{
+			isproportional only
+			1
+			{
+				name			DestinyLight
+				tall			20
+				antialias 		1
+			}
+		}
+		DestinyMedium_20
+		{
+			isproportional only
+			1
+			{
+				name			DestinyMedium
+				tall			20
+				antialias 		1
+			}
+		}
 		DestinyLight_24
 		{
 			isproportional only

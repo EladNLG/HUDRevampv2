@@ -76,8 +76,8 @@ struct {
 
 function ClMainHud_Init()
 {
-	//if ( IsMenuLevel() )
-	//	return
+	if ( IsMenuLevel() )
+		return
 
 	PrecacheHUDMaterial( TEAM_ICON_IMC )
 	PrecacheHUDMaterial( TEAM_ICON_MILITIA )

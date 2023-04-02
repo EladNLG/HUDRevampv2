@@ -1,10 +1,11 @@
 
-resource/ui/healthbar.res
+resource/ui/healthbar_elite.res
 {
 	Icon
 	{
 		ControlName			ImagePanel
-		image			"vgui/hud/white"
+		image			""
+		fg_image			""
 		//change_image		vgui/HUD/white
 
 		drawColor	"255 255 255 255"
@@ -33,7 +34,7 @@ resource/ui/healthbar.res
 		visible					1
 		enabled					1
 		auto_tall_tocontents	1
-		labelText				"Grunt/Pilot"
+		labelText				"Reaper"
 		//textAlignment			center
 		//fgcolor_override 		"255 255 255 255"
 		//bgcolor_override 		"0 0 0 200"
@@ -48,7 +49,7 @@ resource/ui/healthbar.res
 	{
 		ControlName			ImagePanel
 		image			"vgui/hud/white"
-		fg_image			"vgui/hud/white"
+		fg_image			""
 		//change_image		vgui/HUD/white
 
 		drawColor	"0 0 0 127"
@@ -78,13 +79,14 @@ resource/ui/healthbar.res
 		fg_image			"vgui/hud/white"
 		//change_image		vgui/HUD/white
 
-		fgcolor_override	"200 50 50 255"
+		fgcolor_override	"200 100 50 255"
 		bgcolor_override	"0 0 0 0"
 		Inset				0
 		Margin				0
 		ProgressDirection			0
 		SegmentFill			1
-		SegmentSize			256
+		SegmentSize			63
+		SegmentGap			2
 		ChangeStyle			0
 		scaleImage			1
 

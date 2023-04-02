@@ -1,15 +1,26 @@
 untyped
 global function Destiny2_Init
 
+const int HEALTHBAR_INSTANCES = 7
+
 struct
 {
     entity selectedWeapon
     AnnouncementData toDisplay
     array<OffhandCooldownData&> cooldownData
+    array<entity> healthbarEntities = [ null, null, null, null, null, null, null, null ]
+    array<entity> eliteHealthbarEntities = [ null, null, null, null, null, null, null, null ]
+    array<entity> titanHealthbarEntities = [ null, null, null, null, null, null, null, null ]
+    int healthbarIndex = 0
+    int eliteHealthbarIndex = 0
+    int titanHealthbarIndex = 0
+    vector attackDir
+    entity hitEnt
 } file
 
 void function Destiny2_Init()
 {
+    RegisterSignal("EndTargetInfo")
     AddCallback_OnSelectedWeaponChanged( OnSelectedWeaponChanged )
     HudRevamp_AddLayout( "destiny2",
     HudRevamp_Update,
@@ -60,7 +71,7 @@ void function Announcement( var panel, AnnouncementData data )
     Hud_SetVisible( desc, true )
     Hud_SetVisible( title, true )
     icon.SetImage( data.icon )
-    print(data.icon)
+
     // called when the announcement needs to be interrupted. Interruption
     // means the announcement disappears IMMEDIATELY, since the next
     // announcement of higher priority is called directly after.
@@ -224,8 +235,207 @@ void function HudRevamp_Update( var panel )
     {
         UpdateOffhand( HudElement( "OffhandCenter", panel ), offhands[1], 1 )
     }
+
+    // TARGET INFO BULLSHIT SEND HELP PLEASE
+    // also this should be illegal
+
+    file.attackDir = player.GetActiveWeapon().GetAttackDirection()
+    
+    TraceResults tr = TraceHull( player.CameraPosition(), player.CameraPosition() + file.attackDir * 8192, < -5, -5, -5>, <5,5,5>, [ player ], TRACE_MASK_SHOT, TRACE_COLLISION_GROUP_NONE )
+
+    file.hitEnt = tr.hitEnt
+    if (IsValid(tr.hitEnt))
+    {
+        if (tr.hitEnt.IsNPC())
+        {
+            entity npc = tr.hitEnt
+            if (npc.IsTitan())
+            {
+
+            }
+            else
+            {
+                if (!file.healthbarEntities.contains(npc))
+                {
+                    thread HealthBar( npc )
+                }
+            }
+        }
+        else if (tr.hitEnt.IsPlayer())
+        {
+            // they are an npc. shut up
+            entity npc = tr.hitEnt
+            if (npc.IsTitan())
+            {
+                
+            }
+            else
+            {
+                if (!file.healthbarEntities.contains(npc))
+                {
+                    thread HealthBar( npc )
+                }
+            }
+        }
+    }
 }
 
+// util function
+vector function WorldToScreenPos( vector position )
+{
+    array pos = expect array( Hud.ToScreenSpace( position ) )
+
+    vector result = <float( pos[0] ), float( pos[1] ), 0 >
+    //print(result)
+    return result
+}
+
+void function HealthBar( entity ent )
+{
+    ent.EndSignal( "EndTargetInfo" )
+    ent.EndSignal( "OnDestroy" )
+    ent.EndSignal( "OnDeath" )
+    int index = file.healthbarIndex++
+    if (IsValid(file.healthbarEntities[index]))
+    {
+        file.healthbarEntities[index].Signal("EndTargetInfo")
+    }
+    file.healthbarEntities[index] = ent
+    if (file.healthbarIndex > HEALTHBAR_INSTANCES)
+        file.healthbarIndex = 0
+    
+    var healthbar = Hud_GetChild( HudElement("Healthbars"), "Healthbar" + index )
+
+    OnThreadEnd(
+        function() : ( ent, index, healthbar )
+		{
+            Hud_SetVisible( healthbar, false )
+		}
+    )
+
+    Hud_SetVisible( healthbar, true )
+    string title = ent.GetTitleForUI()
+    if (title == "" && ent.IsNPC())
+    {
+        title = expect string( ent.Dev_GetAISettingByKeyField( "title" ) )
+    }
+    Hud_SetText( Hud_GetChild( healthbar, "Name" ), title )
+
+    float alpha = 0.0
+    float lastLookTime = Time()
+    float lastFrameTime = Time()
+    while (true)
+    {
+        float delta = Time() - lastFrameTime
+        if (file.hitEnt == ent)
+            lastLookTime = Time()
+
+        if (Time() - lastLookTime > 0.1)
+            alpha -= 8.0 * delta
+        else alpha += 8.0 * delta
+        alpha = clamp(alpha, 0, 1)
+        healthbar.SetPanelAlpha( alpha * 255.0 )
+
+        vector mins = ent.GetBoundingMins()
+        vector maxs = ent.GetBoundingMaxs()
+        vector worldPos = ent.GetOrigin() + <(mins.x + maxs.x) / 2, (mins.y + maxs.y) / 2, maxs.z + 8>
+
+        vector screenPos = WorldToScreenPos( worldPos )
+        vector size = <Hud_GetWidth( healthbar ), Hud_GetHeight( healthbar ), 0>
+
+        Hud_SetPos( healthbar, screenPos.x - size.x / 2, screenPos.y - size.y )
+
+        Hud_SetBarProgress( Hud_GetChild( healthbar, "Bar" ), GetHealthFrac(ent) )
+
+        lastFrameTime = Time()
+        WaitFrame()
+    }
+}
+
+asset function HUDGetIconForAI( entity npc )
+{
+    return $"rui/hud/gametype_icons/bounty_hunt/bh_titan"  
+    string classname = ""
+    if (npc.IsNPC())
+        classname = npc.GetClassName()
+	switch( classname )
+	{
+		case "npc_titan":
+			return $"rui/hud/gametype_icons/bounty_hunt/bh_titan"
+		case "npc_soldier":
+		case "npc_spectre":
+			return $"rui/hud/gametype_icons/bounty_hunt/bh_spectre"
+		case "npc_stalker":
+			return $"rui/hud/gametype_icons/bounty_hunt/bh_stalker"
+		case "npc_turret_mega":
+			return $"rui/hud/gametype_icons/bounty_hunt/bh_megaturret"
+		case "npc_super_spectre":
+			return $"rui/hud/gametype_icons/bounty_hunt/bh_reaper"
+	}
+	return $""
+}
+
+void function TitanHealthBar( entity ent )
+{
+    ent.EndSignal( "EndTargetInfo" )
+    ent.EndSignal( "OnDestroy" )
+    int index = file.titanHealthbarIndex++
+    if (IsValid(file.titanHealthbarEntities[index]))
+    {
+        file.titanHealthbarEntities[index].Signal("EndTargetInfo")
+    }
+    file.titanHealthbarEntities[index] = ent
+    if (file.titanHealthbarIndex > HEALTHBAR_INSTANCES)
+        file.titanHealthbarIndex = 0
+    
+    var healthbar = Hud_GetChild( HudElement("Healthbars"), "HealthbarChampion" + index )
+
+    OnThreadEnd(
+        function() : ( ent, index, healthbar )
+		{
+            Hud_SetVisible( healthbar, false )
+		}
+    )
+
+    Hud_SetVisible( healthbar, true )
+    string title = ent.GetTitleForUI()
+    if (title == "" && ent.IsNPC())
+    {
+        title = expect string( ent.Dev_GetAISettingByKeyField( "title" ) )
+    }
+    Hud_SetText( Hud_GetChild( healthbar, "Name" ), title )
+    Hud_SetImage( Hud_GetChild( healthbar, "Icon" ), HUDGetIconForAI( ent ) )
+
+    float alpha = 0.0
+    float lastLookTime = Time()
+    float lastFrameTime = Time()
+    while (true)
+    {
+        float delta = Time() - lastFrameTime
+        if (file.hitEnt == ent && IsAlive(ent))
+            lastLookTime = Time()
+
+        if (Time() - lastLookTime > 0.1)
+            alpha -= 8.0 * delta
+        else alpha += 8.0 * delta
+        alpha = clamp(alpha, 0, 1)
+        healthbar.SetPanelAlpha( alpha * 255.0 )
+
+        vector mins = ent.GetBoundingMins()
+        vector maxs = ent.GetBoundingMaxs()
+        vector worldPos = ent.GetOrigin() + <(mins.x + maxs.x) / 2, (mins.y + maxs.y) / 2, maxs.z + 8>
+
+        vector screenPos = WorldToScreenPos( worldPos )
+        vector size = <Hud_GetWidth( healthbar ), Hud_GetHeight( healthbar ), 0>
+
+        Hud_SetPos( healthbar, screenPos.x - size.x / 2, screenPos.y - size.y )
+
+        Hud_SetBarProgress( Hud_GetChild( healthbar, "Bar" ), GetHealthFrac(ent) )
+
+        lastFrameTime = Time()
+        WaitFrame()
+    }
+}
 void function UpdateOffhand( var panel, entity weapon, int index )
 {
     GetOffhandCooldownData( file.cooldownData[index], weapon )

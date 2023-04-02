@@ -1,10 +1,57 @@
 
-resource/ui/healthbar.res
+resource/ui/healthbar_elite.res
 {
 	Icon
 	{
 		ControlName			ImagePanel
-		image			"vgui/hud/white"
+		image			"ui/destiny2/ChampionTriangle"
+		fg_image			""
+		//change_image		vgui/HUD/white
+
+		drawColor	"200 150 50 255"
+		Inset				0
+		Margin				0
+		ProgressDirection			2
+		SegmentFill			1
+		SegmentSize			72
+		ChangeStyle			0
+		scaleImage			1
+
+		wide				36
+		tall				36
+
+		"xpos"			"0"
+		"ypos"			"1"
+	}
+	IconInner
+	{
+		ControlName			ImagePanel
+		image			"ui/destiny2/ChampionTriangle"
+		fg_image			""
+		//change_image		vgui/HUD/white
+
+		drawColor	"200 50 50 255"
+		Inset				0
+		Margin				0
+		ProgressDirection			2
+		SegmentFill			1
+		SegmentSize			72
+		ChangeStyle			0
+		scaleImage			1
+		xpos				3
+		ypos				3
+
+		wide				30
+		tall				30
+
+		"xpos"			"0"
+		"ypos"			"0"
+	}
+	IconSword
+	{
+		ControlName			ImagePanel
+		image			"ui/destiny2/Sword"
+		fg_image			""
 		//change_image		vgui/HUD/white
 
 		drawColor	"255 255 255 255"
@@ -15,10 +62,15 @@ resource/ui/healthbar.res
 		SegmentSize			72
 		ChangeStyle			0
 		scaleImage			1
-		border				WhiteBorder
+		//xpos				2
+		ypos				-3
 
-		wide				32
-		tall				32
+		wide				16
+		tall				16
+
+		pin_to_sibling		IconInner
+		pin_to_sibling_corner CENTER
+		pin_corner_to_sibling CENTER
 
 		"xpos"			"0"
 		"ypos"			"0"
@@ -27,18 +79,19 @@ resource/ui/healthbar.res
     {
 		ControlName				Label
 		xpos					8
-		ypos					0
-		wide					256
-		tall					14
+		ypos					1
+		wide					400
+		tall					16
 		visible					1
 		enabled					1
 		auto_tall_tocontents	1
-		labelText				"Grunt/Pilot"
+		labelText				"EladNLG (Brute)"
 		//textAlignment			center
 		//fgcolor_override 		"255 255 255 255"
 		//bgcolor_override 		"0 0 0 200"
-		font					DestinyLight_16
+		font					DestinyLight_20
 		//fgcolor_override		""
+		allcaps					1
 
 		pin_to_sibling			Icon
 		pin_corner_to_sibling	TOP_LEFT
@@ -56,15 +109,14 @@ resource/ui/healthbar.res
 		Margin				0
 		ProgressDirection			2
 		SegmentFill			1
-		SegmentSize			72
 		ChangeStyle			0
 		scaleImage			1
 
-		wide				192
+		wide				278
 		tall				12
 
 		"xpos"			"0"
-		"ypos"			"-20"
+		"ypos"			"-23"
 
 		pin_to_sibling			Name
 		pin_corner_to_sibling	TOP_LEFT
@@ -78,17 +130,18 @@ resource/ui/healthbar.res
 		fg_image			"vgui/hud/white"
 		//change_image		vgui/HUD/white
 
-		fgcolor_override	"200 50 50 255"
+		fgcolor_override	"200 150 50 255"
 		bgcolor_override	"0 0 0 0"
 		Inset				0
 		Margin				0
 		ProgressDirection			0
 		SegmentFill			1
-		SegmentSize			256
+		SegmentSize			38
+		SegmentGap			2
 		ChangeStyle			0
 		scaleImage			1
 
-		wide				192
+		wide				278
 		tall				12
 
 		"xpos"			"0"

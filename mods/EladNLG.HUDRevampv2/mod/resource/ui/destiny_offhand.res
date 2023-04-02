@@ -35,7 +35,7 @@ resource/ui/destiny_offhand.res
 		bgcolor_override	"0 0 0 0"
 		Inset				0
 		Margin				0
-		ProgressDirection			2
+		ProgressDirection	2
 		SegmentFill			1
 		SegmentSize			60
 		ChangeStyle			0
