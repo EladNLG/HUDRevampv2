@@ -1,7 +1,6 @@
 untyped
 global function Cl_DamageIndicator_Init
 global function PlayerDidDamageText
-global function CalculateDivisorForEntity
 // ()
 const vector INCOMING_DAMAGE_TEXT_BEGIN_POS = <0.63, 0.5 - 0.3, 0>
 float OUTGOING_DAMAGE_TEXT_STACKING_FADE_TIME = 0.5
@@ -69,9 +68,9 @@ void function CreateStackingDamageFlyout( entity s, float damage, bool isCrit, v
 	RuiSetFloat2( rui, "msgPos", WorldToScreenPos(msgPos) - <0, 0.01, 0> )
 	RuiSetString( rui, "msgText",  RecursiveCommas(damage.tointeger()) )
 	RuiSetFloat3( rui, "msgColor", isCrit ? <0.9, 0.55, 0.3> : <0.9, 0.9, 0.9> )
-	RuiSetFloat( rui, "msgFontSize", 36.0)
+	RuiSetFloat( rui, "msgFontSize", 28.0)
 	RuiSetFloat( rui, "msgAlpha", 0.9 )
-	RuiSetFloat( rui, "thicken", 0.0 )
+	RuiSetFloat( rui, "thicken", -0.15 )
 
 	OutgoingDamageData data
 	data.damage = damage
@@ -80,11 +79,10 @@ void function CreateStackingDamageFlyout( entity s, float damage, bool isCrit, v
 	data.msgPos = msgPos
 	data.lastHitTime = Time()
 	damageIndicators[s] <- data
-	int maxHealth = s.GetMaxHealth()
 
 	while (Time() - data.lastHitTime <= OUTGOING_DAMAGE_TEXT_STACKING_STAY_TIME + OUTGOING_DAMAGE_TEXT_STACKING_FADE_TIME)
 	{
-		RuiSetString( rui, "msgText", RecursiveCommas(data.damage.tointeger()) + "|" + maxHealth )
+		RuiSetString( rui, "msgText", RecursiveCommas(data.damage.tointeger()))
 		RuiSetFloat2( rui, "msgPos", WorldToScreenPos(data.msgPos) - <0.0, 0.01, 0> )
 		RuiSetFloat( rui, "msgAlpha", GraphCapped( Time() - data.lastHitTime, OUTGOING_DAMAGE_TEXT_STACKING_STAY_TIME,
 			OUTGOING_DAMAGE_TEXT_STACKING_STAY_TIME + OUTGOING_DAMAGE_TEXT_STACKING_FADE_TIME, 0.9, 0.0 ) )
@@ -103,7 +101,7 @@ void function AddSmallDamageTextFlyout(float damage, bool isCrit, vector msgPos)
 	RuiSetFloat2( rui, "msgPos", WorldToScreenPos(msgPos) - <0, 0.01, 0> )
 	RuiSetString( rui, "msgText",  RecursiveCommas(damage.tointeger()) )
 	RuiSetFloat3( rui, "msgColor", isCrit ? <0.9, 0.55, 0.3> : <0.9, 0.9, 0.9> )
-	RuiSetFloat( rui, "msgFontSize", 24.0)
+	RuiSetFloat( rui, "msgFontSize", 18.0)
 	RuiSetFloat( rui, "msgAlpha", 0.5 )
 	RuiSetFloat( rui, "thicken", 0.0 )
 
@@ -205,55 +203,20 @@ void function PlayerDidDamageText( float damage, vector damagePosition, entity v
 {
 	if (!GetConVarBool("comp_hud_damage_indicator")) return
 
-	float damageScale = 1.0
-	msgPos = victim.GetOrigin() + <0,0,victim.GetBoundingMaxs().z>
-	damageScale *= CalculateDivisorForEntity(victim)
+	msgPos = damagePosition
 
-	thread AddSmallDamageTextFlyout( damage * damageScale, isCrit, msgPos )
+	thread AddSmallDamageTextFlyout( damage, isCrit, msgPos )
 
 	if (victim in damageIndicators)
 	{
 		OutgoingDamageData data = damageIndicators[victim]
 		data.lastHitTime = Time()
-		data.damage += damage * damageScale
+		data.damage += damage
 		data.isLastHitCrit = isCrit
 		data.msgPos = msgPos
 	}
 	else
 	{
-		thread CreateStackingDamageFlyout( victim, damage * damageScale, isCrit, msgPos )
+		thread CreateStackingDamageFlyout( victim, damage, isCrit, msgPos )
 	}
-}
-
-float function CalculateDivisorForEntity( entity npc )
-{
-	#if !PLAYER_HAS_ROGUELIKE_MOD
-		return 1.0
-	#else
-		if (npc.IsNPC())
-		{
-			try
-			{
-				if (typeof( npc.Dev_GetAISettingByKeyField( "Health" ) ) == "string") return 1.0
-			}
-			catch (ex)
-			{
-				return 1.0
-			}
-		}
-		else if (!npc.IsPlayer()) return 1.0
-
-		int baseHealth = expect int (npc.IsNPC() ? npc.Dev_GetAISettingByKeyField( "Health" ) : int(npc.GetPlayerModHealth()))
-
-		int level = npc.GetTeam() == TEAM_IMC ? GetRoguelikeDifficulty() : roguelikeLevel
-		int newBaseHealth = baseHealth + int(0.3 * baseHealth) * level
-
-		baseHealth = int(max(min( newBaseHealth, 524287 ),10))
-
-		if (newBaseHealth > baseHealth)
-		{
-			return float(newBaseHealth) / baseHealth
-		}
-		return 1.0
-	#endif
 }

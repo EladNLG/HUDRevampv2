@@ -1,6 +1,9 @@
 untyped
 global function Destiny2_Init
+global function HUDMenuOpenState
 
+const array<int> ENEMY_BAR_COLOR = [200, 150, 50, 255]
+const array<int> FRIENDLY_BAR_COLOR = [70, 130, 255, 255]
 const int HEALTHBAR_INSTANCES = 7
 
 struct
@@ -14,8 +17,8 @@ struct
     int healthbarIndex = 0
     int eliteHealthbarIndex = 0
     int titanHealthbarIndex = 0
-    vector attackDir
     entity hitEnt
+    bool isMenuOpen
 } file
 
 void function Destiny2_Init()
@@ -202,6 +205,7 @@ bool d2_healthbar_updating = false
 
 void function HudRevamp_Update( var panel )
 {
+    //HudElement("Screen", panel).SetColor(0, 0,0,127)
     entity player = GetLocalClientPlayer()
     var gamestate = HudElement("Destiny_GameStatePanel", panel)
     EarnObject earnGoal = PlayerEarnMeter_GetGoal( player )
@@ -247,6 +251,10 @@ void function HudRevamp_Update( var panel )
     }
 
     float d2_healthbar_opacity = GraphCapped(Time() - lastTimeHealthNotFull, 0, 1, 1, 0)
+    if (IsSingleplayer())
+        d2_healthbar_opacity = 1.0
+    if (player.IsTitan())
+        d2_healthbar_opacity = 0.0
     Hud_SetColor( HudElement("HealthBar", panel), 255, 255, 255, d2_healthbar_opacity * 255 )
     Hud_SetColor( HudElement("HealthBarBG", panel), 0, 0, 0, d2_healthbar_opacity * 120 )
     UpdateMainWeapons( player, panel )
@@ -312,20 +320,26 @@ void function HudRevamp_Update( var panel )
 
     // TARGET INFO BULLSHIT SEND HELP PLEASE
     // also this should be illegal
+    vector attackDir = AnglesToForward( player.CameraAngles() )
+    if (IsValid(player.GetActiveWeapon()))
+        attackDir = player.GetActiveWeapon().GetAttackDirection()
+    
+    TraceResults result = TraceLine( player.CameraPosition(), player.CameraPosition() + attackDir * 8192, [ player ], 
+        TRACE_MASK_SHOT, TRACE_COLLISION_GROUP_NONE )
 
-    file.attackDir = player.GetActiveWeapon().GetAttackDirection()
+    file.hitEnt = result.hitEnt
 
-    TraceResults tr = TraceHull( player.CameraPosition(), player.CameraPosition() + file.attackDir * 8192, < -5, -5, -5>, <5,5,5>, [ player ], TRACE_MASK_SHOT, TRACE_COLLISION_GROUP_NONE )
-
-    file.hitEnt = tr.hitEnt
-    if (IsValid(tr.hitEnt))
+    entity npc = file.hitEnt
+    if (IsValid( npc )) 
     {
-        if (tr.hitEnt.IsNPC())
+        if (npc.IsNPC())
         {
-            entity npc = tr.hitEnt
             if (npc.IsTitan())
             {
-
+                if (!file.titanHealthbarEntities.contains(npc))
+                {
+                    thread TitanHealthBar( npc )
+                }
             }
             else
             {
@@ -335,13 +349,15 @@ void function HudRevamp_Update( var panel )
                 }
             }
         }
-        else if (tr.hitEnt.IsPlayer())
+        else if (npc.IsPlayer())
         {
             // they are an npc. shut up
-            entity npc = tr.hitEnt
             if (npc.IsTitan())
             {
-
+                if (!file.titanHealthbarEntities.contains(npc))
+                {
+                    thread TitanHealthBar( npc )
+                }
             }
             else
             {
@@ -368,17 +384,20 @@ void function HealthBar( entity ent )
 {
     ent.EndSignal( "EndTargetInfo" )
     ent.EndSignal( "OnDestroy" )
-    ent.EndSignal( "OnDeath" )
+
+    // allocate healthbar
     int index = file.healthbarIndex++
+    if (file.healthbarIndex > HEALTHBAR_INSTANCES)
+        file.healthbarIndex = 0
+
     if (IsValid(file.healthbarEntities[index]))
     {
         file.healthbarEntities[index].Signal("EndTargetInfo")
     }
     file.healthbarEntities[index] = ent
-    if (file.healthbarIndex > HEALTHBAR_INSTANCES)
-        file.healthbarIndex = 0
 
     var healthbar = Hud_GetChild( HudElement("Healthbars"), "Healthbar" + index )
+    Hud_SetVisible( healthbar, true )
 
     OnThreadEnd(
         function() : ( ent, index, healthbar )
@@ -387,29 +406,43 @@ void function HealthBar( entity ent )
 		}
     )
 
-    Hud_SetVisible( healthbar, true )
-    string title = ent.GetTitleForUI()
-    if (title == "" && ent.IsNPC())
-    {
-        title = expect string( ent.Dev_GetAISettingByKeyField( "title" ) )
-    }
+    // set title
+    string title = GetHealthbarTitle( ent )
     Hud_SetText( Hud_GetChild( healthbar, "Name" ), title )
 
+    // set icon
+    var rui = Hud_GetRui( Hud_GetChild( healthbar, "Icon" ) )
+    RuiSetImage( rui, "basicImage", HUDGetIconForAI( ent ) )
+
+    // alpha vars
     float alpha = 0.0
     float lastLookTime = Time()
     float lastFrameTime = Time()
+
+    // children
+    var bar = Hud_GetChild( healthbar, "Bar" )
     while (true)
     {
+        Hud_SetVisible( healthbar, !file.isMenuOpen )
+
+        // check team
+        entity player = IsValid(GetLocalViewPlayer()) ? GetLocalViewPlayer() : GetLocalClientPlayer()
+        bool isFriendly = player.GetTeam() == ent.GetTeam()
+        
+        // check if we're being looked at
         float delta = Time() - lastFrameTime
-        if (file.hitEnt == ent)
+        if (file.hitEnt == ent && IsAlive(ent))
             lastLookTime = Time()
 
-        if (Time() - lastLookTime > 0.1)
+        // set alpha
+        if (Time() - lastLookTime > 0.5)
             alpha -= 8.0 * delta
         else alpha += 8.0 * delta
-        alpha = clamp(alpha, 0, 1)
+        alpha = clamp(alpha, 0, 0.8)
         healthbar.SetPanelAlpha( alpha * 255.0 )
+        RuiSetFloat( rui, "basicImageAlpha", alpha )
 
+        // calculate screen pos
         vector mins = ent.GetBoundingMins()
         vector maxs = ent.GetBoundingMaxs()
         vector worldPos = ent.GetOrigin() + <(mins.x + maxs.x) / 2, (mins.y + maxs.y) / 2, maxs.z + 8>
@@ -419,24 +452,28 @@ void function HealthBar( entity ent )
 
         Hud_SetPos( healthbar, screenPos.x - size.x / 2, screenPos.y - size.y )
 
-        Hud_SetBarProgress( Hud_GetChild( healthbar, "Bar" ), GetHealthFrac(ent) )
+        // set health frac
+        // TODO: set shield frac
+        Hud_SetBarProgress( bar, GetHealthFrac(ent) )
 
         lastFrameTime = Time()
-        WaitFrame()
+        wait 0
     }
 }
 
 asset function HUDGetIconForAI( entity npc )
 {
-    return $"rui/hud/gametype_icons/bounty_hunt/bh_titan"
     string classname = ""
     if (npc.IsNPC())
-        classname = npc.GetClassName()
+        classname = npc.GetAISettingsName()
+    if (npc.IsPlayer())
+        classname = npc.GetPlayerSettings()
 	switch( classname )
 	{
 		case "npc_titan":
 			return $"rui/hud/gametype_icons/bounty_hunt/bh_titan"
 		case "npc_soldier":
+        return $"rui/hud/gametype_icons/bounty_hunt/bh_grunt"
 		case "npc_spectre":
 			return $"rui/hud/gametype_icons/bounty_hunt/bh_spectre"
 		case "npc_stalker":
@@ -449,20 +486,29 @@ asset function HUDGetIconForAI( entity npc )
 	return $""
 }
 
+void function HUDMenuOpenState( int state )
+{
+    printt("HUDMENUOPENSTATE", state)
+    file.isMenuOpen = (state != 0)
+}
+
 void function TitanHealthBar( entity ent )
 {
     ent.EndSignal( "EndTargetInfo" )
     ent.EndSignal( "OnDestroy" )
+
+    // allocate healthbar
     int index = file.titanHealthbarIndex++
+    if (file.titanHealthbarIndex > HEALTHBAR_INSTANCES)
+        file.titanHealthbarIndex = 0
     if (IsValid(file.titanHealthbarEntities[index]))
     {
         file.titanHealthbarEntities[index].Signal("EndTargetInfo")
     }
     file.titanHealthbarEntities[index] = ent
-    if (file.titanHealthbarIndex > HEALTHBAR_INSTANCES)
-        file.titanHealthbarIndex = 0
-
+    
     var healthbar = Hud_GetChild( HudElement("Healthbars"), "HealthbarChampion" + index )
+    Hud_SetVisible( healthbar, true )
 
     OnThreadEnd(
         function() : ( ent, index, healthbar )
@@ -471,30 +517,63 @@ void function TitanHealthBar( entity ent )
 		}
     )
 
-    Hud_SetVisible( healthbar, true )
-    string title = ent.GetTitleForUI()
-    if (title == "" && ent.IsNPC())
-    {
-        title = expect string( ent.Dev_GetAISettingByKeyField( "title" ) )
-    }
+    // set title
+    string title = GetHealthbarTitle( ent )
     Hud_SetText( Hud_GetChild( healthbar, "Name" ), title )
-    Hud_SetImage( Hud_GetChild( healthbar, "Icon" ), HUDGetIconForAI( ent ) )
 
+    // alpha variables
     float alpha = 0.0
     float lastLookTime = Time()
     float lastFrameTime = Time()
+
+    // children
+    var bar = Hud_GetChild( healthbar, "Bar" )
+    var triangle = Hud_GetChild( healthbar, "Icon" )
+    var barBG = Hud_GetChild( healthbar, "BG" )
     while (true)
     {
+        Hud_SetVisible( healthbar, !file.isMenuOpen )
+
+        // check team
+        entity player = IsValid(GetLocalViewPlayer()) ? GetLocalViewPlayer() : GetLocalClientPlayer()
+        bool isFriendly = player.GetTeam() == ent.GetTeam()
+
+        if (isFriendly)
+        {
+            triangle.SetImage( $"ui/destiny2/ChampionTriangle" )
+            bar.SetColor( FRIENDLY_BAR_COLOR )
+        }
+        else
+        {
+            triangle.SetImage( $"ui/destiny2/ChampionTriangleEnemy" )
+            bar.SetColor( ENEMY_BAR_COLOR )
+        }
+
+        // check if we're being looked at
         float delta = Time() - lastFrameTime
         if (file.hitEnt == ent && IsAlive(ent))
             lastLookTime = Time()
 
-        if (Time() - lastLookTime > 0.1)
+        // alpha calculation
+        if (Time() - lastLookTime > 0.5)
             alpha -= 8.0 * delta
         else alpha += 8.0 * delta
-        alpha = clamp(alpha, 0, 1)
+        alpha = clamp(alpha, 0, 0.8)
+        // P.S. no rui here since we don't use basic_images
         healthbar.SetPanelAlpha( alpha * 255.0 )
 
+        // calculate bar width with segment count
+        int baseBarWidth = 278
+        float segments = ent.GetMaxHealth() / 2500.0
+        int width = int(segments) * 40
+        if (ent.GetMaxHealth() % 2500 == 0)
+            width -= 2
+        else width += int((segments % 1.0) * 38)
+
+        Hud_SetWidth( bar, width )
+        Hud_SetWidth( barBG, width )
+
+        // calculate screen pos
         vector mins = ent.GetBoundingMins()
         vector maxs = ent.GetBoundingMaxs()
         vector worldPos = ent.GetOrigin() + <(mins.x + maxs.x) / 2, (mins.y + maxs.y) / 2, maxs.z + 8>
@@ -502,14 +581,42 @@ void function TitanHealthBar( entity ent )
         vector screenPos = WorldToScreenPos( worldPos )
         vector size = <Hud_GetWidth( healthbar ), Hud_GetHeight( healthbar ), 0>
 
-        Hud_SetPos( healthbar, screenPos.x - size.x / 2, screenPos.y - size.y )
+        Hud_SetPos( healthbar, screenPos.x - (size.x - baseBarWidth + width) / 2, screenPos.y - size.y )
 
-        Hud_SetBarProgress( Hud_GetChild( healthbar, "Bar" ), GetHealthFrac(ent) )
+        // set health frac
+        // TODO: set shield frac
+        Hud_SetBarProgress( bar, GetHealthFrac(ent) )
 
         lastFrameTime = Time()
-        WaitFrame()
+        wait 0
     }
 }
+
+string function GetHealthbarTitle( entity ent )
+{
+    string title = ent.GetTitleForUI()
+    if (ent.IsNPC())
+    {
+        title = ent.GetTitleForUI()
+        if (title == "")
+            title = expect string( ent.Dev_GetAISettingByKeyField( "title" ) )
+        if (IsValid(ent.GetBossPlayer()))
+        {
+            return ent.GetBossPlayerName() + "'s " + Localize( title )
+        }
+    }
+    if (ent.IsPlayer())
+    {
+        print("IS PLAYER")
+        if (ent.IsTitan())
+            return ent.GetPlayerName() + " (" + Localize( title ) + ")"
+        
+        return ent.GetPlayerName()
+    }
+
+    return title
+}
+
 void function UpdateOffhand( var panel, entity weapon, int index )
 {
     GetOffhandCooldownData( file.cooldownData[index], weapon )
@@ -536,11 +643,6 @@ void function UpdateOffhand( var panel, entity weapon, int index )
         Hud_SetVisible( chargeBox,  false)
     }
 
-
-    //Hud_SetBarProgress( circleBar, file.cooldownData[index].nextChargeFrac )
-        //Hud_SetText( chargeCount, file.cooldownData[index].readyCharges.tostring() )
-
-        //Hud_SetBarProgress( BG, file.cooldownData[index].nextChargeFrac )
     if(file.cooldownData[index].readyCharges >= 1) {
         Hud_SetColor(_BG, 255, 150, 50, 255)
         Hud_SetColor(BG, 200, 200, 200, 100)
@@ -549,7 +651,7 @@ void function UpdateOffhand( var panel, entity weapon, int index )
         Hud_SetColor(_BG, 50, 50, 50, 150)
         Hud_SetColor(BG, 200, 200, 200, 50)
     }
-    //Hud_SetText( chargeCount, file.cooldownData[index].readyCharges.tostring() + "|" + file.cooldownData[index].charges.tostring() )
+
     Hud_SetText( chargeCount, "" )
     Hud_SetBarProgress( BG, file.cooldownData[index].nextChargeFrac )
 }

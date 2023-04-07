@@ -97,21 +97,21 @@ entity function Create_Hud( string cockpitType, entity cockpit, entity player )
 	string attachment = "CAMERA_BASE"
 	int attachId = cockpit.LookupAttachment( attachment )
 
-	vector origin = < 190, 0, 0 >
+	vector origin = < 40, 0, 0 >
 	vector angles = < 0, 0, 0 >
 	var warpSettings
 
 	origin += AnglesToForward( angles ) * COCKPIT_UI_XOFFSET
 	warpSettings = {
-		xWarp = 24
-		xScale = 1.0
-		yWarp = 24 / 1.7665
+		xWarp = 30
+		xScale = 1.1
+		yWarp = 34 / 1.7665
 		yScale = 1.0
 		viewDist = 1.0
 	}
 
-	float COCKPIT_UI_WIDTH = 350
-	float COCKPIT_UI_HEIGHT = 350 / 1.7665
+	float COCKPIT_UI_WIDTH = 100
+	float COCKPIT_UI_HEIGHT = 100 / 1.7665
 	origin += AnglesToRight( angles ) * (-COCKPIT_UI_WIDTH / 2)
 	origin += AnglesToUp( angles ) * (-COCKPIT_UI_HEIGHT / 2)
 

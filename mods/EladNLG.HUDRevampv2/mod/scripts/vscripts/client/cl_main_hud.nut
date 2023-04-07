@@ -766,15 +766,15 @@ entity function Create_Hud( string cockpitType, entity cockpit, entity player )
 
 	origin += AnglesToForward( angles ) * COCKPIT_UI_XOFFSET
 	warpSettings = {
-		xWarp = 24
-		xScale = 1.1
-		yWarp = 24 / 1.7778
+		xWarp = 34
+		xScale = 1.15
+		yWarp = 34 / 1.7778
 		yScale = 1.0
 		viewDist = 0.0
 	}
 
-	float COCKPIT_UI_WIDTH = 350
-	float COCKPIT_UI_HEIGHT = 350 / 1.7778
+	float COCKPIT_UI_WIDTH = 325
+	float COCKPIT_UI_HEIGHT = 325 / 1.7778
 	origin += AnglesToRight( angles ) * (-COCKPIT_UI_WIDTH / 2)
 	origin += AnglesToUp( angles ) * (-COCKPIT_UI_HEIGHT / 2)
 

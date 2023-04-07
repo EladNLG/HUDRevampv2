@@ -97,7 +97,7 @@ hud_revamp.res
 		"tall" "200"
 		"enabled"	"1"
 
-		"xpos"			"0150" // can't use rXXX, is relative to screen resolution and not parent panel.
+		"xpos"			"070" // can't use rXXX, is relative to screen resolution and not parent panel.
 		"ypos"			"880" // can't use rXXX, is relative to screen resolution and not parent panel.
 	}
 

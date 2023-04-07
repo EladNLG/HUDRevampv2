@@ -4,11 +4,11 @@ resource/ui/healthbar_elite.res
 	Icon
 	{
 		ControlName			ImagePanel
-		image			"ui/destiny2/ChampionTriangle"
+		image			"ui/destiny2/ChampionTriangleEnemy"
 		fg_image			""
 		//change_image		vgui/HUD/white
 
-		drawColor	"200 150 50 255"
+		drawColor	"255 255 255 255"
 		Inset				0
 		Margin				0
 		ProgressDirection			2
@@ -22,30 +22,6 @@ resource/ui/healthbar_elite.res
 
 		"xpos"			"0"
 		"ypos"			"1"
-	}
-	IconInner
-	{
-		ControlName			ImagePanel
-		image			"ui/destiny2/ChampionTriangle"
-		fg_image			""
-		//change_image		vgui/HUD/white
-
-		drawColor	"200 50 50 255"
-		Inset				0
-		Margin				0
-		ProgressDirection			2
-		SegmentFill			1
-		SegmentSize			72
-		ChangeStyle			0
-		scaleImage			1
-		xpos				3
-		ypos				3
-
-		wide				30
-		tall				30
-
-		"xpos"			"0"
-		"ypos"			"0"
 	}
 	IconSword
 	{
@@ -63,12 +39,12 @@ resource/ui/healthbar_elite.res
 		ChangeStyle			0
 		scaleImage			1
 		//xpos				2
-		ypos				-3
+		ypos				-4
 
-		wide				16
-		tall				16
+		wide				18
+		tall				18
 
-		pin_to_sibling		IconInner
+		pin_to_sibling		Icon
 		pin_to_sibling_corner CENTER
 		pin_corner_to_sibling CENTER
 
@@ -85,6 +61,7 @@ resource/ui/healthbar_elite.res
 		visible					1
 		enabled					1
 		auto_tall_tocontents	1
+		auto_wide_tocontents	1
 		labelText				"EladNLG (Brute)"
 		//textAlignment			center
 		//fgcolor_override 		"255 255 255 255"
@@ -97,6 +74,33 @@ resource/ui/healthbar_elite.res
 		pin_corner_to_sibling	TOP_LEFT
 		pin_to_sibling_corner	TOP_RIGHT
     }
+	Unstoppable
+	{
+		ControlName			ImagePanel
+		image			"ui/destiny2/Unstoppable"
+		fg_image			""
+		//change_image		vgui/HUD/white
+
+		drawColor	"255 255 255 255"
+		Inset				0
+		Margin				0
+		ProgressDirection			2
+		SegmentFill			1
+		SegmentSize			72
+		ChangeStyle			0
+		scaleImage			1
+		//xpos				2
+		ypos				1
+
+		wide				16
+		tall				16
+
+		pin_to_sibling		Name
+		pin_to_sibling_corner RIGHT
+		pin_corner_to_sibling LEFT
+
+		"xpos"			"4"
+	}
 	BG
 	{
 		ControlName			ImagePanel
@@ -128,17 +132,19 @@ resource/ui/healthbar_elite.res
 		ControlName			CHudProgressBar
 		bg_image			"vgui/hud/white"
 		fg_image			"vgui/hud/white"
-		//change_image		vgui/HUD/white
+		change_image		vgui/HUD/white
 
 		fgcolor_override	"200 150 50 255"
-		bgcolor_override	"0 0 0 0"
+		bgcolor_override	"255 255 255 0"
+		ChangeColor			"255 255 255 255"
 		Inset				0
 		Margin				0
 		ProgressDirection			0
 		SegmentFill			1
 		SegmentSize			38
 		SegmentGap			2
-		ChangeStyle			0
+		ChangeStyle			2
+		ChangeTime			0.5
 		scaleImage			1
 
 		wide				278

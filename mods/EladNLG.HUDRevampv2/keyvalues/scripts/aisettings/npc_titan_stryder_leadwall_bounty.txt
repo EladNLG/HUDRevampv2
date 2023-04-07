@@ -1,0 +1,6 @@
+npc_titan_stryder_leadwall_bounty
+{
+    ui_targetinfo ""
+    ui_targetinfo "" [$mp]
+    ui_targetinfo "" [$sp]
+}

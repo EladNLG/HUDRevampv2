@@ -1,22 +1,24 @@
 
 resource/ui/healthbar_elite.res
 {
-	Icon
+	IconBG
 	{
 		ControlName			ImagePanel
 		image			""
 		fg_image			""
 		//change_image		vgui/HUD/white
 
-		drawColor	"255 255 255 255"
+		drawColor	"85 85 85 255"
 		Inset				0
 		Margin				0
 		ProgressDirection			2
 		SegmentFill			1
 		SegmentSize			72
 		ChangeStyle			0
+		ChangeTime			0.5
 		scaleImage			1
 		border				WhiteBorder
+		visible				0
 
 		wide				32
 		tall				32
@@ -24,6 +26,21 @@ resource/ui/healthbar_elite.res
 		"xpos"			"0"
 		"ypos"			"0"
 	}
+
+	Icon
+	{
+		ControlName	RuiPanel
+
+		rui		ui/basic_image.rpak
+		wide	30
+		tall	30
+		visible	1
+
+		pin_to_sibling			IconBG
+		pin_corner_to_sibling	CENTER
+		pin_to_sibling_corner	CENTER
+	}
+
     Name
     {
 		ControlName				Label
@@ -41,7 +58,7 @@ resource/ui/healthbar_elite.res
 		font					DestinyLight_16
 		//fgcolor_override		""
 
-		pin_to_sibling			Icon
+		pin_to_sibling			IconBG
 		pin_corner_to_sibling	TOP_LEFT
 		pin_to_sibling_corner	TOP_RIGHT
     }

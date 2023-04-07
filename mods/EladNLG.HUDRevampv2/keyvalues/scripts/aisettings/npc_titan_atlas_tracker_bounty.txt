@@ -1,0 +1,6 @@
+npc_titan_atlas_tracker_bounty
+{
+    ui_targetinfo ""
+    ui_targetinfo "" [$mp]
+    ui_targetinfo "" [$sp]
+}

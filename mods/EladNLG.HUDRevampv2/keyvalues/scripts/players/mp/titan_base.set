@@ -1,0 +1,9 @@
+"titan_base"
+{
+    "global"
+    {
+		ui_targetinfo				""
+        ui_targetinfo               "" [$mp]
+        ui_targetinfo               "" [$sp]
+    }
+}

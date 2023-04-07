@@ -238,5 +238,42 @@ Scheme
 	// describes all the border types
 	Borders
 	{
+		WhiteBorder
+		{
+			inset 	"1 1 1 1"
+
+			Left
+			{
+				1
+				{
+					color 	"255 255 255 40"
+					offset	"0 1"
+				}
+			}
+			Right
+			{
+				1
+				{
+					color 	"255 255 255 40"
+					offset	"1 0"
+				}
+			}
+			Top
+			{
+				1
+				{
+					color 	"255 255 255 40"
+					offset 	"0 0"
+				}
+			}
+			Bottom
+			{
+				1
+				{
+					color 	"255 255 255 40"
+					offset 	"0 0"
+				}
+			}
+		}
 	}
 }
