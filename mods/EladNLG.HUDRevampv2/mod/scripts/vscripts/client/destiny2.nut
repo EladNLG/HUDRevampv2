@@ -146,12 +146,52 @@ void function HudRevamp_D2_Gamestate_Update(var gamestate, entity player){
     Hud_SetVisible(friendly_score_bar_winning, friendly_score > enemy_score)
     Hud_SetVisible(enemy_score_bar_winning, enemy_score > friendly_score)
 
-
-
     Hud_SetText(friendly_score_number, string(friendly_score))
     Hud_SetText(enemy_score_number, string(enemy_score))
     Hud_SetBarProgress(friendly_score_bar, (float(friendly_score) / score_limit))
     Hud_SetBarProgress(enemy_score_bar, (float(enemy_score) / score_limit))
+
+    array<entity> friendly_players = GetPlayerArrayOfTeam( friendlyTeam )
+    array<entity> enemy_players    = GetPlayerArrayOfTeam( enemyTeam )
+
+    //disable UI for players that aren't joined
+    for(int i = friendly_players.len(); i < 6; i++){
+        string player_ui_target = "Team0_Player" + string(i)
+        var player_ui = Hud_GetChild(gamestate, player_ui_target)
+        Hud_SetVisible(player_ui, false)
+    }
+    for(int i = enemy_players.len(); i < 6; i++){
+        string player_ui_target = "Team1_Player" + string(i)
+        var player_ui = Hud_GetChild(gamestate, player_ui_target)
+        Hud_SetVisible(player_ui, false)
+    }
+
+    //update UI for players that are joined
+    for(int i = 0; i < friendly_players.len(); i++){
+        string player_ui_target = "Team0_Player" + string(i)
+        var player_ui = Hud_GetChild(gamestate, player_ui_target)
+        Hud_SetVisible(player_ui, true)
+
+        if(!IsAlive(friendly_players[i]))
+            player_ui.SetImage($"ui/destiny2/gamestate/icon_dead_friendly.vmt")
+        else if(friendly_players[i].IsTitan())
+            player_ui.SetImage($"ui/destiny2/gamestate/icon_titan.vmt")
+        else
+            player_ui.SetImage($"ui/destiny2/gamestate/icon_alive.vmt")
+    }
+    for(int i = 0; i < enemy_players.len(); i++){
+        string player_ui_target = "Team1_Player" + string(i)
+        var player_ui = Hud_GetChild(gamestate, player_ui_target)
+        Hud_SetVisible(player_ui, true)
+
+        if(!IsAlive(enemy_players[i]))
+            player_ui.SetImage($"ui/destiny2/gamestate/icon_dead_enemy.vmt")
+        else if(enemy_players[i].IsTitan())
+            player_ui.SetImage($"ui/destiny2/gamestate/icon_titan.vmt")
+        else
+            player_ui.SetImage($"ui/destiny2/gamestate/icon_alive.vmt")
+    }
+
 
 }
 

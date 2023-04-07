@@ -6,7 +6,7 @@ resource/ui/destiny_gamestate.res
 		image			"vgui/hud/white"
 		fg_image			"vgui/hud/white"
 
-		drawColor	"0 0 0 175"
+		drawColor	"0 0 0 0"
 		scaleImage			1
 
 		wide				1200
@@ -44,7 +44,7 @@ resource/ui/destiny_gamestate.res
 		image			"vgui/hud/white"
 		fg_image			"vgui/hud/white"
 
-		drawColor	"0 0 255 175"
+		drawColor	"79 121 1278 255"
 		scaleImage			1
 
 		wide				90
@@ -103,7 +103,7 @@ resource/ui/destiny_gamestate.res
 		image			"ui/destiny2/gamestate/scorebar_outline_winning"
 		fg_image			"ui/destiny2/gamestate/scorebar_outline_winning"
 
-		drawColor	"70 70 255 255"
+		drawColor	"79 121 1278 255"
 		scaleImage			1
 
 		wide				256
@@ -148,7 +148,7 @@ resource/ui/destiny_gamestate.res
 		SegmentFill			1
 		SegmentSize			1000
 
-		fgcolor_override	"70 70 255 175"
+		fgcolor_override	"79 121 1278 255"
 		scaleImage			1
 
 		wide				170
@@ -168,7 +168,7 @@ resource/ui/destiny_gamestate.res
 		image			"vgui/hud/white"
 		fg_image			"vgui/hud/white"
 
-		drawColor	"255 0 0 175"
+		drawColor	"172 50 39 255"
 		scaleImage			1
 
 		wide				90
@@ -226,7 +226,7 @@ resource/ui/destiny_gamestate.res
 		image			"ui/destiny2/gamestate/scorebar_outline_winning"
 		fg_image			"ui/destiny2/gamestate/scorebar_outline_winning"
 
-		drawColor	"255 0 0 255"
+		drawColor	"172 50 39 255"
 		scaleImage			1
 
 		wide				256
@@ -274,7 +274,7 @@ resource/ui/destiny_gamestate.res
 		CircularEnabled 		0
 		CircularClockwise		1
 
-		fgcolor_override	"255 0 0 175"
+		fgcolor_override	"172 50 39 255"
 		scaleImage			1
 
 		wide				170
@@ -296,7 +296,7 @@ resource/ui/destiny_gamestate.res
 		image			"vgui/hud/white"
 		fg_image			"vgui/hud/white"
 
-		drawColor	"128 128 128 175"
+		drawColor	"128 128 128 0"
 		scaleImage			1
 
 		wide				380 //(60*6) + (2*5)
@@ -316,7 +316,7 @@ resource/ui/destiny_gamestate.res
 		image			"vgui/hud/white"
 		fg_image			"vgui/hud/white"
 
-		drawColor	"128 128 128 175"
+		drawColor	"128 128 128 0"
 		scaleImage			1
 
 		wide				380 //(60*6) + (2*5)
@@ -338,7 +338,7 @@ resource/ui/destiny_gamestate.res
 		image			"vgui/hud/white"
 		fg_image			"vgui/hud/white"
 
-		drawColor	"128 0 128 175"
+		drawColor	"255 255 255 175"
 		scaleImage			1
 
 		wide				60
@@ -358,7 +358,7 @@ resource/ui/destiny_gamestate.res
 		image			"vgui/hud/white"
 		fg_image			"vgui/hud/white"
 
-		drawColor	"128 0 128 175"
+		drawColor	"255 255 255 175"
 		scaleImage			1
 
 		wide				60
@@ -372,6 +372,86 @@ resource/ui/destiny_gamestate.res
 		pin_to_sibling_corner	TOP_LEFT
 	}
 
+	Team0_Player2
+	{
+		ControlName			ImagePanel
+		image			"vgui/hud/white"
+		fg_image			"vgui/hud/white"
+
+		drawColor	"255 255 255 175"
+		scaleImage			1
+
+		wide				60
+		tall				60
+
+		"xpos"			"4"
+		"ypos"			"0"
+
+		pin_to_sibling "Team0_Player1"
+		pin_corner_to_sibling	TOP_RIGHT
+		pin_to_sibling_corner	TOP_LEFT
+	}
+
+	Team0_Player3
+	{
+		ControlName			ImagePanel
+		image			"vgui/hud/white"
+		fg_image			"vgui/hud/white"
+
+		drawColor	"255 255 255 175"
+		scaleImage			1
+
+		wide				60
+		tall				60
+
+		"xpos"			"4"
+		"ypos"			"0"
+
+		pin_to_sibling "Team0_Player2"
+		pin_corner_to_sibling	TOP_RIGHT
+		pin_to_sibling_corner	TOP_LEFT
+	}
+
+	Team0_Player4
+	{
+		ControlName			ImagePanel
+		image			"vgui/hud/white"
+		fg_image			"vgui/hud/white"
+
+		drawColor	"255 255 255 175"
+		scaleImage			1
+
+		wide				60
+		tall				60
+
+		"xpos"			"4"
+		"ypos"			"0"
+
+		pin_to_sibling "Team0_Player3"
+		pin_corner_to_sibling	TOP_RIGHT
+		pin_to_sibling_corner	TOP_LEFT
+	}
+
+	Team0_Player5
+	{
+		ControlName			ImagePanel
+		image			"vgui/hud/white"
+		fg_image			"vgui/hud/white"
+
+		drawColor	"255 255 255 175"
+		scaleImage			1
+
+		wide				60
+		tall				60
+
+		"xpos"			"4"
+		"ypos"			"0"
+
+		pin_to_sibling "Team0_Player4"
+		pin_corner_to_sibling	TOP_RIGHT
+		pin_to_sibling_corner	TOP_LEFT
+	}
+
 
 	Team1_Player0
 	{
@@ -379,7 +459,7 @@ resource/ui/destiny_gamestate.res
 		image			"vgui/hud/white"
 		fg_image			"vgui/hud/white"
 
-		drawColor	"128 0 128 175"
+		drawColor	"255 255 255 175"
 		scaleImage			1
 
 		wide				60
@@ -399,7 +479,7 @@ resource/ui/destiny_gamestate.res
 		image			"vgui/hud/white"
 		fg_image			"vgui/hud/white"
 
-		drawColor	"128 0 128 175"
+		drawColor	"255 255 255 175"
 		scaleImage			1
 
 		wide				60
@@ -409,6 +489,86 @@ resource/ui/destiny_gamestate.res
 		"ypos"			"0"
 
 		pin_to_sibling "Team1_Player0"
+		pin_corner_to_sibling	TOP_LEFT
+		pin_to_sibling_corner	TOP_RIGHT
+	}
+
+	Team1_Player2
+	{
+		ControlName			ImagePanel
+		image			"vgui/hud/white"
+		fg_image			"vgui/hud/white"
+
+		drawColor	"255 255 255 175"
+		scaleImage			1
+
+		wide				60
+		tall				60
+
+		"xpos"			"4"
+		"ypos"			"0"
+
+		pin_to_sibling "Team1_Player1"
+		pin_corner_to_sibling	TOP_LEFT
+		pin_to_sibling_corner	TOP_RIGHT
+	}
+
+	Team1_Player3
+	{
+		ControlName			ImagePanel
+		image			"vgui/hud/white"
+		fg_image			"vgui/hud/white"
+
+		drawColor	"255 255 255 175"
+		scaleImage			1
+
+		wide				60
+		tall				60
+
+		"xpos"			"4"
+		"ypos"			"0"
+
+		pin_to_sibling "Team1_Player2"
+		pin_corner_to_sibling	TOP_LEFT
+		pin_to_sibling_corner	TOP_RIGHT
+	}
+
+	Team1_Player4
+	{
+		ControlName			ImagePanel
+		image			"vgui/hud/white"
+		fg_image			"vgui/hud/white"
+
+		drawColor	"255 255 255 175"
+		scaleImage			1
+
+		wide				60
+		tall				60
+
+		"xpos"			"4"
+		"ypos"			"0"
+
+		pin_to_sibling "Team1_Player3"
+		pin_corner_to_sibling	TOP_LEFT
+		pin_to_sibling_corner	TOP_RIGHT
+	}
+
+	Team1_Player5
+	{
+		ControlName			ImagePanel
+		image			"vgui/hud/white"
+		fg_image			"vgui/hud/white"
+
+		drawColor	"255 255 255 175"
+		scaleImage			1
+
+		wide				60
+		tall				60
+
+		"xpos"			"4"
+		"ypos"			"0"
+
+		pin_to_sibling "Team1_Player4"
 		pin_corner_to_sibling	TOP_LEFT
 		pin_to_sibling_corner	TOP_RIGHT
 	}
@@ -423,7 +583,7 @@ resource/ui/destiny_gamestate.res
 		visible					1
 		enabled					1
 		auto_tall_tocontents	1
-		labelText				"PLACEHOLDER"
+		labelText				"WORK IN PROGRESS"
 		textAlignment			center
     pin_to_sibling "BG"
 		font					OxaniumLight_24
