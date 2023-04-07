@@ -97,6 +97,26 @@ resource/ui/destiny_gamestate.res
 		pin_to_sibling_corner	TOP_RIGHT
 	}
 
+	Team0_ScoreBar_BG_Border_Winning
+	{
+		ControlName			ImagePanel
+		image			"ui/destiny2/gamestate/scorebar_outline_winning"
+		fg_image			"ui/destiny2/gamestate/scorebar_outline_winning"
+
+		drawColor	"70 70 255 255"
+		scaleImage			1
+
+		wide				256
+		tall				16
+
+		"xpos"			"3"
+		"ypos"			"3"
+
+    pin_to_sibling "Team0_ScoreBar_BG"
+		pin_corner_to_sibling	BOTTOM_LEFT
+		pin_to_sibling_corner	BOTTOM_LEFT
+	}
+
 	Team0_ScoreBar_BG_Border
 	{
 		ControlName			ImagePanel
@@ -198,6 +218,26 @@ resource/ui/destiny_gamestate.res
     pin_to_sibling "Team1_Score"
 		pin_corner_to_sibling	BOTTOM_LEFT
 		pin_to_sibling_corner	TOP_LEFT
+	}
+
+	Team1_ScoreBar_BG_Border_Winning
+	{
+		ControlName			ImagePanel
+		image			"ui/destiny2/gamestate/scorebar_outline_winning"
+		fg_image			"ui/destiny2/gamestate/scorebar_outline_winning"
+
+		drawColor	"255 0 0 255"
+		scaleImage			1
+
+		wide				256
+		tall				16
+
+		"xpos"			"3"
+		"ypos"			"3"
+
+    pin_to_sibling "Team1_ScoreBar_BG"
+		pin_corner_to_sibling	BOTTOM_LEFT
+		pin_to_sibling_corner	BOTTOM_LEFT
 	}
 
 	Team1_ScoreBar_BG_Border

@@ -126,8 +126,6 @@ string function ExpandString( string str )
     return result
 }
 
-bool needs_to_set_gamestate_bar_colors = true;
-
 void function HudRevamp_D2_Gamestate_Update(var gamestate, entity player){
     //this logic is safe to run every frame, i know this because respawn does it
     var friendly_score_number = Hud_GetChild(gamestate, "Team0_ScoreCount")
@@ -135,12 +133,19 @@ void function HudRevamp_D2_Gamestate_Update(var gamestate, entity player){
     var friendly_score_bar = Hud_GetChild(gamestate, "Team0_ScoreBar")
     var enemy_score_bar = Hud_GetChild(gamestate, "Team1_ScoreBar")
 
+    var friendly_score_bar_winning = Hud_GetChild(gamestate, "Team0_ScoreBar_BG_Border_Winning")
+    var enemy_score_bar_winning = Hud_GetChild(gamestate, "Team1_ScoreBar_BG_Border_Winning")
+
     float score_limit = float(GetScoreLimit_FromPlaylist())
     int friendlyTeam = player.GetTeam()
     int enemyTeam = friendlyTeam == TEAM_IMC ? TEAM_MILITIA : TEAM_IMC
 
     int friendly_score = GameRules_GetTeamScore( friendlyTeam )
     int enemy_score    = GameRules_GetTeamScore( enemyTeam )
+
+    Hud_SetVisible(friendly_score_bar_winning, friendly_score > enemy_score)
+    Hud_SetVisible(enemy_score_bar_winning, enemy_score > friendly_score)
+
 
 
     Hud_SetText(friendly_score_number, string(friendly_score))
