@@ -126,6 +126,30 @@ string function ExpandString( string str )
     return result
 }
 
+bool needs_to_set_gamestate_bar_colors = true;
+
+void function HudRevamp_D2_Gamestate_Update(var gamestate, entity player){
+    //this logic is safe to run every frame, i know this because respawn does it
+    var friendly_score_number = Hud_GetChild(gamestate, "Team0_ScoreCount")
+    var enemy_score_number = Hud_GetChild(gamestate, "Team1_ScoreCount")
+    var friendly_score_bar = Hud_GetChild(gamestate, "Team0_ScoreBar")
+    var enemy_score_bar = Hud_GetChild(gamestate, "Team1_ScoreBar")
+
+    float score_limit = float(GetScoreLimit_FromPlaylist())
+    int friendlyTeam = player.GetTeam()
+    int enemyTeam = friendlyTeam == TEAM_IMC ? TEAM_MILITIA : TEAM_IMC
+
+    int friendly_score = GameRules_GetTeamScore( friendlyTeam )
+    int enemy_score    = GameRules_GetTeamScore( enemyTeam )
+
+
+    Hud_SetText(friendly_score_number, string(friendly_score))
+    Hud_SetText(enemy_score_number, string(enemy_score))
+    Hud_SetBarProgress(friendly_score_bar, (float(friendly_score) / score_limit))
+    Hud_SetBarProgress(enemy_score_bar, (float(enemy_score) / score_limit))
+
+}
+
 
 float lastTimeHealthNotFull = -99
 bool d2_healthbar_needs_update = false
@@ -134,11 +158,15 @@ bool d2_healthbar_updating = false
 void function HudRevamp_Update( var panel )
 {
     entity player = GetLocalClientPlayer()
+    var gamestate = HudElement("Destiny_GameStatePanel", panel)
     EarnObject earnGoal = PlayerEarnMeter_GetGoal( player )
     EarnObject earnReward = PlayerEarnMeter_GetReward( player )
     if (IsSingleplayer())
     {
-        Hud_SetVisible(HudElement("Destiny_GameStatePanel", panel), false)
+        Hud_SetVisible(gamestate, false)
+    }
+    else{
+        HudRevamp_D2_Gamestate_Update(gamestate, player)
     }
     if (!IsValid(file.selectedWeapon) || file.selectedWeapon.GetWeaponOwner() != GetLocalClientPlayer())
         return
@@ -149,6 +177,7 @@ void function HudRevamp_Update( var panel )
 
     //printt("earngoal.buildingImage")
     //printt(earnGoal.buildingImage)
+
 
     SuperIcon.SetImage( earnGoal.buildingImage )
 
@@ -240,7 +269,7 @@ void function HudRevamp_Update( var panel )
     // also this should be illegal
 
     file.attackDir = player.GetActiveWeapon().GetAttackDirection()
-    
+
     TraceResults tr = TraceHull( player.CameraPosition(), player.CameraPosition() + file.attackDir * 8192, < -5, -5, -5>, <5,5,5>, [ player ], TRACE_MASK_SHOT, TRACE_COLLISION_GROUP_NONE )
 
     file.hitEnt = tr.hitEnt
@@ -267,7 +296,7 @@ void function HudRevamp_Update( var panel )
             entity npc = tr.hitEnt
             if (npc.IsTitan())
             {
-                
+
             }
             else
             {
@@ -303,7 +332,7 @@ void function HealthBar( entity ent )
     file.healthbarEntities[index] = ent
     if (file.healthbarIndex > HEALTHBAR_INSTANCES)
         file.healthbarIndex = 0
-    
+
     var healthbar = Hud_GetChild( HudElement("Healthbars"), "Healthbar" + index )
 
     OnThreadEnd(
@@ -354,7 +383,7 @@ void function HealthBar( entity ent )
 
 asset function HUDGetIconForAI( entity npc )
 {
-    return $"rui/hud/gametype_icons/bounty_hunt/bh_titan"  
+    return $"rui/hud/gametype_icons/bounty_hunt/bh_titan"
     string classname = ""
     if (npc.IsNPC())
         classname = npc.GetClassName()
@@ -387,7 +416,7 @@ void function TitanHealthBar( entity ent )
     file.titanHealthbarEntities[index] = ent
     if (file.titanHealthbarIndex > HEALTHBAR_INSTANCES)
         file.titanHealthbarIndex = 0
-    
+
     var healthbar = Hud_GetChild( HudElement("Healthbars"), "HealthbarChampion" + index )
 
     OnThreadEnd(

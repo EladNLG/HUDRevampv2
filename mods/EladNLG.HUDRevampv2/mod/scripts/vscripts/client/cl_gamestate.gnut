@@ -364,6 +364,11 @@ void function TEMP_UpdateRuiScores( entity player )
 	int maxPlayers = GetCurrentPlaylistVarInt( "max_players", 12 )
 	//RuiSetInt( file.gamestate_info, "maxTeamPlayers", maxPlayers / 2 )
 
+	//print max players
+	//printt( "max players: " + maxPlayers )
+	//printt("gameEndTime: " + level.nv.gameEndTime)
+
+
 	int friendlyTeam = player.GetTeam()
 	//RuiSetFloat( file.gamestate_info, "leftTeamScore", 69.0) //float( GameRules_GetTeamScore( friendlyTeam ) ) )
 

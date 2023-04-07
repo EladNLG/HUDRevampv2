@@ -77,13 +77,13 @@ resource/ui/destiny_gamestate.res
 		pin_to_sibling_corner	TOP_LEFT
 	}
 
-	Team0_ScoreBar
+	Team0_ScoreBar_BG
 	{
 		ControlName			ImagePanel
 		image			"vgui/hud/white"
 		fg_image			"vgui/hud/white"
 
-		drawColor	"0 0 0 175"
+		drawColor	"0 0 0 150"
 		scaleImage			1
 
 		wide				170
@@ -95,6 +95,51 @@ resource/ui/destiny_gamestate.res
     pin_to_sibling "Team0_Score"
 		pin_corner_to_sibling	BOTTOM_RIGHT
 		pin_to_sibling_corner	TOP_RIGHT
+	}
+
+	Team0_ScoreBar_BG_Border
+	{
+		ControlName			ImagePanel
+		image			"ui/destiny2/gamestate/scorebar_outline"
+		fg_image			"ui/destiny2/gamestate/scorebar_outline"
+
+		drawColor	"255 255 255 255"
+		scaleImage			1
+
+		wide				256
+		tall				16
+
+		"xpos"			"3"
+		"ypos"			"3"
+
+    pin_to_sibling "Team0_ScoreBar_BG"
+		pin_corner_to_sibling	BOTTOM_LEFT
+		pin_to_sibling_corner	BOTTOM_LEFT
+	}
+
+	Team0_ScoreBar
+	{
+		ControlName			CHudProgressBar
+		image			"vgui/hud/white"
+		fg_image			"vgui/hud/white"
+
+		ProgressDirection			1
+		CircularEnabled 		0
+		SegmentFill			1
+		SegmentSize			1000
+
+		fgcolor_override	"70 70 255 175"
+		scaleImage			1
+
+		wide				170
+		tall				10
+
+		"xpos"			"0"
+		"ypos"			"0"
+
+    pin_to_sibling "Team0_ScoreBar_BG"
+		pin_corner_to_sibling	TOP_LEFT
+		pin_to_sibling_corner	TOP_LEFT
 	}
 
 	Team1_Score
@@ -129,20 +174,19 @@ resource/ui/destiny_gamestate.res
 		labelText				"0"
 		textAlignment			center
 		font					DestinyMedium_43
-		//font					NeueHaasGroteskTextProMedium_43
 
 		pin_to_sibling			Team1_Score
 		pin_corner_to_sibling	TOP_LEFT
 		pin_to_sibling_corner	TOP_LEFT
 	}
 
-	Team1_ScoreBar
+	Team1_ScoreBar_BG
 	{
 		ControlName			ImagePanel
 		image			"vgui/hud/white"
 		fg_image			"vgui/hud/white"
 
-		drawColor	"0 0 0 175"
+		drawColor	"0 0 0 150"
 		scaleImage			1
 
 		wide				170
@@ -154,6 +198,54 @@ resource/ui/destiny_gamestate.res
     pin_to_sibling "Team1_Score"
 		pin_corner_to_sibling	BOTTOM_LEFT
 		pin_to_sibling_corner	TOP_LEFT
+	}
+
+	Team1_ScoreBar_BG_Border
+	{
+		ControlName			ImagePanel
+		image			"ui/destiny2/gamestate/scorebar_outline"
+		fg_image			"ui/destiny2/gamestate/scorebar_outline"
+
+		drawColor	"255 255 255 255"
+		scaleImage			1
+
+		wide				256
+		tall				16
+
+		"xpos"			"3"
+		"ypos"			"3"
+
+    pin_to_sibling "Team1_ScoreBar_BG"
+		pin_corner_to_sibling	BOTTOM_LEFT
+		pin_to_sibling_corner	BOTTOM_LEFT
+	}
+
+	Team1_ScoreBar
+	{
+		ControlName			CHudProgressBar
+		fg_image			"vgui/hud/white"
+		bg_image			"vgui/hud/white"
+
+		ProgressDirection			0
+		SegmentFill			1
+		SegmentSize			1000
+		ChangeStyle			0
+
+		CircularEnabled 		0
+		CircularClockwise		1
+
+		fgcolor_override	"255 0 0 175"
+		scaleImage			1
+
+		wide				170
+		tall				10
+
+		"xpos"			"0"
+		"ypos"			"0"
+
+    pin_to_sibling "Team1_ScoreBar_BG"
+		pin_corner_to_sibling	BOTTOM_LEFT
+		pin_to_sibling_corner	BOTTOM_LEFT
 	}
 
 	// TEAMS //
