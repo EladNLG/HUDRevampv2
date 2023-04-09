@@ -129,15 +129,46 @@ string function ExpandString( string str )
     return result
 }
 
+void function HudRevamp_D2_SetFriendlyScoreObjectNotWinningCol(var obj){
+    Hud_SetColor(obj, 80, 120, 176, 63.75)
+}
+void function HudRevamp_D2_SetFriendlyScoreObjectWinningCol(var obj){
+    Hud_SetColor(obj, 80, 120, 176, 255)
+}
+void function HudRevamp_D2_SetEnemyScoreObjectNotWinningCol(var obj){
+    Hud_SetColor(obj, 173, 52, 43, 63.75)
+}
+void function HudRevamp_D2_SetEnemyScoreObjectWinningCol(var obj){
+    Hud_SetColor(obj, 173, 52, 43, 255)
+}
+
 void function HudRevamp_D2_Gamestate_Update(var gamestate, entity player){
     //this logic is safe to run every frame, i know this because respawn does it
     var friendly_score_number = Hud_GetChild(gamestate, "Team0_ScoreCount")
+    var friendly_score_box = Hud_GetChild(gamestate, "Team0_Score")
     var enemy_score_number = Hud_GetChild(gamestate, "Team1_ScoreCount")
+    var enemy_score_box = Hud_GetChild(gamestate, "Team1_Score")
     var friendly_score_bar = Hud_GetChild(gamestate, "Team0_ScoreBar")
     var enemy_score_bar = Hud_GetChild(gamestate, "Team1_ScoreBar")
+    var clock = Hud_GetChild(gamestate, "Round_Timer")
 
-    var friendly_score_bar_winning = Hud_GetChild(gamestate, "Team0_ScoreBar_BG_Border_Winning")
-    var enemy_score_bar_winning = Hud_GetChild(gamestate, "Team1_ScoreBar_BG_Border_Winning")
+    var friendly_score_bar_winning = Hud_GetChild(gamestate, "Team0_ScoreBar_Border_Winning")
+    var friendly_score_bar_border = Hud_GetChild(gamestate, "Team0_ScoreBar_Border")
+    var friendly_score_border = Hud_GetChild(gamestate, "Team0_Score_Border")
+    var enemy_score_bar_winning = Hud_GetChild(gamestate, "Team1_ScoreBar_Border_Winning")
+    var enemy_score_bar_border = Hud_GetChild(gamestate, "Team1_ScoreBar_Border")
+    var enemy_score_border = Hud_GetChild(gamestate, "Team1_Score_Border")
+
+    float endTime
+	if ( IsRoundBased() )
+	{
+        //line 351 in vscripts/client/cl_gamestate.nut
+		endTime = expect float( level.nv.roundEndTime)
+	}
+	else
+	{
+      endTime = expect float( level.nv.gameEndTime )
+	}
 
     float score_limit = float(GetScoreLimit_FromPlaylist())
     int friendlyTeam = player.GetTeam()
@@ -146,7 +177,40 @@ void function HudRevamp_D2_Gamestate_Update(var gamestate, entity player){
     int friendly_score = GameRules_GetTeamScore( friendlyTeam )
     int enemy_score    = GameRules_GetTeamScore( enemyTeam )
 
-    Hud_SetVisible(friendly_score_bar_winning, friendly_score > enemy_score)
+    int seconds = int(endTime - Time()) % 60
+    int mins = int(floor(int(endTime - Time()) / 60))
+
+    Hud_SetText(clock, (mins + ":" + (seconds < 10 ? "0" : "") + seconds))
+
+    if(friendly_score > enemy_score){
+        HudRevamp_D2_SetFriendlyScoreObjectWinningCol(friendly_score_box)
+        Hud_SetVisible(friendly_score_bar_winning, true)
+        Hud_SetColor(friendly_score_bar_border, 255, 255, 255, 255)
+        Hud_SetColor(friendly_score_border, 255, 255, 255, 255)
+    }
+    else{
+        HudRevamp_D2_SetFriendlyScoreObjectNotWinningCol(friendly_score_box)
+        Hud_SetVisible(friendly_score_bar_winning, false)
+        Hud_SetColor(friendly_score_bar_border, 255, 255, 255, 63.75)
+        Hud_SetColor(friendly_score_border, 255, 255, 255, 63.75)
+    }
+
+    if(enemy_score > friendly_score){
+        HudRevamp_D2_SetEnemyScoreObjectWinningCol(enemy_score_box)
+        Hud_SetVisible(enemy_score_bar_winning, true)
+        Hud_SetColor(enemy_score_bar_border, 255, 255, 255, 255)
+        Hud_SetColor(enemy_score_border, 255, 255, 255, 255)
+    }
+    else{
+        HudRevamp_D2_SetEnemyScoreObjectNotWinningCol(enemy_score_box)
+        Hud_SetVisible(enemy_score_bar_winning, false)
+        Hud_SetColor(enemy_score_bar_border, 255, 255, 255, 63.75)
+        Hud_SetColor(enemy_score_border, 255, 255, 255, 63.75)
+    }
+
+
+
+
     Hud_SetVisible(enemy_score_bar_winning, enemy_score > friendly_score)
 
     Hud_SetText(friendly_score_number, string(friendly_score))
@@ -158,19 +222,19 @@ void function HudRevamp_D2_Gamestate_Update(var gamestate, entity player){
     array<entity> enemy_players    = GetPlayerArrayOfTeam( enemyTeam )
 
     //disable UI for players that aren't joined
-    for(int i = friendly_players.len(); i < 6; i++){
+    for(int i = friendly_players.len(); i < 8; i++){
         string player_ui_target = "Team0_Player" + string(i)
         var player_ui = Hud_GetChild(gamestate, player_ui_target)
         Hud_SetVisible(player_ui, false)
     }
-    for(int i = enemy_players.len(); i < 6; i++){
+    for(int i = enemy_players.len(); i < 8; i++){
         string player_ui_target = "Team1_Player" + string(i)
         var player_ui = Hud_GetChild(gamestate, player_ui_target)
         Hud_SetVisible(player_ui, false)
     }
 
     //update UI for players that are joined
-    for(int i = 0; i < friendly_players.len(); i++){
+    for(int i = 0; i < min(8,friendly_players.len()); i++){
         string player_ui_target = "Team0_Player" + string(i)
         var player_ui = Hud_GetChild(gamestate, player_ui_target)
         Hud_SetVisible(player_ui, true)
@@ -182,7 +246,7 @@ void function HudRevamp_D2_Gamestate_Update(var gamestate, entity player){
         else
             player_ui.SetImage($"ui/destiny2/gamestate/icon_alive.vmt")
     }
-    for(int i = 0; i < enemy_players.len(); i++){
+    for(int i = 0; i < min(8,enemy_players.len()); i++){
         string player_ui_target = "Team1_Player" + string(i)
         var player_ui = Hud_GetChild(gamestate, player_ui_target)
         Hud_SetVisible(player_ui, true)
@@ -323,14 +387,14 @@ void function HudRevamp_Update( var panel )
     vector attackDir = AnglesToForward( player.CameraAngles() )
     if (IsValid(player.GetActiveWeapon()))
         attackDir = player.GetActiveWeapon().GetAttackDirection()
-    
-    TraceResults result = TraceLine( player.CameraPosition(), player.CameraPosition() + attackDir * 8192, [ player ], 
+
+    TraceResults result = TraceLine( player.CameraPosition(), player.CameraPosition() + attackDir * 8192, [ player ],
         TRACE_MASK_SHOT, TRACE_COLLISION_GROUP_NONE )
 
     file.hitEnt = result.hitEnt
 
     entity npc = file.hitEnt
-    if (IsValid( npc )) 
+    if (IsValid( npc ))
     {
         if (npc.IsNPC())
         {
@@ -428,7 +492,7 @@ void function HealthBar( entity ent )
         // check team
         entity player = IsValid(GetLocalViewPlayer()) ? GetLocalViewPlayer() : GetLocalClientPlayer()
         bool isFriendly = player.GetTeam() == ent.GetTeam()
-        
+
         // check if we're being looked at
         float delta = Time() - lastFrameTime
         if (file.hitEnt == ent && IsAlive(ent))
@@ -506,7 +570,7 @@ void function TitanHealthBar( entity ent )
         file.titanHealthbarEntities[index].Signal("EndTargetInfo")
     }
     file.titanHealthbarEntities[index] = ent
-    
+
     var healthbar = Hud_GetChild( HudElement("Healthbars"), "HealthbarChampion" + index )
     Hud_SetVisible( healthbar, true )
 
@@ -610,7 +674,7 @@ string function GetHealthbarTitle( entity ent )
         print("IS PLAYER")
         if (ent.IsTitan())
             return ent.GetPlayerName() + " (" + Localize( title ) + ")"
-        
+
         return ent.GetPlayerName()
     }
 

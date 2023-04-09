@@ -55,6 +55,16 @@ Scheme
 				antialias 		1
 			}
 		}
+		DestinyLight_36
+		{
+			isproportional only
+			1
+			{
+				name			DestinyLight
+				tall			36
+				antialias 		1
+			}
+		}
 		DestinyMedium_24
 		{
 			isproportional only
