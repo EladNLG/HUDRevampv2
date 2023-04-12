@@ -85,6 +85,16 @@ Scheme
 				antialias 		1
 			}
 		}
+		DestinyMedium_72
+		{
+			isproportional only
+			1
+			{
+				name			DestinyMedium
+				tall			72
+				antialias 		1
+			}
+		}
 
 		OxaniumLight_43
 		{

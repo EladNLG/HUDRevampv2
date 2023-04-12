@@ -633,16 +633,12 @@ hud_revamp.res
 		ypos					0
 		wide					72
 		tall					72
-		//auto_tall_tocontents	1
 		visible					1
 		enabled					1
-		//auto_wide_tocontents	1
 		labelText				"100"
 		textAlignment			west
 		auto_wide_tocontents	1
 		auto_tall_tocontents	1
-		//fgcolor_override 		"255 255 255 255"
-		//bgcolor_override 		"0 0 0 200"
 		font					OxaniumBold_56
 
 		pin_to_sibling			BarBG
@@ -690,7 +686,7 @@ hud_revamp.res
 		pin_corner_to_sibling	TOP
 	}
 
-	AnnouncementTitleBG
+	AnnouncementTitle_JankBorder
 	{
 		ControlName		ImagePanel
 		ypos		0
@@ -702,6 +698,100 @@ hud_revamp.res
 		pin_to_sibling	AnnouncementIcon
 		pin_to_sibling_corner	CENTER
 		pin_corner_to_sibling	CENTER
+	}
+
+	AnnouncementTitle_JankBorder_Left
+	{
+		ControlName		ImagePanel
+		tall		72
+		image 			"vgui/hud/white"
+		scaleImage 	1
+		visible			0
+
+		pin_to_sibling	AnnouncementTitle_JankBorder
+		pin_to_sibling_corner	BOTTOM_LEFT
+		pin_corner_to_sibling	BOTTOM_LEFT
+	}
+	AnnouncementTitle_JankBorder_Right
+	{
+		ControlName		ImagePanel
+		tall		72
+		image 			"vgui/hud/white"
+		scaleImage 	1
+		visible			0
+
+		pin_to_sibling	AnnouncementTitle_JankBorder
+		pin_to_sibling_corner	TOP_RIGHT
+		pin_corner_to_sibling	TOP_RIGHT
+	}
+	AnnouncementTitle_JankBorder_Bottom
+	{
+		ControlName		ImagePanel
+		tall		1
+		image 			"vgui/hud/white"
+		scaleImage 	1
+		visible			0
+
+		pin_to_sibling	AnnouncementTitle_JankBorder
+		pin_to_sibling_corner	BOTTOM_LEFT
+		pin_corner_to_sibling	BOTTOM_LEFT
+	}
+	AnnouncementTitle_JankBorder_Top
+	{
+		ControlName		ImagePanel
+		tall		1
+		image 			"vgui/hud/white"
+		scaleImage 	1
+		visible			0
+
+		pin_to_sibling	AnnouncementTitle_JankBorder
+		pin_to_sibling_corner	TOP_RIGHT
+		pin_corner_to_sibling	TOP_RIGHT
+	}
+
+	AnnouncementTitleBG
+	{
+		ControlName		ImagePanel
+		ypos		0
+		tall		72
+		wide		400
+		fillColor		"0 0 0 175"
+		visible			0
+		border		"WhiteBorder"
+		paintborder  1
+
+		pin_to_sibling	AnnouncementIcon
+		pin_to_sibling_corner	CENTER
+		pin_corner_to_sibling	CENTER
+	}
+
+	AnnouncementTitle_RB
+	{
+		ControlName		ImagePanel
+		image 			"vgui/hud/white"
+		scaleImage 	1
+		ypos				0
+		tall				72
+		wide				1
+		visible			0
+
+		pin_to_sibling	AnnouncementTitleBG
+		pin_to_sibling_corner	BOTTOM_RIGHT
+		pin_corner_to_sibling	BOTTOM_RIGHT
+	}
+	AnnouncementTitle_LB
+	{
+		ControlName		ImagePanel
+		image 			"vgui/hud/white"
+		scaleImage 	1
+		ypos				0
+		tall				72
+		wide				1
+		visible			0
+
+		pin_to_sibling	AnnouncementTitleBG
+		pin_to_sibling_corner	BOTTOM_LEFT
+		pin_corner_to_sibling	BOTTOM_LEFT
 	}
 
 	AnnouncementTitle
@@ -721,7 +811,7 @@ hud_revamp.res
 		auto_tall_tocontents	1
 		fgcolor_override 		"255 255 255 255"
 		//bgcolor_override 		"0 0 0 200"
-		font					OxaniumLight_72
+		font					DestinyMedium_43
 
 		pin_to_sibling			AnnouncementTitleBG
 		pin_to_sibling_corner	CENTER

@@ -35,6 +35,16 @@ Scheme
 				antialias 		1
 			}
 		}
+		OxaniumLight_43
+		{
+			isproportional only
+			1
+			{
+				name			OxaniumLight
+				tall			43
+				antialias 		1
+			}
+		}
 		DestinyMedium_20
 		{
 			isproportional only
@@ -45,13 +55,13 @@ Scheme
 				antialias 		1
 			}
 		}
-		OxaniumLight_43
+		DestinyMedium_72
 		{
 			isproportional only
 			1
 			{
-				name			OxaniumLight
-				tall			43
+				name			DestinyMedium
+				tall			72
 				antialias 		1
 			}
 		}

@@ -1,0 +1,12 @@
+"Basic"
+{
+	"$basetexture" "rui/titan_loadout/core/destiny2/titan_core_sword"
+	"$translucent" 1
+	"$vertexcolor" 1
+	"$vertexalpha" 1
+	"$no_fullbright" 1
+	"$ignorez" 1
+	"$nolod" 1
+
+	"$SHADERSRGBREAD360" 1
+}

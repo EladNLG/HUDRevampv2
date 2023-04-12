@@ -4,6 +4,8 @@ global function HUDMenuOpenState
 
 const array<int> ENEMY_BAR_COLOR = [200, 150, 50, 255]
 const array<int> FRIENDLY_BAR_COLOR = [70, 130, 255, 255]
+const array<int> SUBCLASS_COLOR = [255, 150, 50, 255] //Solar
+const array<int> SUPER_COL_RGB = [223, 194, 79]
 const int HEALTHBAR_INSTANCES = 7
 
 struct
@@ -40,22 +42,34 @@ void function Destiny2_Init()
 
 void function Announcement( var panel, AnnouncementData data )
 {
+    printt("announcement'd")
     if (panel == null)
     {
         return
     }
-    var icon = HudElement("AnnouncementIcon", panel)
-    var title = HudElement("AnnouncementTitle", panel)
-    var desc = HudElement("AnnouncementDesc", panel)
-    var bg = HudElement("AnnouncementTitleBG", panel)
+    var icon  = HudElement("AnnouncementIcon",     panel)
+    var title = HudElement("AnnouncementTitle",    panel)
+    var desc  = HudElement("AnnouncementDesc",     panel)
+    var bg    = HudElement("AnnouncementTitleBG",  panel)
+
+    //the two "curtains"
+    var bg_lb = HudElement("AnnouncementTitle_LB", panel)
+    var bg_rb = HudElement("AnnouncementTitle_RB", panel)
+
+    //these are the border you actually see
+    var jank_border_assist = HudElement("AnnouncementTitle_JankBorder",        panel)
+    var jank_border_left   = HudElement("AnnouncementTitle_JankBorder_Left",   panel)
+    var jank_border_right  = HudElement("AnnouncementTitle_JankBorder_Right",  panel)
+    var jank_border_bottom = HudElement("AnnouncementTitle_JankBorder_Bottom", panel)
+    var jank_border_top    = HudElement("AnnouncementTitle_JankBorder_Top",    panel)
 
     OnThreadEnd( function() : (title, desc, bg, icon) {
         try
         {
-            Hud_SetVisible( icon, false )
+            Hud_SetVisible( icon,  false )
             Hud_SetVisible( title, false )
-            Hud_SetVisible( desc, false )
-            Hud_SetVisible( bg, false )
+            Hud_SetVisible( desc,  false )
+            Hud_SetVisible( bg,    false )
         }
         catch (ex)
         {
@@ -70,8 +84,8 @@ void function Announcement( var panel, AnnouncementData data )
             break
     }
     Hud_SetVisible( icon, showIcon )
-    Hud_SetVisible( bg, true )
-    Hud_SetVisible( desc, true )
+    Hud_SetVisible( bg,    true )
+    //Hud_SetVisible( desc,  true )
     Hud_SetVisible( title, true )
     icon.SetImage( data.icon )
 
@@ -85,20 +99,118 @@ void function Announcement( var panel, AnnouncementData data )
     //Hud_EnableKeyBindingIcons(title)
     Hud_SetText(desc, CleanString(Localize(data.subText)))
 
+    //Hud_SetVisible(bg, false)
+
+    Hud_SetHeight(jank_border_bottom, 4)
+    Hud_SetHeight(jank_border_top,    4)
+    Hud_SetWidth(jank_border_left,    4)
+    Hud_SetWidth(jank_border_right,   4)
+
+    Hud_SetWidth(jank_border_assist, (Hud_GetWidth(title) + 40))
+    Hud_SetWidth(jank_border_bottom, (Hud_GetWidth(title) + 40))
+    Hud_SetWidth(jank_border_top,    (Hud_GetWidth(title) + 40))
+
+    //Here's how the D2 super animation flow goes
+
+    //fade in:
+    //first half:
+    //  text not visible
+    //  l/r borders sliding in from center (to create the big rectangle)
+    //second half:
+    //  text active
+    //  l/r borders revealing the center
+    ////////////////// Just vibing there
+    //fade out:
+    //  icon fading to 0 opacity throughout
+    //  first half:
+    //    text visible
+    //    l/r borders sliding in from center to create rectangle again
+    //  second half:
+    //    text invisible
+    //    l/r borders revealing center again
+
+
+    Hud_SetVisible( bg_lb, true )
+    Hud_SetVisible( bg_rb, true )
+
     float start = Time()
     float fadeInTime = 0.5
     while ( Time() - start <= data.duration )
     {
         float fadeInFrac = min( (Time() - start) / 0.75, 1 )
         float fadeOutFrac = min( (start + data.duration - Time()) / 0.75, 1 )
-        Hud_SetColor( title, 255, 255, 255, 255 * min(fadeInFrac, fadeOutFrac) )
-        Hud_SetColor( desc, 255, 255, 255, 255 * min(fadeInFrac, fadeOutFrac) )
-        Hud_SetColor( icon, 255, 255, 255, 255 * min(fadeInFrac, fadeOutFrac) )
-        int width = int((Hud_GetWidth(HudElement("AnnouncementTitle", panel)) + 40) * min(fadeInFrac, fadeOutFrac))
+        float fadeInCap = min(fadeInFrac*2, 1)
+        float fadeOutCap = min(fadeOutFrac*2, 1)
+
+        float jank_frac = 0.0
+        if(fadeInFrac < 1) jank_frac = fadeInFrac
+        else if (fadeOutFrac < 1) jank_frac = 1 - fadeOutFrac
+        else jank_frac = 1
+        float jank_cap = min(jank_frac * 2,1)
+
+        int width = int((Hud_GetWidth(title) + 40) * jank_cap)
         width -= width % 2
         Hud_SetWidth( bg, width )
+
+
+        float yeah_frac = 0.0
+        if(fadeInFrac < 1) yeah_frac = fadeInFrac
+        else if (fadeOutFrac < 1) yeah_frac = 1 - fadeOutFrac
+        else yeah_frac = 0
+
+        if(yeah_frac <= 0.5){
+            Hud_SetWidth(bg_lb, (width/2))
+            Hud_SetWidth(bg_rb, (width/2))
+        }
+        else if(yeah_frac > 0.5){ //0.5 to 1
+            Hud_SetWidth(bg_lb, (width/2) * ( 1 - ((yeah_frac - 0.5)*2)))
+            Hud_SetWidth(bg_rb, (width/2) * ( 1 - ((yeah_frac - 0.5)*2)))
+        }
+        if(fadeInFrac == 1 && fadeOutFrac == 1){
+            Hud_SetWidth(bg_lb, 1)
+            Hud_SetWidth(bg_rb, 1)
+        }
+
+
+        if(fadeInFrac >= 0.5 && fadeOutFrac >= 0.5) Hud_SetVisible( title, true )
+        else Hud_SetVisible( title, false )
+
+        if(fadeOutFrac >= 0.5 && fadeInFrac >= 0.5){
+            Hud_SetVisible(jank_border_left, true)
+            Hud_SetVisible(jank_border_right, true)
+            Hud_SetVisible(jank_border_top, true)
+            Hud_SetVisible(jank_border_bottom, true)
+
+        }
+        else{
+            Hud_SetVisible(jank_border_left, false)
+            Hud_SetVisible(jank_border_right, false)
+            Hud_SetVisible(jank_border_top, false)
+            Hud_SetVisible(jank_border_bottom, false)
+        }
+
+
+        //Hud_SetColor( title, 255, 255, 255, 255 * min(fadeInFrac, fadeOutFrac) )
+
+        Hud_SetColor(title, SUPER_COL_RGB, 255)
+        Hud_SetColor(bg_lb, SUPER_COL_RGB, 255)
+        Hud_SetColor(bg_rb, SUPER_COL_RGB, 255)
+        Hud_SetColor(jank_border_left, SUPER_COL_RGB, 255)
+        Hud_SetColor(jank_border_right, SUPER_COL_RGB, 255)
+        Hud_SetColor(jank_border_top, SUPER_COL_RGB, 255)
+        Hud_SetColor(jank_border_bottom, SUPER_COL_RGB, 255)
+        //Hud_SetColor(bg, 0,0,0, 0)
+        Hud_SetVisible(bg, false)
+
+        //Hud_SetText(desc, "fadeIn: " + string(fadeInFrac) + "| fadeOut: " + string(fadeOutFrac) + "| time: " + string(start + data.duration - Time()))
+
+        //Hud_SetColor( desc, 255, 255, 255, 255 * min(fadeInFrac, fadeOutFrac) )
+        Hud_SetColor( icon, SUPER_COL_RGB, 150 * min(fadeInFrac, fadeOutFrac) )
+
         WaitFrame()
     }
+    Hud_SetVisible( bg_lb, false )
+    Hud_SetVisible( bg_rb, false )
 }
 
 void function OnSelectedWeaponChanged( entity weapon )
@@ -269,17 +381,53 @@ bool d2_healthbar_updating = false
 
 void function HudRevamp_Update( var panel )
 {
+    //var icon = HudElement("AnnouncementIcon", panel)
+    //var title = HudElement("AnnouncementTitle", panel)
+    //var desc = HudElement("AnnouncementDesc", panel)
+    //var bg = HudElement("AnnouncementTitleBG", panel)
+    //var bg_lb = HudElement("AnnouncementTitle_LB", panel)
+    //var bg_rb = HudElement("AnnouncementTitle_RB", panel)
+    //Hud_SetVisible( icon, true )
+    //Hud_SetVisible( bg, true )
+    //Hud_SetVisible( bg_lb, true )
+    //Hud_SetVisible( bg_rb, true )
+    //Hud_SetVisible( desc, false )
+    //Hud_SetVisible( title, true )
+
+    //Hud_SetColor(title,SUPER_COL_RGB,255)
+    //Hud_SetColor(bg_lb,255,255,255,255)
+    //Hud_SetColor(bg_rb,255,255,255,255)
+    //Hud_SetColor(icon,SUPER_COL_RGB,150)
+    //Hud_SetText(title,"SHIT CORE CHARGED")
+    //int width = ((Hud_GetWidth(title) + 40))
+    //width -= width % 2
+    //Hud_SetWidth( bg, width )
+    //Hud_SetWidth( bg_lb, width/4 )
+    //Hud_SetWidth( bg_rb, width/4 )
+    //Hud_SetImage(icon, $"rui/titan_loadout/core/titan_core_smart_destiny2")
+    //Hud_SetImage(bg_rb, $"vgui/hud/white")
+    //Hud_SetImage(bg_lb, $"vgui/hud/white")
+
+
+
+
+
+
     //HudElement("Screen", panel).SetColor(0, 0,0,127)
     entity player = GetLocalClientPlayer()
     var gamestate = HudElement("Destiny_GameStatePanel", panel)
+    var player_healthbar = HudElement("HealthBar", panel)
+    var player_healthbar_bg = HudElement("HealthBarBG", panel)
     EarnObject earnGoal = PlayerEarnMeter_GetGoal( player )
     EarnObject earnReward = PlayerEarnMeter_GetReward( player )
     if (IsSingleplayer())
     {
         Hud_SetVisible(gamestate, false)
+        Hud_SetPos(player_healthbar_bg, 710, 140)
     }
     else{
         HudRevamp_D2_Gamestate_Update(gamestate, player)
+        Hud_SetPos(player_healthbar_bg, 710, 240)
     }
     if (!IsValid(file.selectedWeapon) || file.selectedWeapon.GetWeaponOwner() != GetLocalClientPlayer())
         return
@@ -295,11 +443,11 @@ void function HudRevamp_Update( var panel )
     SuperIcon.SetImage( earnGoal.buildingImage )
 
 
-    Hud_SetBarProgress( HudElement("HealthBar", panel), GetHealthFrac(player) )
+    Hud_SetBarProgress( player_healthbar, GetHealthFrac(player) )
     Hud_SetBarProgress( SuperBar, PlayerEarnMeter_GetEarnedFrac(player) )
     if(PlayerEarnMeter_GetEarnedFrac(player) >= 1){
-        Hud_SetColor( SuperBar, 223, 194, 79, 255 )
-        Hud_SetColor( SuperIcon_BG, 223, 194, 79, 255 )
+        Hud_SetColor( SuperBar, SUPER_COL_RGB, 255 )
+        Hud_SetColor( SuperIcon_BG, SUPER_COL_RGB, 255 )
         Hud_SetColor( SuperIcon, 255, 255, 255, 255 )
         SuperIcon_BG.SetImage($"ui/destiny2/super_full.vmt")
     }
@@ -308,6 +456,17 @@ void function HudRevamp_Update( var panel )
         Hud_SetColor( SuperIcon_BG, 255, 255, 255, 255 )
         Hud_SetColor( SuperIcon, 255, 255, 255, 255 )
         SuperIcon_BG.SetImage($"ui/destiny2/super_empty.vmt")
+    }
+
+    if(player.IsTitan()){
+        entity shitass = player.GetOffhandWeapon(3)
+        if(IsValid(shitass)){
+            var validImage = GetWeaponInfoFileKeyFieldAsset_WithMods_Global( shitass.GetWeaponClassName(), shitass.GetMods(), "hud_icon" )
+            var shit = StringToAsset( expect string( GetWeaponInfoFileKeyField_WithMods_Global( shitass.GetWeaponClassName(), shitass.GetMods(), "hud_icon" ) ) + "_destiny2" )
+            Hud_SetImage(SuperIcon, shit)
+        }
+        else
+            Hud_SetImage(SuperIcon,$"ui/destiny2/unstoppable.vmt")
     }
 
     if(GetHealthFrac(player) < 1){
@@ -319,8 +478,8 @@ void function HudRevamp_Update( var panel )
         d2_healthbar_opacity = 1.0
     if (player.IsTitan())
         d2_healthbar_opacity = 0.0
-    Hud_SetColor( HudElement("HealthBar", panel), 255, 255, 255, d2_healthbar_opacity * 255 )
-    Hud_SetColor( HudElement("HealthBarBG", panel), 0, 0, 0, d2_healthbar_opacity * 120 )
+    Hud_SetColor( player_healthbar, 255, 255, 255, d2_healthbar_opacity * 255 )
+    Hud_SetColor( player_healthbar_bg, 0, 0, 0, d2_healthbar_opacity * 120 )
     UpdateMainWeapons( player, panel )
 
     int shield = 0
@@ -696,7 +855,7 @@ void function UpdateOffhand( var panel, entity weapon, int index )
         Hud_SetVisible( chargeBox,  true)
         if (file.cooldownData[index].readyCharges >= 2)
         {
-            Hud_SetColor(chargeBox, 255, 150, 50, 255)
+            Hud_SetColor(chargeBox, SUBCLASS_COLOR)
         }
         else
         {
@@ -708,7 +867,7 @@ void function UpdateOffhand( var panel, entity weapon, int index )
     }
 
     if(file.cooldownData[index].readyCharges >= 1) {
-        Hud_SetColor(_BG, 255, 150, 50, 255)
+        Hud_SetColor(_BG, SUBCLASS_COLOR)
         Hud_SetColor(BG, 200, 200, 200, 100)
     }
     else{
