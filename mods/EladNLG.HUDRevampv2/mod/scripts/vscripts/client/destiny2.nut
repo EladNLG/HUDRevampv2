@@ -254,6 +254,88 @@ void function HudRevamp_D2_SetEnemyScoreObjectWinningCol(var obj){
     Hud_SetColor(obj, 173, 52, 43, 255)
 }
 
+void function HudRevamp_D2_SetGamestateClassIcon(entity player, var ui_object, bool friendly){
+
+    if(!IsAlive(player)){
+        ui_object.SetImage(friendly ? $"ui/destiny2/gamestate/icon_dead_friendly.vmt" : $"ui/destiny2/gamestate/icon_dead_enemy.vmt")
+        return
+    }
+    printt(player.GetPlayerSettings())
+    switch (player.GetPlayerSettings()){
+
+        //PILOTS
+
+
+        case "pilot_geist_male":
+        case "pilot_geist_female": //cloak
+             ui_object.SetImage($"ui/destiny2/gamestate/pilot_classes/cloak")
+            break
+        case "pilot_medium_male":
+        case "pilot_medium_female": //pulse blade
+             ui_object.SetImage($"ui/destiny2/gamestate/pilot_classes/pulse")
+            break
+        case "pilot_grapple_male":
+        case "pilot_grapple_female": //the only one worth using
+             ui_object.SetImage($"ui/destiny2/gamestate/pilot_classes/grapple")
+            break
+        case "pilot_nomad_male":
+        case "pilot_nomad_female": //crack
+             ui_object.SetImage($"ui/destiny2/gamestate/pilot_classes/stim")
+            break
+        case "pilot_heavy_male":
+        case "pilot_heavy_female": //a-wall
+             ui_object.SetImage($"ui/destiny2/gamestate/pilot_classes/awall")
+            break
+        case "pilot_light_male":
+        case "pilot_light_female": //phase shift
+             ui_object.SetImage($"ui/destiny2/gamestate/pilot_classes/phase")
+            break
+        case "pilot_stalker_male":
+        case "pilot_stalker_female": //holo
+             ui_object.SetImage($"ui/destiny2/gamestate/pilot_classes/holo")
+            break
+
+        //TITANS
+
+        case "titan_stryder_leadwall":
+        case "titan_stryder_ronin_prime": //ronin
+            ui_object.SetImage($"ui/destiny2/gamestate/titan_classes/ronin")
+            break
+        case "titan_atlas_stickybomb":
+        case "titan_atlas_ion_prime": //ion
+            ui_object.SetImage($"ui/destiny2/gamestate/titan_classes/ion")
+            break
+        case "titan_ogre_scorch_prime":
+        case "titan_ogre_meteor": //scorch
+            ui_object.SetImage($"ui/destiny2/gamestate/titan_classes/scorch")
+            break
+        case "titan_stryder_northstar_prime":
+        case "titan_stryder_sniper": //northstar
+            ui_object.SetImage($"ui/destiny2/gamestate/titan_classes/northstar")
+            break
+        case "titan_atlas_tone_prime":
+        case "titan_atlas_tracker": //tone
+            ui_object.SetImage($"ui/destiny2/gamestate/titan_classes/tone")
+            break
+        case "titan_ogre_legion_prime":
+        case "titan_ogre_minigun": //legion
+            ui_object.SetImage($"ui/destiny2/gamestate/titan_classes/legion")
+            break
+        case "titan_atlas_vanguard": //battery whore
+            ui_object.SetImage($"ui/destiny2/gamestate/titan_classes/batterywhore")
+            break
+
+        //GENERIC
+
+        default:
+            if(player.IsTitan())
+                ui_object.SetImage($"ui/destiny2/gamestate/icon_titan.vmt")
+            else
+                ui_object.SetImage($"ui/destiny2/gamestate/icon_alive.vmt")
+            break
+    }
+}
+
 void function HudRevamp_D2_Gamestate_Update(var gamestate, entity player){
     //this logic is safe to run every frame, i know this because respawn does it
     var friendly_score_number = Hud_GetChild(gamestate, "Team0_ScoreCount")
@@ -351,24 +433,14 @@ void function HudRevamp_D2_Gamestate_Update(var gamestate, entity player){
         var player_ui = Hud_GetChild(gamestate, player_ui_target)
         Hud_SetVisible(player_ui, true)
 
-        if(!IsAlive(friendly_players[i]))
-            player_ui.SetImage($"ui/destiny2/gamestate/icon_dead_friendly.vmt")
-        else if(friendly_players[i].IsTitan())
-            player_ui.SetImage($"ui/destiny2/gamestate/icon_titan.vmt")
-        else
-            player_ui.SetImage($"ui/destiny2/gamestate/icon_alive.vmt")
+        HudRevamp_D2_SetGamestateClassIcon(friendly_players[i], player_ui, true)
     }
     for(int i = 0; i < min(8,enemy_players.len()); i++){
         string player_ui_target = "Team1_Player" + string(i)
         var player_ui = Hud_GetChild(gamestate, player_ui_target)
         Hud_SetVisible(player_ui, true)
 
-        if(!IsAlive(enemy_players[i]))
-            player_ui.SetImage($"ui/destiny2/gamestate/icon_dead_enemy.vmt")
-        else if(enemy_players[i].IsTitan())
-            player_ui.SetImage($"ui/destiny2/gamestate/icon_titan.vmt")
-        else
-            player_ui.SetImage($"ui/destiny2/gamestate/icon_alive.vmt")
+        HudRevamp_D2_SetGamestateClassIcon(enemy_players[i], player_ui, false)
     }
 
 
@@ -427,7 +499,7 @@ void function HudRevamp_Update( var panel )
     }
     else{
         HudRevamp_D2_Gamestate_Update(gamestate, player)
-        Hud_SetPos(player_healthbar_bg, 710, 240)
+        Hud_SetPos(player_healthbar_bg, 0, 240)
     }
     if (!IsValid(file.selectedWeapon) || file.selectedWeapon.GetWeaponOwner() != GetLocalClientPlayer())
         return

@@ -1,0 +1,3 @@
+bg: 7e7e7e, 40% opacity
+
+i probably should have included the XCF source for all of them but eh, it's too late now and most of them are easy enough to recreate
