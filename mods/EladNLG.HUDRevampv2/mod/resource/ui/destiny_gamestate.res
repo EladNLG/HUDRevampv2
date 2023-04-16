@@ -68,7 +68,7 @@ resource/ui/destiny_gamestate.res
 		tall					100
 		visible					1
 		enabled					1
-		labelText				"ROUND TIMER"
+		labelText				"0:00"
 		textAlignment			center
 		font					DestinyLight_36
 

@@ -626,50 +626,6 @@ hud_revamp.res
 		pin_to_sibling_corner	LEFT
 	}
 
-	Health
-	{
-		ControlName				Label
-		xpos					-8
-		ypos					0
-		wide					72
-		tall					72
-		visible					1
-		enabled					1
-		labelText				"100"
-		textAlignment			west
-		auto_wide_tocontents	1
-		auto_tall_tocontents	1
-		font					OxaniumBold_56
-
-		pin_to_sibling			BarBG
-		pin_corner_to_sibling	BOTTOM_LEFT
-		pin_to_sibling_corner	TOP_LEFT
-	}
-
-	MaxHealth
-	{
-		ControlName				Label
-		xpos					8
-		ypos					5
-		wide					72
-		tall					72
-		//auto_tall_tocontents	1
-		visible					1
-		enabled					1
-		//auto_wide_tocontents	1
-		labelText				"100"
-		textAlignment			west
-		auto_wide_tocontents	1
-		auto_tall_tocontents	1
-		fgcolor_override 		"200 200 200 255"
-		//bgcolor_override 		"0 0 0 200"
-		font					OxaniumBold_43_DropShadow
-
-		pin_to_sibling			Health
-		pin_corner_to_sibling	LEFT
-		pin_to_sibling_corner	RIGHT
-	}
-
 	AnnouncementIcon
 	{
 		ControlName		ImagePanel

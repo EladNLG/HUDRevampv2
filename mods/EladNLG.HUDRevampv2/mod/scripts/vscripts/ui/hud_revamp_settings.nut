@@ -21,6 +21,10 @@ void function HudRevampSettings_Init()
 	AddModTitle("HUD ^FF902000Revamp")
 	AddModCategory("General")
 	AddConVarSettingEnum("comp_hud_layout", "Layout", [ "HUDRevamp", "Destiny 2" ] )
+	AddModSettingsButton( "Preview HUD", void function() : () {
+		AdvanceMenu( GetMenu( "HUDPreview" ) )
+		//print("Advance!")
+	})
 	AddModCategory("Damage Indicator")
 	AddConVarSettingEnum( "comp_hud_damage_indicator", "Enabled", [ "No", "Yes" ] )
 	AddConVarSetting( "comp_hud_damage_indicator_duration", "Duration", "float" )
@@ -47,10 +51,8 @@ void function UpdateHUDMenuOpenState()
 	{
 		WaitSignal( uiGlobal.signalDummy, "ActiveMenuChanged" )
 
-		printt("yo")
 		if ( CanRunClientScript() )
 		{
-			printt("yo")
 			int newState = 0
 			if ( IsDialogOnlyActiveMenu() )
 				newState = 2

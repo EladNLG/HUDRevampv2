@@ -33,6 +33,13 @@
             }
         },
         {
+            "Path": "ui/menu_hud_preview.nut",
+            "RunOn": "UI",
+            "UICallback": {
+                "Before": "HudPreview_Init"
+            }
+        },
+        {
             "Path": "ui/hud_revamp_settings.nut",
             "RunOn": "UI",
             "UICallback": {

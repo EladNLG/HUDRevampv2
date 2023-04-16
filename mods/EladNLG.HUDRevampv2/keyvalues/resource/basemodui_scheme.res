@@ -35,16 +35,6 @@ Scheme
 				antialias 		1
 			}
 		}
-		OxaniumLight_43
-		{
-			isproportional only
-			1
-			{
-				name			OxaniumLight
-				tall			43
-				antialias 		1
-			}
-		}
 		DestinyMedium_20
 		{
 			isproportional only
@@ -55,6 +45,46 @@ Scheme
 				antialias 		1
 			}
 		}
+		DestinyLight_24
+		{
+			isproportional only
+			1
+			{
+				name			DestinyLight
+				tall			24
+				antialias 		1
+			}
+		}
+		DestinyLight_36
+		{
+			isproportional only
+			1
+			{
+				name			DestinyLight
+				tall			36
+				antialias 		1
+			}
+		}
+		DestinyMedium_24
+		{
+			isproportional only
+			1
+			{
+				name			DestinyMedium
+				tall			24
+				antialias 		1
+			}
+		}
+		DestinyMedium_43
+		{
+			isproportional only
+			1
+			{
+				name			DestinyMedium
+				tall			43
+				antialias 		1
+			}
+		}
 		DestinyMedium_72
 		{
 			isproportional only
@@ -62,6 +92,17 @@ Scheme
 			{
 				name			DestinyMedium
 				tall			72
+				antialias 		1
+			}
+		}
+
+		OxaniumLight_43
+		{
+			isproportional only
+			1
+			{
+				name			OxaniumLight
+				tall			43
 				antialias 		1
 			}
 		}

@@ -594,9 +594,6 @@ void function HudRevamp_Update( var panel )
         }
     }
 
-    Hud_SetText( HudElement("Health", panel), "") //(GetHealthFrac(player)).tostring() )
-    Hud_SetText( HudElement("MaxHealth", panel), "")//player.GetMaxHealth().tostring() )
-
     Hud_SetVisible(HudElement( "OffhandRight",  panel ), offhands.len() > 0)
     Hud_SetVisible(HudElement( "OffhandCenter", panel ), offhands.len() > 1)
     Hud_SetVisible(HudElement( "OffhandLeft",   panel ), offhands.len() > 2)

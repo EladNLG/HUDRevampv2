@@ -48,7 +48,7 @@ void function InitHUD( entity cockpit )
 
 		local panel = mainVGUI.s.panel
 		local warpSettings = mainVGUI.s.warpSettings
-		printt("XWARP:", warpSettings.xWarp)
+
 		mainVGUI.s.panel.WarpGlobalSettings( 34, 0, 34 / 1.7665, 0, warpSettings.viewDist )
 		mainVGUI.s.panel.WarpEnable()
 
