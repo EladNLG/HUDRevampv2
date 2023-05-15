@@ -11,8 +11,10 @@ struct
 void function HudRevamp_Init()
 {
     AddCallback_OnSelectedWeaponChanged( OnSelectedWeaponChanged )
-    HudRevamp_AddLayout( "hud_revamp",
+    HudRevamp_AddLayout( "HudRevamp",
+    null,
     HudRevamp_Update,
+    null,
     Announcement )
     OffhandCooldownData data
     file.cooldownData.append(data)
@@ -135,12 +137,7 @@ void function HudRevamp_Update( var panel )
         Hud_SetBarProgress( HudElement("SHBar", panel), float(shield) / float(maxShield) )
     }
     else Hud_SetBarProgress( HudElement("SHBar", panel), 0.0 )
-    try
-    {
-        Hud_SetBarProgress( HudElement("HDBar", panel), player.GetPlayerNetFloat("hardDamage") / 100.0 )
-    }
-    catch (ex)
-    {}
+
     Hud_SetText( HudElement("Health", panel), (player.GetHealth() + shield).tostring() )
     Hud_SetText( HudElement("MaxHealth", panel), player.GetMaxHealth().tostring() )
     int weaponIndex = 0

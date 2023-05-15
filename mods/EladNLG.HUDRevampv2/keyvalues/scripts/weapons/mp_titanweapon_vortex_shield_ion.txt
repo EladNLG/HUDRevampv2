@@ -1,0 +1,4 @@
+WeaponData
+{
+	"shared_energy_charge_cost"						"2" // 
+}

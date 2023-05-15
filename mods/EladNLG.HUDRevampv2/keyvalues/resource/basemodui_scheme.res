@@ -12,9 +12,37 @@ Scheme
 {
 	InheritableProperties
 	{
+		ChatBox
+		{
+			bgcolor_override 		"0 0 0 180"
+
+			chatBorderThickness		3
+
+			chatHistoryBgColor		"24 27 30 0"
+			chatEntryBgColor		"24 27 30 0"
+			chatEntryBgColorFocused	"24 27 30 0"
+		}
 	}
 	Fonts
 	{
+		ChatFont
+		{
+			1
+			{
+				shadowglow	0
+				outline 1
+			}
+			2
+			{
+				shadowglow	0
+				outline 1
+			}
+			3
+			{
+				shadowglow	0
+				outline 1
+			}
+		}
 		DestinyLight_16
 		{
 			isproportional only

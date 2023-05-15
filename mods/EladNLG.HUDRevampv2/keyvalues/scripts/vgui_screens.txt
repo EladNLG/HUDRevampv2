@@ -1,11 +1,11 @@
 VGUI_Screens
 {
-    hud_revamp
+    HudRevamp
     {
         type            vgui_screen_panel
 
         pixelswide      1920
         pixelshigh      1080
-        resfile         "scripts/screens/hud_revamp.res"
+        resfile         "resource/ui/menus/panels/hud_panels.res"
     }
 }

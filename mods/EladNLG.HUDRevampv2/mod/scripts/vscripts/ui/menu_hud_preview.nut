@@ -1,4 +1,5 @@
 global function HudPreview_Init
+global function HudRevamp_AddLayout
 
 struct
 {
@@ -15,4 +16,8 @@ void function HudPreviewMenu_Init()
     print("yo")
     file.menu = GetMenu( "HUDPreview" )
     Hud_EnableKeyBindingIcons( Hud_GetChild(file.menu, "ControlsLine1") )
+}
+
+void function HudRevamp_AddLayout() {
+    
 }

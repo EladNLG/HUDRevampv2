@@ -23,30 +23,48 @@
             zpos -1000
 		}
 
-		MenuTitle
+		HUDName
 		{
 			ControlName Label
 			tall	60
-			ypos 	-50
+			ypos 	-60
 			textAlignment center
 			auto_wide_tocontents 1
+			auto_tall_tocontents	1
 			pin_corner_to_sibling CENTER
 			pin_to_sibling_corner CENTER
 			pin_to_sibling Vignette
-			labelText "HUD Preview"
+			labelText "Destiny 2"
 			font		OxaniumBold_56
 		}
+
+		HUDAuthor
+		{
+			ControlName Label
+			tall	60
+			ypos	-5
+			textAlignment center
+			auto_wide_tocontents 1
+			auto_tall_tocontents	1
+			pin_corner_to_sibling TOP
+			pin_to_sibling_corner BOTTOM
+			pin_to_sibling HUDName
+			fgcolor_override	"255 159 50 255"
+			labelText "By headassbtw, EladNLG"
+			font		OxaniumLight_27
+		}
+
         ControlsLine1
         {
 			ControlName Label
 			auto_tall_tocontents    1
-			ypos 	0
+			ypos 	15
 			textAlignment north
 			auto_wide_tocontents 1
 			pin_corner_to_sibling TOP
 			pin_to_sibling_corner BOTTOM
-			pin_to_sibling MenuTitle
-			labelText "Press %[LEFT|A]%/%[RIGHT|D]% to switch between HUD layouts. %[A_BUTTON|ENTER]% to select."
+			pin_to_sibling HUDAuthor
+			labelText "%[LEFT|LEFTARROW]%/%[RIGHT|RIGHTARROW]% Swap between HUD layouts | %[A_BUTTON|ENTER]% Select"
 			font		OxaniumLight_27
         }
         ControlsLine2
@@ -72,7 +90,7 @@
 			pin_corner_to_sibling TOP
 			pin_to_sibling_corner BOTTOM
 			pin_to_sibling ControlsLine2
-			labelText "May not be a 100% accurate representation, but it's as close as we're getting.."
+			labelText "Note: not a 100% accurate representation."
 			font		OxaniumLight_27
         }
 		
@@ -93,7 +111,7 @@
 			InheritProperties FooterButtons
 		}
 
-        Destiny2_Hud
+        Hud_Panels
         {
             "ControlName"				"CNestedPanel"
             "xpos"						"0"
@@ -103,7 +121,7 @@
             "visible"					"1"
             "tabPosition"				"0"
             "zpos"						"-1"
-            "controlSettingsFile"		"resource/ui/layouts/destiny2.res"
+            "controlSettingsFile"		"resource/ui/menus/panels/hud_panels.res"
         }
     }
 }

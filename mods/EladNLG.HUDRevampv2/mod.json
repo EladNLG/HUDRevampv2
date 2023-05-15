@@ -58,6 +58,10 @@
             "Flags": 16777216
         },
         {
+            "Name": "scale",
+            "DefaultValue": "1.0"
+        },
+        {
             "Name": "comp_hud_damage_indicator",
             "DefaultValue": "1",
             "Flags": 16777216

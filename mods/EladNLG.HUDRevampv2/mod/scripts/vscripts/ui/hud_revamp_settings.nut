@@ -20,8 +20,7 @@ void function HudRevampSettings_Init()
 {
 	AddModTitle("HUD ^FF902000Revamp")
 	AddModCategory("General")
-	AddConVarSettingEnum("comp_hud_layout", "Layout", [ "HUDRevamp", "Destiny 2" ] )
-	AddModSettingsButton( "Preview HUD", void function() : () {
+	AddModSettingsButton( "Change HUD Layout", void function() : () {
 		AdvanceMenu( GetMenu( "HUDPreview" ) )
 		//print("Advance!")
 	})

@@ -1,8 +1,7 @@
 
 Resource/UI/HudScripted_mp.res
 {
-
-	"Healthbars"
+	"HUDRevamp_panels"
 	{
 		"ControlName"				"CNestedPanel"
 		"xpos"						"0"
@@ -12,6 +11,6 @@ Resource/UI/HudScripted_mp.res
 		"visible"					"1"
 		"tabPosition"				"0"
 		"zpos"						"10"
-		"controlSettingsFile"		"resource/ui/healthbars.res"
+		"controlSettingsFile"		"resource/ui/menus/panels/hud_panels.res"
 	}
 }
