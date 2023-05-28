@@ -181,6 +181,7 @@ Scheme
 			{
 				name			OxaniumLight
 				tall			24
+				antialias		1
 			}
 		}
 

@@ -17,7 +17,7 @@
         "ypos"						"0"
         "wide"						"%100"
         "tall"						"%100"
-        "visible"					"1"
+        "visible"					"0"
         "tabPosition"				"0"
         "zpos"						"-1"
         "controlSettingsFile"		"resource/ui/layouts/Destiny2/Hud.res"
@@ -31,11 +31,12 @@
         "wide"						"%100"
         "tall"						"%100"
         // KEEP THIS TO 0. 
-        "visible"					"1"
+        "visible"					"0"
         "tabPosition"				"0"
         "zpos"						"-1"
         "controlSettingsFile"		"resource/ui/layouts/Destiny2/Fullscreen.res"
     }
+    
     
     HudRevamp_Hud
     {
@@ -44,9 +45,23 @@
         "ypos"						"0"
         "wide"						"%100"
         "tall"						"%100"
-        "visible"					"1"
+        "visible"					"0"
         "tabPosition"				"0"
         "zpos"						"-1"
-        "controlSettingsFile"		"resource/ui/layouts/HudRevamp.res"
+        "controlSettingsFile"		"resource/ui/layouts/HudRevamp/Hud.res"
+    }
+
+    HudRevamp_Fullscreen
+    {
+        "ControlName"				"CNestedPanel"
+        "xpos"						"0"
+        "ypos"						"0"
+        "wide"						"%100"
+        "tall"						"%100"
+        // KEEP THIS TO 0. 
+        "visible"					"0"
+        "tabPosition"				"0"
+        "zpos"						"-1"
+        "controlSettingsFile"		"resource/ui/layouts/HudRevamp/Fullscreen.res"
     }
 }

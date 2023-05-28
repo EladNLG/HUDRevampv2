@@ -26,12 +26,12 @@ resource/ui/layouts/Destiny2/Hud.res
 	HealthBarBG
 	{
 		"ControlName" "ImagePanel"
-		"image" "vgui/hud/white"
+		"image" "ui/destiny2/health_16"
 		"scaleImage" "1"
 		"drawColor" "0 0 0 50" // vanilla label color
 		"visible" "1"
 		"wide" "500"
-		"tall" "18"
+		"tall" "20"
 		"enabled"	"1"
 
 		"xpos"			"710" // can't use rXXX, is relative to screen resolution and not parent panel.
@@ -398,13 +398,12 @@ resource/ui/layouts/Destiny2/Hud.res
 	{
 		"ControlName"				"CNestedPanel"
 		"classname"					"ModButton"
-		"tall"						"75"
+		"tall"						"115"
 		"wide"						"60"
 		"pin_to_sibling"			"DestinyPrimarySlot"
 		"xpos"						"8"
-		"ypos"						"15"
-		"pin_corner_to_sibling"		"BOTTOM_RIGHT"
-		"pin_to_sibling_corner"		"BOTTOM_LEFT"
+		"pin_corner_to_sibling"		"TOP_RIGHT"
+		"pin_to_sibling_corner"		"TOP_LEFT"
 		"controlSettingsFile"		"resource/ui/layouts/Destiny2/Offhand.res"
 	}
 
@@ -412,7 +411,7 @@ resource/ui/layouts/Destiny2/Hud.res
 	{
 		"ControlName"				"CNestedPanel"
 		"classname"					"ModButton"
-		"tall"						"75"
+		"tall"						"115"
 		"wide"						"60"
 		"pin_to_sibling"			"OffhandRight"
 		"xpos"						"8"
@@ -425,7 +424,7 @@ resource/ui/layouts/Destiny2/Hud.res
 	{
 		"ControlName"				"CNestedPanel"
 		"classname"					"ModButton"
-		"tall"						"75"
+		"tall"						"115"
 		"wide"						"60"
 		"pin_to_sibling"			"OffhandCenter"
 		"xpos"						"8"

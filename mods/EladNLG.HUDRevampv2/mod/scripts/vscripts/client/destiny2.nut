@@ -535,6 +535,7 @@ void function Destiny2_Update( var panel )
     var player_healthbar_bg = HudElement("HealthBarBG", panel)
 
     Hud_SetPos(player_healthbar_bg, 710, 140)
+    Hud_SetHeight(player_healthbar_bg, 24)
 
     Hud_SetBarProgress( player_healthbar, GetHealthFrac(player) )
 
@@ -918,24 +919,48 @@ void function UpdateOffhand( var panel, entity weapon, int index )
     var BG = Hud_GetChild( panel, "BGFill" )
     var _BG = Hud_GetChild( panel, "BG" )
     var chargeBox = Hud_GetChild( panel, "SecondChargeBox" )
+    var chargeBox2 = Hud_GetChild( panel, "ThirdChargeBox" )
+    var chargeBox3 = Hud_GetChild( panel, "FourthChargeBox" )
     var icon = Hud_GetChild( panel, "Icon" )
-    var chargeCount = Hud_GetChild( panel, "Charges" )
 
     Hud_SetImage( icon, GetWeaponInfoFileKeyFieldAsset_WithMods_Global( weapon.GetWeaponClassName(), weapon.GetMods(), "hud_icon" ) )
 
-    if(file.cooldownData[index].charges >= 2){
-        Hud_SetVisible( chargeBox,  true)
-        if (file.cooldownData[index].readyCharges >= 2)
-        {
-            Hud_SetColor(chargeBox, SUBCLASS_COLOR)
-        }
-        else
-        {
-            Hud_SetColor(chargeBox, 50, 50, 50, 150)
-        }
+    Hud_SetVisible( chargeBox, file.cooldownData[index].charges >= 2 )
+    Hud_SetHeight( chargeBox, 8 )
+
+    if (file.cooldownData[index].readyCharges >= 2)
+    {
+        Hud_SetColor(chargeBox, SUBCLASS_COLOR)
     }
-    else{
-        Hud_SetVisible( chargeBox,  false)
+    else
+    {
+        Hud_SetColor(chargeBox, 50, 50, 50, 150)
+    }
+
+    Hud_SetVisible( chargeBox2, file.cooldownData[index].charges >= 3 )
+    Hud_SetHeight( chargeBox2, 8 )
+    Hud_SetWidth( chargeBox2, 60)
+
+    if (file.cooldownData[index].readyCharges >= 3)
+    {
+        Hud_SetColor(chargeBox2, SUBCLASS_COLOR)
+    }
+    else
+    {
+        Hud_SetColor(chargeBox2, 50, 50, 50, 150)
+    }
+
+    Hud_SetVisible( chargeBox3, file.cooldownData[index].charges >= 4 )
+    Hud_SetHeight( chargeBox3, 8 )
+    Hud_SetWidth( chargeBox3, 60)
+
+    if (file.cooldownData[index].readyCharges >= 4)
+    {
+        Hud_SetColor(chargeBox3, SUBCLASS_COLOR)
+    }
+    else
+    {
+        Hud_SetColor(chargeBox3, 50, 50, 50, 150)
     }
 
     if(file.cooldownData[index].readyCharges >= 1) {
@@ -947,7 +972,6 @@ void function UpdateOffhand( var panel, entity weapon, int index )
         Hud_SetColor(BG, 200, 200, 200, 50)
     }
 
-    Hud_SetText( chargeCount, "" )
     Hud_SetBarProgress( BG, file.cooldownData[index].nextChargeFrac )
 }
 
@@ -996,7 +1020,7 @@ string function GetStowedAmmoString( entity weapon)
     {
         return "∞"
     }
-    if (file.selectedWeapon.GetWeaponSettingInt(eWeaponVar.ammo_clip_size) <= 0)
+    if (weapon.GetWeaponSettingInt(eWeaponVar.ammo_clip_size) <= 0)
     {
         return weapon.GetWeaponPrimaryAmmoCount().tostring()
     }

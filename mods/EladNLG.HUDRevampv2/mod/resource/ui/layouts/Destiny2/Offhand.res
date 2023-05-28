@@ -91,45 +91,51 @@ resource/ui/layouts/Destiny2/Offhand.res
 	{
 		ControlName			ImagePanel
 		image			"ui/destiny2/health_16"
-		fg_image			"ui/destiny2/health_16"
 
 		drawColor	"255 150 50 255"
-		Inset				0
-		Margin				0
-		ProgressDirection			2
-		SegmentFill			1
-		SegmentSize			72
-		ChangeStyle			0
 		scaleImage			1
 
 		wide				60
-		tall				15
+		tall				8
 
 		"xpos"			"0"
-		"ypos"			"25"
-		pin_to_sibling			BG
-		pin_corner_to_sibling	BOTTOM
+		"ypos"			"5"
+		pin_to_sibling			Border
+		pin_corner_to_sibling	TOP
 		pin_to_sibling_corner	BOTTOM
 	}
-	"Charges"
+	ThirdChargeBox
 	{
-		ControlName				Label
-		xpos					0
-		ypos					0
-		wide					64
-		tall					64
-		visible					1
-		enabled					1
-		//auto_wide_tocontents	1
-		labelText				""
-		textAlignment			center
-		//fgcolor_override 		"255 255 255 255"
-		//bgcolor_override 		"0 0 0 200"
-		font					OxaniumBold_27
-		//fgcolor_override		""
+		ControlName			ImagePanel
+		image			"ui/destiny2/health_16"
 
-		pin_to_sibling			Icon
-		pin_corner_to_sibling	CENTER
-		pin_to_sibling_corner	CENTER
+		drawColor	"255 150 50 255"
+		scaleImage	1
+
+		wide				60
+		tall				8
+
+		"xpos"			"0"
+		"ypos"			"5"
+		pin_to_sibling			SecondChargeBox
+		pin_corner_to_sibling	TOP
+		pin_to_sibling_corner	BOTTOM
+	}
+	FourthChargeBox
+	{
+		ControlName			ImagePanel
+		image			"ui/destiny2/health_16"
+
+		drawColor	"255 150 50 255"
+		scaleImage	1
+
+		wide				60
+		tall				8
+
+		"xpos"			"0"
+		"ypos"			"5"
+		pin_to_sibling			ThirdChargeBox
+		pin_corner_to_sibling	TOP
+		pin_to_sibling_corner	BOTTOM
 	}
 }

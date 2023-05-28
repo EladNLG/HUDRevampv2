@@ -92,7 +92,7 @@ hud_revamp.res
 		wide					74
 		tall					48
 		//auto_tall_tocontents	1
-		visible					1
+		visible					0
 		enabled					1
 		//auto_wide_tocontents	1
 		labelText				"32"
@@ -133,7 +133,7 @@ hud_revamp.res
 		ypos					-5
 		wide					74
 		tall					27
-		visible					1
+		visible					0
 		enabled					1
 		//auto_wide_tocontents	1
 		labelText				"128"
@@ -158,7 +158,7 @@ hud_revamp.res
 		"xpos"						"16"
 		"pin_corner_to_sibling"		"BOTTOM_RIGHT"
 		"pin_to_sibling_corner"		"BOTTOM_LEFT"
-		"controlSettingsFile"		"resource/ui/offhand.res"
+		"controlSettingsFile"		"resource/ui/layouts/HudRevamp/offhand.res"
 	}
 
 	OffhandCenter
@@ -171,7 +171,7 @@ hud_revamp.res
 		"xpos"						"16"
 		"pin_corner_to_sibling"		"BOTTOM_RIGHT"
 		"pin_to_sibling_corner"		"BOTTOM_LEFT"
-		"controlSettingsFile"		"resource/ui/offhand.res"
+		"controlSettingsFile"		"resource/ui/layouts/HudRevamp/offhand.res"
 	}
 
 	OffhandLeft
@@ -184,7 +184,7 @@ hud_revamp.res
 		"xpos"						"16"
 		"pin_corner_to_sibling"		"BOTTOM_RIGHT"
 		"pin_to_sibling_corner"		"BOTTOM_LEFT"
-		"controlSettingsFile"		"resource/ui/offhand.res"
+		"controlSettingsFile"		"resource/ui/layouts/HudRevamp/offhand.res"
 	}
 
 	// HEALTHBAR //
@@ -274,43 +274,6 @@ hud_revamp.res
 		pin_to_sibling			Bar
 		pin_corner_to_sibling	TOP
 		pin_to_sibling_corner	TOP
-	}
-
-	HDBar
-	{
-		ControlName			CHudProgressBar
-		bg_image			"vgui/hud/white"
-		fg_image			"vgui/hud/white"
-		//change_image		vgui/HUD/white
-
-		fgcolor_override	"175 175 175 255"
-		bgcolor_override	"0 0 0 0"
-		Inset				1
-		Margin				1
-		ProgressDirection			1
-		SegmentFill			1
-		SegmentSize			1000
-		ChangeStyle			0
-		//ChangeTime			0.5
-		//ChangeDir			2
-		//ChangeColor			"255 128 64 255"
-
-		CircularEnabled 		0
-		CircularClockwise		1
-
-		xpos				-8
-		ypos				0
-		wide				384
-		tall				32
-		visible				1
-//		image				vgui/HUD/white
-		scaleImage			1
-
-		//drawColor			"160 160 160 128"
-
-		pin_to_sibling			BarBG
-		pin_corner_to_sibling	LEFT
-		pin_to_sibling_corner	LEFT
 	}
 
 	Health
