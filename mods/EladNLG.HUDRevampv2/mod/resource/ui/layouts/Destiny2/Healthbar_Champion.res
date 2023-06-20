@@ -157,4 +157,35 @@ resource/ui/layouts/Destiny2/Healthbar_Champion.res
 		pin_corner_to_sibling	TOP_LEFT
 		pin_to_sibling_corner	TOP_LEFT
 	}
+
+	ShieldBar
+	{
+		ControlName			CHudProgressBar
+		bg_image			"vgui/hud/white"
+		fg_image			"vgui/hud/white"
+		change_image		vgui/HUD/white
+
+		fgcolor_override	"221 221 221 255"
+		bgcolor_override	"255 255 255 0"
+		ChangeColor			"255 255 255 0"
+		Inset				0
+		Margin				0
+		ProgressDirection			0
+		SegmentFill			1
+		SegmentSize			10000
+		SegmentGap			0
+		ChangeStyle			0
+		ChangeTime			0
+		scaleImage			1
+
+		wide				278
+		tall				3
+
+		"xpos"			"0"
+		"ypos"			"0"
+
+		pin_to_sibling			Bar
+		pin_corner_to_sibling	BOTTOM_LEFT
+		pin_to_sibling_corner	BOTTOM_LEFT
+	}
 }

@@ -86,8 +86,8 @@ resource/ui/layouts/Destiny2/Hud.res
 		"tall" "200"
 		"enabled"	"1"
 
-		"xpos"			"070" // can't use rXXX, is relative to screen resolution and not parent panel.
-		"ypos"			"880" // can't use rXXX, is relative to screen resolution and not parent panel.
+		"xpos"			"000" // can't use rXXX, is relative to screen resolution and not parent panel.
+		"ypos"			"900" // can't use rXXX, is relative to screen resolution and not parent panel.
 	}
 
 	DestinyPrimarySlot
@@ -707,7 +707,7 @@ resource/ui/layouts/Destiny2/Hud.res
 		auto_tall_tocontents	1
 		fgcolor_override 		"255 255 255 255"
 		//bgcolor_override 		"0 0 0 200"
-		font					OxaniumLight_27_ShadowGlow
+		font					ChakraLight_27_ShadowGlow
 
 		pin_to_sibling			AnnouncementTitleBG
 		pin_to_sibling_corner	BOTTOM

@@ -14,7 +14,7 @@
     {
         "ControlName"				"CNestedPanel"
         "xpos"						"0"
-        "ypos"						"0"
+        "ypos"						"0" 
         "wide"						"%100"
         "tall"						"%100"
         "visible"					"0"

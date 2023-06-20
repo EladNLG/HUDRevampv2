@@ -124,136 +124,159 @@ Scheme
 			}
 		}
 
-		OxaniumLight_43
+		ChakraLight_43
 		{
 			isproportional only
 			1
 			{
-				name			OxaniumLight
+				name			ChakraLight
 				tall			43
 				antialias 		1
 			}
 		}
 
-		OxaniumBold_56
+		ChakraBold_56
 		{
-			isproportional only
+			isproportional both
 			1
 			{
-				name			OxaniumBold
+				name			ChakraBold
 				tall			56
 				antialias 		1
 			}
 		}
+		
+		ChakraBold_56_Outline
+		{
+			isproportional both
+			1
+			{
+				name			ChakraBold
+				tall			56
+				antialias 		1
+				outline			1
+			}
+		}
 
-		OxaniumBold_43_DropShadow
+		ChakraBold_43_DropShadow
 		{
 			isproportional only
 			1
 			{
-				name			OxaniumBold
+				name			ChakraBold
 				tall			43
 				antialias 		1
 				dropshadow		1
 			}
 		}
 
-		OxaniumBold_43
+		ChakraBold_43
 		{
 			isproportional only
 			1
 			{
-				name			OxaniumBold
+				name			ChakraBold
 				tall			43
 				antialias 		1
 			}
 		}
 
-		OxaniumBold_36
+		ChakraBold_36
 		{
 			isproportional only
 			1
 			{
-				name			OxaniumBold
+				name			ChakraBold
 				tall			36
 				antialias 		1
 			}
 		}
 
-		OxaniumBold_27
+		ChakraBold_27
 		{
 			isproportional only
 			1
 			{
-				name			OxaniumBold
+				name			ChakraBold
 				tall			27
 				antialias 		1
 			}
 		}
 
-		OxaniumLight_32
+		ChakraLight_36
 		{
 			isproportional only
 			1
 			{
-				name			OxaniumLight
+				name			ChakraLight
+				tall			36
+				antialias 		1
+			}
+		}
+
+		ChakraLight_32
+		{
+			isproportional only
+			1
+			{
+				name			ChakraLight
 				tall			32
 				antialias 		1
 			}
 		}
 
-		OxaniumLight_27
+		ChakraLight_27
 		{
 			isproportional only
 			1
 			{
-				name			OxaniumLight
+				name			ChakraLight
 				tall			27
 				antialias 		1
 			}
 		}
 
-		OxaniumLight_27_ShadowGlow
+		ChakraLight_27_ShadowGlow
 		{
 			isproportional only
 			1
 			{
-				name			OxaniumLight
+				name			ChakraLight
 				tall			27
 				antialias 		1
 				shadowglow		7
 			}
 		}
 
-		OxaniumLight_27_Italic
+		ChakraLight_27_Italic
 		{
 			isproportional only
 			1
 			{
-				name			OxaniumLight
+				name			ChakraLight
 				tall			27
 				antialias 		1
 				italic			1
 			}
 		}
 
-		OxaniumLight_24
+		ChakraLight_24
 		{
 			isproportional only
 			1
 			{
-				name			OxaniumLight
+				name			ChakraLight
 				tall			24
 				antialias 		1
 			}
 		}
 
-		OxaniumLight_18
+		ChakraLight_18
 		{
 			isproportional only
 			1
 			{
-				name			OxaniumLight
+				name			ChakraLight
 				tall			18
 				antialias 		1
 			}

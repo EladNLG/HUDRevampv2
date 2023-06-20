@@ -5,6 +5,10 @@
     "Description": "pAIN\ntest",
     "Scripts": [
         {
+            "Path": "client/cropbar.nut",
+            "RunOn": "CLIENT || UI"
+        },
+        {
             "Path": "cl_damageindicators.gnut",
             "RunOn": "CLIENT",
             "ClientCallback": {

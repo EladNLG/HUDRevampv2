@@ -1,11 +1,9 @@
 FontFileTable
 {
-	"OxaniumLight"				"resource/Oxanium-Regular.ttf"
-	"OxaniumBold"				"resource/Oxanium-SemiBold.ttf"
+	"ChakraLight"				"resource/ChakraPetch-Regular.ttf"
+	"ChakraBold"				"resource/ChakraPetch-Bold.ttf"
 	"DestinyMedium"				"resource/DontSueMe_M.ttf"
 	"DestinyLight"				"resource/DontSueMe_R.ttf"
-	"Default"				"resource/DontSueMe_R.ttf"
-	"DefaultBold"				"resource/DontSueMe_M.ttf"
 	
 	// northstar shit
 	"lucida console"			"resource/NorthstarMono.ttf"			[$PC]

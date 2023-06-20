@@ -26,12 +26,144 @@ hud_revamp.res
 		"drawColor" "0 0 0 175" // vanilla label color
 		"visible" "1"
 		"wide" "250"
-		"tall" "100"
+		"tall" "64"
 		"enabled"	"1"
 
-		"xpos"			"500"
-		"ypos"			"984" // can't use rXXX, is relative to screen resolution and not parent panel.
+		"xpos"			"1646"
+		"ypos"			"992" // can't use rXXX, is relative to screen resolution and not parent panel.
 	}
+	
+	Weapon3Label
+	{
+		ControlName				Label
+		xpos					-8
+		ypos					0
+		wide					30
+		tall					27
+		visible					1
+		enabled					1
+		//auto_wide_tocontents	1
+		auto_tall_tocontents	1
+		labelText				"3"
+		fgcolor_override		"150 150 150 200"
+		textAlignment			center
+		//fgcolor_override 		"255 255 255 255"
+		//bgcolor_override 		"0 0 0 200"
+		font					ChakraBold_36
+
+		pin_to_sibling			WeaponBG
+		pin_corner_to_sibling	BOTTOM_RIGHT
+		pin_to_sibling_corner	TOP_RIGHT
+	}
+
+	Weapon2Label
+	{
+		ControlName				Label
+		xpos					8
+		ypos					0
+		wide					30
+		tall					27
+		visible					1
+		enabled					1
+		//auto_wide_tocontents	1
+		auto_tall_tocontents	1
+		labelText				"2"
+		fgcolor_override		"150 150 150 200"
+		textAlignment			center
+		//fgcolor_override 		"255 255 255 255"
+		//bgcolor_override 		"0 0 0 200"
+		font					ChakraBold_36
+
+		pin_to_sibling			Weapon3Label
+		pin_corner_to_sibling	BOTTOM_RIGHT
+		pin_to_sibling_corner BOTTOM_LEFT
+	}
+
+	Weapon1Label
+	{
+		ControlName				Label
+		xpos					8
+		ypos					0
+		wide					30
+		tall					27
+		visible					1
+		enabled					1
+		//auto_wide_tocontents	1
+		auto_tall_tocontents	1
+		labelText				"1"
+		fgcolor_override		"200 200 200 255"
+		textAlignment			center
+		//fgcolor_override 		"255 255 255 255"
+		//bgcolor_override 		"0 0 0 200"
+		font					ChakraBold_36
+
+		pin_to_sibling			Weapon2Label
+		pin_corner_to_sibling	BOTTOM_RIGHT
+		pin_to_sibling_corner BOTTOM_LEFT
+	}
+	AmmoStockpile
+	{
+		ControlName				Label
+		xpos					-12
+		ypos					0
+		wide					74
+		tall					27
+		visible					1
+		enabled					1
+		auto_wide_tocontents	1
+		auto_tall_tocontents	1
+		labelText				"32"
+		fgcolor_override		"200 200 200 255"
+		textAlignment			north
+		//fgcolor_override 		"255 255 255 255"
+		//bgcolor_override 		"0 0 0 200"
+		font					ChakraLight_43
+
+		pin_to_sibling			WeaponBG
+		pin_corner_to_sibling	RIGHT
+		pin_to_sibling_corner	RIGHT
+	}
+	AmmoCount
+	{
+		ControlName				Label
+		xpos					-12
+		ypos					0
+		wide					30
+		tall					48
+		visible					1
+		enabled					1
+		auto_wide_tocontents	1
+		auto_tall_tocontents	1
+		labelText				"32"
+		textAlignment			east
+		//fgcolor_override 		"255 255 255 255"
+		//bgcolor_override 		"0 0 0 200"
+		font					ChakraBold_43
+
+		pin_to_sibling			AmmoSeparator
+		pin_corner_to_sibling	RIGHT
+		pin_to_sibling_corner	RIGHT
+	}
+
+	AmmoSeparator
+	{
+		"ControlName" "ImagePanel"
+		"image" "vgui/hud/white"
+		"scaleImage" "1"
+		"drawColor" "255 255 255 255" // vanilla label color
+		"fillColor"	"0 0 0 0"
+		"visible" "1"
+		"wide" "2"
+		"tall" "32"
+		"enabled"	"1"
+
+		"xpos"			"12"
+		"ypos"			"0"
+		"pin_to_sibling"		"AmmoStockpile"
+		"pin_to_sibling_corner"	"LEFT"
+		"pin_corner_to_sibling"	"LEFT"
+	}
+
 	WeaponIcon
 	{
 		"ControlName" "ImagePanel"
@@ -40,112 +172,15 @@ hud_revamp.res
 		"drawColor" "255 255 255 255" // vanilla label color
 		"fillColor"	"0 0 0 0"
 		"visible" "1"
-		"wide" "168"
-		"tall" "84"
+		"wide" "128"
+		"tall" "64"
 		"enabled"	"1"
 
-		"xpos"			"-8"
+		"xpos"			"12"
 		"ypos"			"0"
-		"pin_to_sibling"		"WeaponBG"
+		"pin_to_sibling"		"AmmoCount"
 		"pin_to_sibling_corner"	"LEFT"
-		"pin_corner_to_sibling"	"LEFT"
-	}
-	WeaponIcon1
-	{
-		"ControlName" "ImagePanel"
-		"image" "r2_ui/menus/loadout_icons/primary_weapon/primary_r102"
-		"scaleImage" "1"
-		"drawColor" "0 0 0 175" // vanilla label color
-		"visible" "1"
-		"wide" "84"
-		"tall" "42"
-		"enabled"	"1"
-
-		"xpos"			"-16"
-		"ypos"			"8"
-		"pin_to_sibling"	"WeaponBG"
-		"pin_corner_to_sibling"		"BOTTOM_LEFT"
-		"pin_to_sibling_corner"		"TOP_LEFT"
-	}
-	WeaponIcon2
-	{
-		"ControlName" "ImagePanel"
-		"image" "r2_ui/menus/loadout_icons/primary_weapon/primary_r102"
-		"scaleImage" "1"
-		"drawColor" "0 0 0 175" // vanilla label color
-		"visible" "1"
-		"wide" "84"
-		"tall" "42"
-		"enabled"	"1"
-
-		"xpos"			"0"
-		"ypos"			"0"
-		"pin_to_sibling"	"WeaponIcon1"
-		"pin_corner_to_sibling"		"TOP_LEFT"
-		"pin_to_sibling_corner"		"TOP_RIGHT"
-	}
-	AmmoCount
-	{
-		ControlName				Label
-		xpos					0
-		ypos					0
-		wide					74
-		tall					48
-		//auto_tall_tocontents	1
-		visible					0
-		enabled					1
-		//auto_wide_tocontents	1
-		labelText				"32"
-		textAlignment			south
-		//fgcolor_override 		"255 255 255 255"
-		//bgcolor_override 		"0 0 0 200"
-		font					OxaniumBold_36
-
-		pin_to_sibling			WeaponIcon
-		pin_corner_to_sibling	TOP_LEFT
-		pin_to_sibling_corner	TOP_RIGHT
-	}
-	AmmoCountLarge
-	{
-		ControlName				Label
-		xpos					0
-		ypos					0
-		wide					74
-		tall					76
-		//auto_tall_tocontents	1
-		visible					1
-		enabled					1
-		//auto_wide_tocontents	1
-		labelText				"32"
-		textAlignment			center
-		//fgcolor_override 		"255 255 255 255"
-		//bgcolor_override 		"0 0 0 200"
-		font					OxaniumBold_36
-
-		pin_to_sibling			WeaponIcon
-		pin_corner_to_sibling	TOP_LEFT
-		pin_to_sibling_corner	TOP_RIGHT
-	}
-	AmmoStockpile
-	{
-		ControlName				Label
-		xpos					-1
-		ypos					-5
-		wide					74
-		tall					27
-		visible					0
-		enabled					1
-		//auto_wide_tocontents	1
-		labelText				"128"
-		fgcolor_override		"200 200 200 255"
-		textAlignment			north
-		//fgcolor_override 		"255 255 255 255"
-		//bgcolor_override 		"0 0 0 200"
-		font					OxaniumLight_24
-
-		pin_to_sibling			AmmoCount
-		pin_corner_to_sibling	TOP_RIGHT
-		pin_to_sibling_corner	BOTTOM_RIGHT
+		"pin_corner_to_sibling"	"RIGHT"
 	}
 
 	OffhandRight
@@ -153,7 +188,7 @@ hud_revamp.res
 		"ControlName"				"CNestedPanel"
 		"classname"					"ModButton"
 		"tall"						"128"
-		"wide"						"72"
+		"wide"						"64"
 		"pin_to_sibling"			"WeaponBG"
 		"xpos"						"16"
 		"pin_corner_to_sibling"		"BOTTOM_RIGHT"
@@ -166,7 +201,7 @@ hud_revamp.res
 		"ControlName"				"CNestedPanel"
 		"classname"					"ModButton"
 		"tall"						"128"
-		"wide"						"72"
+		"wide"						"64"
 		"pin_to_sibling"			"OffhandRight"
 		"xpos"						"16"
 		"pin_corner_to_sibling"		"BOTTOM_RIGHT"
@@ -179,7 +214,7 @@ hud_revamp.res
 		"ControlName"				"CNestedPanel"
 		"classname"					"ModButton"
 		"tall"						"128"
-		"wide"						"72"
+		"wide"						"64"
 		"pin_to_sibling"			"OffhandCenter"
 		"xpos"						"16"
 		"pin_corner_to_sibling"		"BOTTOM_RIGHT"
@@ -197,11 +232,11 @@ hud_revamp.res
 		"drawColor" "0 0 0 175" // vanilla label color
 		"visible" "1"
 		"wide" "400"
-		"tall" "48"
+		"tall" "48"	
 		"enabled"	"1"
 
-		"xpos"			"1120" // can't use rXXX, is relative to screen resolution and not parent panel.
-		"ypos"			"1028" // can't use rXXX, is relative to screen resolution and not parent panel.
+		"xpos"			"24" // can't use rXXX, is relative to screen resolution and not parent panel.
+		"ypos"			"1008" // can't use rXXX, is relative to screen resolution and not parent panel.
 	}
 
 	Bar
@@ -226,10 +261,10 @@ hud_revamp.res
 		CircularEnabled 		0
 		CircularClockwise		1
 
-		xpos				-8
+		xpos				0
 		ypos				0
-		wide				384
-		tall				32
+		wide				400
+		tall				48
 		visible				1
 //		image				vgui/HUD/white
 		scaleImage			1
@@ -282,7 +317,7 @@ hud_revamp.res
 		xpos					-8
 		ypos					0
 		wide					72
-		tall					72
+		tall					64
 		//auto_tall_tocontents	1
 		visible					1
 		enabled					1
@@ -293,7 +328,7 @@ hud_revamp.res
 		auto_tall_tocontents	1
 		//fgcolor_override 		"255 255 255 255"
 		//bgcolor_override 		"0 0 0 200"
-		font					OxaniumBold_56
+		font					ChakraBold_56
 
 		pin_to_sibling			BarBG
 		pin_corner_to_sibling	BOTTOM_LEFT
@@ -306,7 +341,7 @@ hud_revamp.res
 		xpos					8
 		ypos					5
 		wide					72
-		tall					72
+		tall					64
 		//auto_tall_tocontents	1
 		visible					1
 		enabled					1
@@ -317,7 +352,7 @@ hud_revamp.res
 		auto_tall_tocontents	1
 		fgcolor_override 		"200 200 200 255"
 		//bgcolor_override 		"0 0 0 200"
-		font					OxaniumBold_43_DropShadow
+		font					ChakraBold_43
 
 		pin_to_sibling			Health
 		pin_corner_to_sibling	LEFT
@@ -344,7 +379,7 @@ hud_revamp.res
 	{
 		ControlName		ImagePanel
 		ypos		0
-		tall		72
+		tall		64
 		wide		400
 		fillColor		"0 0 0 175"
 		visible			0
@@ -371,7 +406,7 @@ hud_revamp.res
 		auto_tall_tocontents	1
 		fgcolor_override 		"255 255 255 255"
 		//bgcolor_override 		"0 0 0 200"
-		font					OxaniumLight_72
+		font					ChakraLight_72
 
 		pin_to_sibling			AnnouncementTitleBG
 		pin_to_sibling_corner	CENTER
@@ -395,7 +430,7 @@ hud_revamp.res
 		auto_tall_tocontents	1
 		fgcolor_override 		"255 255 255 255"
 		//bgcolor_override 		"0 0 0 200"
-		font					OxaniumLight_27_ShadowGlow
+		font					ChakraLight_27_ShadowGlow
 
 		pin_to_sibling			AnnouncementTitleBG
 		pin_to_sibling_corner	BOTTOM

@@ -1,6 +1,7 @@
 untyped
 global function Destiny2_Init
 
+const array<int> INVULNERABLE_BAR_COLOR = [127, 127, 127, 255]
 const array<int> ENEMY_TITAN_BAR_COLOR = [200, 150, 50, 255]
 const array<int> ENEMY_BAR_COLOR = [200, 50, 50, 255]
 const array<int> FRIENDLY_BAR_COLOR = [70, 130, 255, 255]
@@ -814,6 +815,7 @@ void function TitanHealthBar( var flatPanel, entity ent )
 
     // children
     var bar = Hud_GetChild( healthbar, "Bar" )
+    var shieldBar = Hud_GetChild( healthbar, "ShieldBar" )
     var triangle = Hud_GetChild( healthbar, "Icon" )
     var barBG = Hud_GetChild( healthbar, "BG" )
     while (true)
@@ -840,6 +842,10 @@ void function TitanHealthBar( var flatPanel, entity ent )
             triangle.SetImage( $"ui/destiny2/ChampionTriangleEnemy" )
             bar.SetColor( ENEMY_TITAN_BAR_COLOR )
         }
+        if (ent.IsInvulnerable())
+        {
+            bar.SetColor( INVULNERABLE_BAR_COLOR )
+        }
 
         // check if we're being looked at
         float delta = Time() - lastFrameTime
@@ -861,11 +867,13 @@ void function TitanHealthBar( var flatPanel, entity ent )
             healthPerSegment = 1500.0
         float segments = ent.GetMaxHealth() / healthPerSegment
         int width = int(segments) * 40
+        entity soul = ent.GetTitanSoul()
         if (ent.GetMaxHealth() % healthPerSegment == 0)
             width -= 2
         else width += int((segments % 1.0) * 38)
 
         Hud_SetWidth( bar, width )
+        Hud_SetWidth( shieldBar, width )
         Hud_SetWidth( barBG, width )
 
         // calculate screen pos
@@ -881,6 +889,8 @@ void function TitanHealthBar( var flatPanel, entity ent )
         // set health frac
         // TODO: set shield frac
         Hud_SetBarProgress( bar, GetHealthFrac(ent) )
+        Hud_SetBarProgress( shieldBar, IsValid(soul) && soul.GetShieldHealthMax() > 0.0 ? 
+            float(soul.GetShieldHealth()) / float(soul.GetShieldHealthMax()) : 0.0 )
 
         lastFrameTime = Time()
         wait 0

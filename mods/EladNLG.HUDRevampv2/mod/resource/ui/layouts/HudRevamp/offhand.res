@@ -3,7 +3,7 @@ resource/ui/offhand.res
 	BG
 	{
 		ControlName			ImagePanel
-		image			"vgui/hud/white"
+		image			"ui/hudrevamp/offhandbg"
 		fg_image			"vgui/hud/white"
 		//change_image		vgui/HUD/white
 
@@ -12,38 +12,37 @@ resource/ui/offhand.res
 		Margin				0
 		ProgressDirection			2
 		SegmentFill			1
-		SegmentSize			72
+		SegmentSize			128
 		ChangeStyle			0
-		scaleImage			1
+		//scaleImage			1
 
-		wide				72
-		tall				72
+		wide				128
+		tall				128
 
-		"xpos"			"0"
-		"ypos"			"56"
+		"xpos"			"-32"
+		"ypos"			"32"
 	}
-    BGFill
+	BGFill2
 	{
-		ControlName			CHudProgressBar
-		bg_image			"vgui/hud/white"
-		fg_image			"vgui/hud/white"
-		//change_image		vgui/HUD/white
-
-		fgcolor_override	"255 150 50 255"
-		bgcolor_override	"0 0 0 0"
-		Inset				0
-		Margin				0
-		ProgressDirection			2
-		SegmentFill			1
-		SegmentSize			72
-		ChangeStyle			0
-		scaleImage			1
-
-		wide				72
-		tall				72
-
+		"ControlName"				"CNestedPanel"
+		"tall"						"128"
+		"wide"						"128"
+		pin_to_sibling			BG
+		pin_corner_to_sibling	BOTTOM
+		pin_to_sibling_corner	BOTTOM
 		"xpos"			"0"
-		"ypos"			"56"
+		"controlSettingsFile"		"resource/ui/layouts/HudRevamp/cropbar.res"
+	}
+	BGFill
+	{
+		"ControlName"				"CNestedPanel"
+		"tall"						"128"
+		"wide"						"128"
+		pin_to_sibling			BG
+		pin_corner_to_sibling	BOTTOM
+		pin_to_sibling_corner	BOTTOM
+		"xpos"			"0"
+		"controlSettingsFile"		"resource/ui/layouts/HudRevamp/cropbar.res"
 	}
 	Icon
 	{
@@ -85,9 +84,9 @@ resource/ui/offhand.res
 		CircularClockwise		1
 
 		xpos				0
-		ypos				8
-		wide				36
-		tall				36
+		ypos				-24
+		wide				28
+		tall				28
 		visible				1
 //		image				vgui/HUD/white
 		scaleImage			1
@@ -106,16 +105,15 @@ resource/ui/offhand.res
 		ControlName				Label
 		xpos					0
 		ypos					0
-		wide					64
-		tall					64
 		visible					1
 		enabled					1
-		//auto_wide_tocontents	1
+		auto_wide_tocontents	1
+		auto_tall_tocontents	1
 		labelText				"1"
 		textAlignment			center
 		//fgcolor_override 		"255 255 255 255"
 		//bgcolor_override 		"0 0 0 200"
-		font					OxaniumBold_27
+		font					ChakraBold_27
 		//fgcolor_override		""
 
 		pin_to_sibling			Bar

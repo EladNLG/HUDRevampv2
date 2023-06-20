@@ -705,6 +705,6 @@ resource/ui/layouts/Destiny2/Gamestate.res
 		labelText				"WORK IN PROGRESS"
 		textAlignment			center
     pin_to_sibling "BG"
-		font					OxaniumLight_24
+		font					ChakraLight_24
   }
 }

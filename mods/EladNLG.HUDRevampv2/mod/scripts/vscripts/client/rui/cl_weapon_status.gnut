@@ -114,54 +114,6 @@ void function OnSelectedWeaponChanged( entity selectedWeapon )
 	file.selectedWeapon = selectedWeapon
 }
 
-// UTILITY
-
-string function GetAmmoString( entity weapon )
-{
-	string result
-	//RuiSetFloat(file.ruis["ammoDisplay"], "msgAlpha", GetConVarFloat( "comp_hud_ammo_label" ) )
-	if (!weapon.GetWeaponSettingBool( eWeaponVar.ammo_no_remove_from_stockpile ))
-	{
-		if (weapon.GetWeaponSettingInt( eWeaponVar.ammo_clip_size ) <= 1)
-		{
-			//if (file.selectedWeapon == weapon) RuiSetFloat(file.ruis["stockpile"], "msgAlpha", 0.0)
-			return (weapon.GetWeaponPrimaryAmmoCount() + weapon.GetWeaponPrimaryClipCount()).tostring()
-		}
-		if (file.selectedWeapon == weapon) {
-			//RuiSetString(file.ruis["ammoDisplay"], "msgText", "AMMO")
-			//RuiSetFloat(file.ruis["stockpile"], "msgAlpha", 0.9)
-			//RuiSetString(file.ruis["stockpile"], "msgText", weapon.GetWeaponPrimaryAmmoCount().tostring())
-		}
-		else return weapon.GetWeaponPrimaryClipCount().tostring() + "|`1" + weapon.GetWeaponPrimaryAmmoCount().tostring()
-
-		result = weapon.GetWeaponPrimaryClipCount().tostring()
-		int digits = result.len()
-
-		result += "|"
-
-		for (int i = 0; i < digits; i++)
-		{
-			result += " "
-		}
-
-		return result;
-	}
-	else
-	{
-		//if (file.selectedWeapon == weapon) RuiSetFloat(file.ruis["stockpile"], "msgAlpha", 0.0)
-		if (weapon.GetWeaponSettingFloat(eWeaponVar.regen_ammo_refill_rate) > 0.0)
-		{
-			float ammoFrac = float( weapon.GetWeaponPrimaryClipCount() ) / float( weapon.GetWeaponPrimaryClipCountMax() )
-
-			//if (file.selectedWeapon == weapon) RuiSetString(file.ruis["ammoDisplay"], "msgText", "HEAT")
-
-			return int(RoundToNearestInt(100.0 - (ammoFrac * 100.0))).tostring() + "%"
-		}
-		//else if (file.selectedWeapon == weapon) RuiSetString(file.ruis["ammoDisplay"], "msgText", "AMMO")
-	}
-	return weapon.GetWeaponPrimaryClipCount().tostring()
-}
-
 // could be useful, but we are already checking for weapon changed, so?
 void function OnPlayerClassChanged( entity player )
 {

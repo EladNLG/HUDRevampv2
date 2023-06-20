@@ -146,10 +146,8 @@ void function DestroyOnCockpitEnd( entity cockpit )
     OnThreadEnd(
         function() : ()
         {
-			foreach (string name, HUDLayout layout in file.layouts)
-			{
+			file.screen.Destroy()
 				file.screen = null
-			}
 			
         }
     )
