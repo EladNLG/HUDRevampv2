@@ -1,5 +1,5 @@
 
-resource/ui/healthbar_elite.res
+resource/ui/layouts/Destiny2/Healthbar_Elite.res
 {
 	IconBG
 	{

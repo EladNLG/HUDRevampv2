@@ -5,6 +5,10 @@
     "Description": "pAIN\ntest",
     "Scripts": [
         {
+            "Path": "client/cropbar.nut",
+            "RunOn": "CLIENT || UI"
+        },
+        {
             "Path": "cl_damageindicators.gnut",
             "RunOn": "CLIENT",
             "ClientCallback": {
@@ -33,6 +37,13 @@
             }
         },
         {
+            "Path": "ui/menu_hud_preview.nut",
+            "RunOn": "UI",
+            "UICallback": {
+                "Before": "HudPreview_Init"
+            }
+        },
+        {
             "Path": "ui/hud_revamp_settings.nut",
             "RunOn": "UI",
             "UICallback": {
@@ -49,6 +60,10 @@
             "Name":"comp_hud_layout",
             "DefaultValue": "0",
             "Flags": 16777216
+        },
+        {
+            "Name": "scale",
+            "DefaultValue": "1.0"
         },
         {
             "Name": "comp_hud_damage_indicator",

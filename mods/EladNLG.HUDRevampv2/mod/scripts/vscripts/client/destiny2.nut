@@ -1,8 +1,9 @@
 untyped
 global function Destiny2_Init
-global function HUDMenuOpenState
 
-const array<int> ENEMY_BAR_COLOR = [200, 150, 50, 255]
+const array<int> INVULNERABLE_BAR_COLOR = [127, 127, 127, 255]
+const array<int> ENEMY_TITAN_BAR_COLOR = [200, 150, 50, 255]
+const array<int> ENEMY_BAR_COLOR = [200, 50, 50, 255]
 const array<int> FRIENDLY_BAR_COLOR = [70, 130, 255, 255]
 const array<int> SUBCLASS_COLOR = [255, 150, 50, 255] //Solar
 const array<int> SUPER_COL_RGB = [223, 194, 79]
@@ -21,14 +22,19 @@ struct
     int titanHealthbarIndex = 0
     entity hitEnt
     bool isMenuOpen
+    EarnObject& earnGoal
+    EarnObject& earnReward
+    int goalId = 0
 } file
 
 void function Destiny2_Init()
 {
     RegisterSignal("EndTargetInfo")
     AddCallback_OnSelectedWeaponChanged( OnSelectedWeaponChanged )
-    HudRevamp_AddLayout( "destiny2",
-    HudRevamp_Update,
+    HudRevamp_AddLayout( "Destiny2",
+    null,
+    Destiny2_Update,
+    Destiny2_FlatUpdate,
     Announcement )
     OffhandCooldownData data
     file.cooldownData.append(data)
@@ -42,7 +48,6 @@ void function Destiny2_Init()
 
 void function Announcement( var panel, AnnouncementData data )
 {
-    printt("announcement'd")
     if (panel == null)
     {
         return
@@ -260,7 +265,6 @@ void function HudRevamp_D2_SetGamestateClassIcon(entity player, var ui_object, b
         ui_object.SetImage(friendly ? $"ui/destiny2/gamestate/icon_dead_friendly.vmt" : $"ui/destiny2/gamestate/icon_dead_enemy.vmt")
         return
     }
-    printt(player.GetPlayerSettings())
     switch (player.GetPlayerSettings()){
 
         //PILOTS
@@ -357,7 +361,7 @@ void function HudRevamp_D2_Gamestate_Update(var gamestate, entity player){
 	if ( IsRoundBased() )
 	{
         //line 351 in vscripts/client/cl_gamestate.nut
-		endTime = expect float( level.nv.roundEndTime)
+		endTime = expect float( level.nv.roundEndTime )
 	}
 	else
 	{
@@ -401,9 +405,6 @@ void function HudRevamp_D2_Gamestate_Update(var gamestate, entity player){
         Hud_SetColor(enemy_score_bar_border, 255, 255, 255, 63.75)
         Hud_SetColor(enemy_score_border, 255, 255, 255, 63.75)
     }
-
-
-
 
     Hud_SetVisible(enemy_score_bar_winning, enemy_score > friendly_score)
 
@@ -450,95 +451,160 @@ void function HudRevamp_D2_Gamestate_Update(var gamestate, entity player){
 float lastTimeHealthNotFull = -99
 bool d2_healthbar_needs_update = false
 bool d2_healthbar_updating = false
+vector lastPos = <0,0,0>
 
-void function HudRevamp_Update( var panel )
+void function Destiny2_FlatUpdate( var flatPanel )
 {
-    //var icon = HudElement("AnnouncementIcon", panel)
-    //var title = HudElement("AnnouncementTitle", panel)
-    //var desc = HudElement("AnnouncementDesc", panel)
-    //var bg = HudElement("AnnouncementTitleBG", panel)
-    //var bg_lb = HudElement("AnnouncementTitle_LB", panel)
-    //var bg_rb = HudElement("AnnouncementTitle_RB", panel)
-    //Hud_SetVisible( icon, true )
-    //Hud_SetVisible( bg, true )
-    //Hud_SetVisible( bg_lb, true )
-    //Hud_SetVisible( bg_rb, true )
-    //Hud_SetVisible( desc, false )
-    //Hud_SetVisible( title, true )
+    entity player = GetLocalViewPlayer()
 
-    //Hud_SetColor(title,SUPER_COL_RGB,255)
-    //Hud_SetColor(bg_lb,255,255,255,255)
-    //Hud_SetColor(bg_rb,255,255,255,255)
-    //Hud_SetColor(icon,SUPER_COL_RGB,150)
-    //Hud_SetText(title,"SHIT CORE CHARGED")
-    //int width = ((Hud_GetWidth(title) + 40))
-    //width -= width % 2
-    //Hud_SetWidth( bg, width )
-    //Hud_SetWidth( bg_lb, width/4 )
-    //Hud_SetWidth( bg_rb, width/4 )
-    //Hud_SetImage(icon, $"rui/titan_loadout/core/titan_core_smart_destiny2")
-    //Hud_SetImage(bg_rb, $"vgui/hud/white")
-    //Hud_SetImage(bg_lb, $"vgui/hud/white")
+    if (!IsValid(player))
+        return
+    
+    // update gamestate stuff :)
+    var gamestate = HudElement("Destiny_GameStatePanel", flatPanel)
+    Hud_SetY( gamestate, 0 )
+    Hud_SetVisible( gamestate, !IsSingleplayer() )
+    HudRevamp_D2_Gamestate_Update(gamestate, player)
 
+    // HEALTHBAR CHECKS
+    // side note - mem leak. can't fix because traceline creates a new instance of
+    // the traceresults stack every time it's called :(
+    // TARGET INFO BULLSHIT SEND HELP PLEASE
+    // also this should be illegal
+    vector attackDir = AnglesToForward( player.CameraAngles() )
+    if (IsValid(player.GetActiveWeapon()) && player.GetActiveWeapon().GetWeaponOwner() == player)
+        attackDir = player.GetActiveWeapon().GetAttackDirection()
+    TraceResults results = TraceLine( player.CameraPosition(), player.CameraPosition() + attackDir * 8192, [ player ],
+        TRACE_MASK_SHOT, TRACE_COLLISION_GROUP_NONE )
+    
+    file.hitEnt = results.hitEnt
+    string entities = "ents: [ "
+    if (IsValid( results.hitEnt ))
+    {
+        if (results.hitEnt.IsNPC())
+        {
+            if (results.hitEnt.IsTitan())
+            {
+                if (!file.titanHealthbarEntities.contains(results.hitEnt))
+                {
+                    thread TitanHealthBar( flatPanel, results.hitEnt )
+                }
+            }
+            else
+            {
+                if (!file.healthbarEntities.contains(results.hitEnt))
+                {
+                    thread HealthBar( flatPanel, results.hitEnt )
+                }
+            }
+        }
+        else if (results.hitEnt.IsPlayer())
+        {
+            if (results.hitEnt.IsTitan())
+            {
+                if (!file.titanHealthbarEntities.contains(results.hitEnt))
+                {
+                    thread TitanHealthBar( flatPanel, results.hitEnt )
+                }
+            }
+            else
+            {
+                if (!file.healthbarEntities.contains(results.hitEnt))
+                {
+                    thread HealthBar( flatPanel, results.hitEnt )
+                }
+            }
+        }
+    }
+}
 
-
-
-
-
-    //HudElement("Screen", panel).SetColor(0, 0,0,127)
+int energy = 0
+void function Destiny2_Update( var panel )
+{
     entity player = GetLocalClientPlayer()
-    var gamestate = HudElement("Destiny_GameStatePanel", panel)
+
+    if (file.goalId != player.GetPlayerNetInt( EARNMETER_GOALID ))
+    {
+        file.earnGoal = PlayerEarnMeter_GetGoal( player )
+        file.earnReward = PlayerEarnMeter_GetReward( player )
+        file.goalId = player.GetPlayerNetInt( EARNMETER_GOALID )
+        print("!!! " + file.goalId)
+    }
+    
+    // healthbar stuff
     var player_healthbar = HudElement("HealthBar", panel)
     var player_healthbar_bg = HudElement("HealthBarBG", panel)
-    EarnObject earnGoal = PlayerEarnMeter_GetGoal( player )
-    EarnObject earnReward = PlayerEarnMeter_GetReward( player )
-    if (IsSingleplayer())
-    {
-        Hud_SetVisible(gamestate, false)
-        Hud_SetPos(player_healthbar_bg, 710, 140)
-    }
-    else{
-        HudRevamp_D2_Gamestate_Update(gamestate, player)
-        Hud_SetPos(player_healthbar_bg, 0, 240)
-    }
+
+    Hud_SetPos(player_healthbar_bg, 710, 140)
+    Hud_SetHeight(player_healthbar_bg, 24)
+
+    Hud_SetBarProgress( player_healthbar, GetHealthFrac(player) )
+
     if (!IsValid(file.selectedWeapon) || file.selectedWeapon.GetWeaponOwner() != GetLocalClientPlayer())
         return
 
+    if (player.GetSharedEnergyCount() < energy)
+    {
+        printt(player.GetSharedEnergyCount(), Time())
+    }
+    energy = player.GetSharedEnergyCount()
+
     var SuperBar = HudElement("SuperBar", panel)
+    var SuperBorder = HudElement("SuperBorder", panel)
+    var SuperBar_BG = HudElement("SuperBarBG", panel)
     var SuperIcon_BG = HudElement("SuperImageBG", panel)
     var SuperIcon = HudElement("SuperImage", panel)
 
-    //printt("earngoal.buildingImage")
-    //printt(earnGoal.buildingImage)
+    Hud_SetVisible( SuperIcon, file.goalId != 0 )
+    Hud_SetVisible( SuperBorder, file.goalId != 0 )
+    Hud_SetVisible( SuperBar, file.goalId != 0 )
+    Hud_SetVisible( SuperBar_BG, file.goalId != 0 )
+    Hud_SetVisible( SuperIcon_BG, file.goalId != 0 )
+    SuperIcon.SetImage( file.earnGoal.buildingImage )
+    
+    float superFrac = PlayerEarnMeter_GetEarnedFrac(player)
+    if (player.IsTitan() && IsValid(player.GetTitanSoul()))
+        superFrac = player.GetTitanSoul().GetTitanSoulNetFloat( "coreAvailableFrac" )
+    Hud_SetBarProgress( SuperBar, superFrac )
 
-
-    SuperIcon.SetImage( earnGoal.buildingImage )
-
-
-    Hud_SetBarProgress( player_healthbar, GetHealthFrac(player) )
-    Hud_SetBarProgress( SuperBar, PlayerEarnMeter_GetEarnedFrac(player) )
-    if(PlayerEarnMeter_GetEarnedFrac(player) >= 1){
+    if(superFrac >= 1)
+    {
         Hud_SetColor( SuperBar, SUPER_COL_RGB, 255 )
         Hud_SetColor( SuperIcon_BG, SUPER_COL_RGB, 255 )
         Hud_SetColor( SuperIcon, 255, 255, 255, 255 )
         SuperIcon_BG.SetImage($"ui/destiny2/super_full.vmt")
     }
-    else{
+    else
+    {
         Hud_SetColor( SuperBar, 255, 255, 255, 255 )
         Hud_SetColor( SuperIcon_BG, 255, 255, 255, 255 )
         Hud_SetColor( SuperIcon, 255, 255, 255, 255 )
         SuperIcon_BG.SetImage($"ui/destiny2/super_empty.vmt")
     }
-
     if(player.IsTitan()){
-        entity shitass = player.GetOffhandWeapon(3)
-        if(IsValid(shitass)){
-            var validImage = GetWeaponInfoFileKeyFieldAsset_WithMods_Global( shitass.GetWeaponClassName(), shitass.GetMods(), "hud_icon" )
-            var shit = StringToAsset( expect string( GetWeaponInfoFileKeyField_WithMods_Global( shitass.GetWeaponClassName(), shitass.GetMods(), "hud_icon" ) ) + "_destiny2" )
-            Hud_SetImage(SuperIcon, shit)
+        entity coreWeapon = player.GetOffhandWeapon(3)
+        if(IsValid(coreWeapon)){
+            
+            Hud_SetVisible( SuperIcon, true )
+            Hud_SetVisible( SuperBorder, true )
+            Hud_SetVisible( SuperBar, true )
+            Hud_SetVisible( SuperBar_BG, true )
+            Hud_SetVisible( SuperIcon_BG, true )
+
+            var originalIcon = GetWeaponInfoFileKeyFieldAsset_WithMods_Global( 
+                coreWeapon.GetWeaponClassName(), coreWeapon.GetMods(), "hud_icon"
+            )
+            var customIcon = StringToAsset( 
+                expect string( 
+                    GetWeaponInfoFileKeyField_WithMods_Global(
+                        coreWeapon.GetWeaponClassName(), coreWeapon.GetMods(), "hud_icon"
+                    ) 
+                ) + "_destiny2"
+            )
+            Hud_SetImage(SuperIcon, customIcon)
         }
         else
-            Hud_SetImage(SuperIcon,$"ui/destiny2/unstoppable.vmt")
+            Hud_SetImage(SuperIcon, $"ui/destiny2/unstoppable.vmt")
     }
 
     if(GetHealthFrac(player) < 1){
@@ -554,36 +620,6 @@ void function HudRevamp_Update( var panel )
     Hud_SetColor( player_healthbar_bg, 0, 0, 0, d2_healthbar_opacity * 120 )
     UpdateMainWeapons( player, panel )
 
-    int shield = 0
-    int maxShield = 0
-    if (player.IsTitan() && IsValid(player.GetTitanSoul()))
-        shield = player.GetTitanSoul().GetShieldHealth()
-    else
-        shield = player.GetShieldHealth()
-    if (player.IsTitan() && IsValid(player.GetTitanSoul()))
-        maxShield = player.GetTitanSoul().GetShieldHealthMax()
-    else
-        maxShield = player.GetShieldHealthMax()
-
-    Hud_SetColor( HudElement("SHBar", panel), 0, 255, 0, 255 )
-    Hud_SetVisible( HudElement("SHBar", panel), false )
-
-    if (shield > 0)
-    {
-        Hud_SetBarProgress( HudElement("SHBar", panel), float(shield) / float(maxShield) )
-
-    }
-    else Hud_SetBarProgress( HudElement("SHBar", panel), 0.0 )
-    try
-    {
-        Hud_SetBarProgress( HudElement("HDBar", panel), player.GetPlayerNetFloat("hardDamage") / 100.0 )
-
-
-        Hud_SetColor( HudElement("HDBar", panel), 255, 0, 0, 255 )
-    }
-    catch (ex)
-    {}
-
     array<entity> offhands = [ player.GetOffhandWeapon(0), player.GetOffhandWeapon(1), player.GetOffhandWeapon(2) ]
 
     for (int i = 0; i < offhands.len(); i++)
@@ -594,9 +630,6 @@ void function HudRevamp_Update( var panel )
         }
     }
 
-    Hud_SetText( HudElement("Health", panel), "") //(GetHealthFrac(player)).tostring() )
-    Hud_SetText( HudElement("MaxHealth", panel), "")//player.GetMaxHealth().tostring() )
-
     Hud_SetVisible(HudElement( "OffhandRight",  panel ), offhands.len() > 0)
     Hud_SetVisible(HudElement( "OffhandCenter", panel ), offhands.len() > 1)
     Hud_SetVisible(HudElement( "OffhandLeft",   panel ), offhands.len() > 2)
@@ -605,63 +638,12 @@ void function HudRevamp_Update( var panel )
         UpdateOffhand( HudElement( "OffhandRight", panel ), offhands[0], 0 )
     if (offhands.len() > 2)
     {
-        UpdateOffhand( HudElement( "OffhandLeft", panel ), offhands[1], 1 )
-        UpdateOffhand( HudElement( "OffhandCenter", panel ), offhands[2], 2 )
+        UpdateOffhand( HudElement( "OffhandLeft", panel ), offhands[2], 1 )
+        UpdateOffhand( HudElement( "OffhandCenter", panel ), offhands[1], 2 )
     }
     else if (offhands.len() > 1)
     {
         UpdateOffhand( HudElement( "OffhandCenter", panel ), offhands[1], 1 )
-    }
-
-    // TARGET INFO BULLSHIT SEND HELP PLEASE
-    // also this should be illegal
-    vector attackDir = AnglesToForward( player.CameraAngles() )
-    if (IsValid(player.GetActiveWeapon()))
-        attackDir = player.GetActiveWeapon().GetAttackDirection()
-
-    TraceResults result = TraceLine( player.CameraPosition(), player.CameraPosition() + attackDir * 8192, [ player ],
-        TRACE_MASK_SHOT, TRACE_COLLISION_GROUP_NONE )
-
-    file.hitEnt = result.hitEnt
-
-    entity npc = file.hitEnt
-    if (IsValid( npc ))
-    {
-        if (npc.IsNPC())
-        {
-            if (npc.IsTitan())
-            {
-                if (!file.titanHealthbarEntities.contains(npc))
-                {
-                    thread TitanHealthBar( npc )
-                }
-            }
-            else
-            {
-                if (!file.healthbarEntities.contains(npc))
-                {
-                    thread HealthBar( npc )
-                }
-            }
-        }
-        else if (npc.IsPlayer())
-        {
-            // they are an npc. shut up
-            if (npc.IsTitan())
-            {
-                if (!file.titanHealthbarEntities.contains(npc))
-                {
-                    thread TitanHealthBar( npc )
-                }
-            }
-            else
-            {
-                if (!file.healthbarEntities.contains(npc))
-                {
-                    thread HealthBar( npc )
-                }
-            }
-        }
     }
 }
 
@@ -675,7 +657,7 @@ vector function WorldToScreenPos( vector position )
     return result
 }
 
-void function HealthBar( entity ent )
+void function HealthBar( var flatPanel, entity ent )
 {
     ent.EndSignal( "EndTargetInfo" )
     ent.EndSignal( "OnDestroy" )
@@ -691,13 +673,14 @@ void function HealthBar( entity ent )
     }
     file.healthbarEntities[index] = ent
 
-    var healthbar = Hud_GetChild( HudElement("Healthbars"), "Healthbar" + index )
+    var healthbar = Hud_GetChild( flatPanel, "Healthbar" + index )
     Hud_SetVisible( healthbar, true )
 
     OnThreadEnd(
         function() : ( ent, index, healthbar )
 		{
             Hud_SetVisible( healthbar, false )
+            file.healthbarEntities[index] = null
 		}
     )
 
@@ -718,6 +701,12 @@ void function HealthBar( entity ent )
     var bar = Hud_GetChild( healthbar, "Bar" )
     while (true)
     {
+        if (ent.IsTitan())
+        {
+            file.titanHealthbarEntities[index] = null
+            ent.Signal("EndTargetInfo")
+        }
+        
         Hud_SetVisible( healthbar, !file.isMenuOpen )
 
         // check team
@@ -736,6 +725,15 @@ void function HealthBar( entity ent )
         alpha = clamp(alpha, 0, 0.8)
         healthbar.SetPanelAlpha( alpha * 255.0 )
         RuiSetFloat( rui, "basicImageAlpha", alpha )
+
+        if (isFriendly)
+        {
+            bar.SetColor( FRIENDLY_BAR_COLOR )
+        }
+        else
+        {
+            bar.SetColor( ENEMY_BAR_COLOR )
+        }
 
         // calculate screen pos
         vector mins = ent.GetBoundingMins()
@@ -781,13 +779,7 @@ asset function HUDGetIconForAI( entity npc )
 	return $""
 }
 
-void function HUDMenuOpenState( int state )
-{
-    printt("HUDMENUOPENSTATE", state)
-    file.isMenuOpen = (state != 0)
-}
-
-void function TitanHealthBar( entity ent )
+void function TitanHealthBar( var flatPanel, entity ent )
 {
     ent.EndSignal( "EndTargetInfo" )
     ent.EndSignal( "OnDestroy" )
@@ -802,7 +794,7 @@ void function TitanHealthBar( entity ent )
     }
     file.titanHealthbarEntities[index] = ent
 
-    var healthbar = Hud_GetChild( HudElement("Healthbars"), "HealthbarChampion" + index )
+    var healthbar = Hud_GetChild( flatPanel, "HealthbarChampion" + index )
     Hud_SetVisible( healthbar, true )
 
     OnThreadEnd(
@@ -823,10 +815,17 @@ void function TitanHealthBar( entity ent )
 
     // children
     var bar = Hud_GetChild( healthbar, "Bar" )
+    var shieldBar = Hud_GetChild( healthbar, "ShieldBar" )
     var triangle = Hud_GetChild( healthbar, "Icon" )
     var barBG = Hud_GetChild( healthbar, "BG" )
     while (true)
     {
+        if (!ent.IsTitan())
+        {
+            file.titanHealthbarEntities[index] = null
+            ent.Signal("EndTargetInfo")
+        }
+        
         Hud_SetVisible( healthbar, !file.isMenuOpen )
 
         // check team
@@ -841,7 +840,11 @@ void function TitanHealthBar( entity ent )
         else
         {
             triangle.SetImage( $"ui/destiny2/ChampionTriangleEnemy" )
-            bar.SetColor( ENEMY_BAR_COLOR )
+            bar.SetColor( ENEMY_TITAN_BAR_COLOR )
+        }
+        if (ent.IsInvulnerable())
+        {
+            bar.SetColor( INVULNERABLE_BAR_COLOR )
         }
 
         // check if we're being looked at
@@ -859,13 +862,18 @@ void function TitanHealthBar( entity ent )
 
         // calculate bar width with segment count
         int baseBarWidth = 278
-        float segments = ent.GetMaxHealth() / 2500.0
+        float healthPerSegment = 2500.0
+        if (IsSingleplayer())
+            healthPerSegment = 1500.0
+        float segments = ent.GetMaxHealth() / healthPerSegment
         int width = int(segments) * 40
-        if (ent.GetMaxHealth() % 2500 == 0)
+        entity soul = ent.GetTitanSoul()
+        if (ent.GetMaxHealth() % healthPerSegment == 0)
             width -= 2
         else width += int((segments % 1.0) * 38)
 
         Hud_SetWidth( bar, width )
+        Hud_SetWidth( shieldBar, width )
         Hud_SetWidth( barBG, width )
 
         // calculate screen pos
@@ -881,6 +889,8 @@ void function TitanHealthBar( entity ent )
         // set health frac
         // TODO: set shield frac
         Hud_SetBarProgress( bar, GetHealthFrac(ent) )
+        Hud_SetBarProgress( shieldBar, IsValid(soul) && soul.GetShieldHealthMax() > 0.0 ? 
+            float(soul.GetShieldHealth()) / float(soul.GetShieldHealthMax()) : 0.0 )
 
         lastFrameTime = Time()
         wait 0
@@ -889,6 +899,8 @@ void function TitanHealthBar( entity ent )
 
 string function GetHealthbarTitle( entity ent )
 {
+    if (!IsValid(ent))
+        return "\x1b[38;5;220mnull"
     string title = ent.GetTitleForUI()
     if (ent.IsNPC())
     {
@@ -902,7 +914,6 @@ string function GetHealthbarTitle( entity ent )
     }
     if (ent.IsPlayer())
     {
-        print("IS PLAYER")
         if (ent.IsTitan())
             return ent.GetPlayerName() + " (" + Localize( title ) + ")"
 
@@ -918,24 +929,48 @@ void function UpdateOffhand( var panel, entity weapon, int index )
     var BG = Hud_GetChild( panel, "BGFill" )
     var _BG = Hud_GetChild( panel, "BG" )
     var chargeBox = Hud_GetChild( panel, "SecondChargeBox" )
+    var chargeBox2 = Hud_GetChild( panel, "ThirdChargeBox" )
+    var chargeBox3 = Hud_GetChild( panel, "FourthChargeBox" )
     var icon = Hud_GetChild( panel, "Icon" )
-    var chargeCount = Hud_GetChild( panel, "Charges" )
 
     Hud_SetImage( icon, GetWeaponInfoFileKeyFieldAsset_WithMods_Global( weapon.GetWeaponClassName(), weapon.GetMods(), "hud_icon" ) )
 
-    if(file.cooldownData[index].charges >= 2){
-        Hud_SetVisible( chargeBox,  true)
-        if (file.cooldownData[index].readyCharges >= 2)
-        {
-            Hud_SetColor(chargeBox, SUBCLASS_COLOR)
-        }
-        else
-        {
-            Hud_SetColor(chargeBox, 50, 50, 50, 150)
-        }
+    Hud_SetVisible( chargeBox, file.cooldownData[index].charges >= 2 )
+    Hud_SetHeight( chargeBox, 8 )
+
+    if (file.cooldownData[index].readyCharges >= 2)
+    {
+        Hud_SetColor(chargeBox, SUBCLASS_COLOR)
     }
-    else{
-        Hud_SetVisible( chargeBox,  false)
+    else
+    {
+        Hud_SetColor(chargeBox, 50, 50, 50, 150)
+    }
+
+    Hud_SetVisible( chargeBox2, file.cooldownData[index].charges >= 3 )
+    Hud_SetHeight( chargeBox2, 8 )
+    Hud_SetWidth( chargeBox2, 60)
+
+    if (file.cooldownData[index].readyCharges >= 3)
+    {
+        Hud_SetColor(chargeBox2, SUBCLASS_COLOR)
+    }
+    else
+    {
+        Hud_SetColor(chargeBox2, 50, 50, 50, 150)
+    }
+
+    Hud_SetVisible( chargeBox3, file.cooldownData[index].charges >= 4 )
+    Hud_SetHeight( chargeBox3, 8 )
+    Hud_SetWidth( chargeBox3, 60)
+
+    if (file.cooldownData[index].readyCharges >= 4)
+    {
+        Hud_SetColor(chargeBox3, SUBCLASS_COLOR)
+    }
+    else
+    {
+        Hud_SetColor(chargeBox3, 50, 50, 50, 150)
     }
 
     if(file.cooldownData[index].readyCharges >= 1) {
@@ -947,7 +982,6 @@ void function UpdateOffhand( var panel, entity weapon, int index )
         Hud_SetColor(BG, 200, 200, 200, 50)
     }
 
-    Hud_SetText( chargeCount, "" )
     Hud_SetBarProgress( BG, file.cooldownData[index].nextChargeFrac )
 }
 
@@ -996,7 +1030,7 @@ string function GetStowedAmmoString( entity weapon)
     {
         return "∞"
     }
-    if (file.selectedWeapon.GetWeaponSettingInt(eWeaponVar.ammo_clip_size) <= 0)
+    if (weapon.GetWeaponSettingInt(eWeaponVar.ammo_clip_size) <= 0)
     {
         return weapon.GetWeaponPrimaryAmmoCount().tostring()
     }

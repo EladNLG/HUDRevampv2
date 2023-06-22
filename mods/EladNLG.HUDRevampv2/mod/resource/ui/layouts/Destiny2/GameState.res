@@ -1,4 +1,4 @@
-resource/ui/destiny_gamestate.res
+resource/ui/layouts/Destiny2/Gamestate.res
 {
 	BG
 	{
@@ -32,12 +32,11 @@ resource/ui/destiny_gamestate.res
 		wide				2
 		tall				50
 
-		"xpos"			"-691"
-		"ypos"			"-65"
+		"ypos"			"-10"
 
-    pin_to_sibling "BG"
-		pin_corner_to_sibling	TOP_LEFT
-		pin_to_sibling_corner	TOP_LEFT
+    	pin_to_sibling "BG"
+		pin_corner_to_sibling	BOTTOM
+		pin_to_sibling_corner	BOTTOM
 	}
 
 	Deco
@@ -68,7 +67,7 @@ resource/ui/destiny_gamestate.res
 		tall					100
 		visible					1
 		enabled					1
-		labelText				"ROUND TIMER"
+		labelText				"0:00"
 		textAlignment			center
 		font					DestinyLight_36
 
@@ -706,6 +705,6 @@ resource/ui/destiny_gamestate.res
 		labelText				"WORK IN PROGRESS"
 		textAlignment			center
     pin_to_sibling "BG"
-		font					OxaniumLight_24
+		font					ChakraLight_24
   }
 }

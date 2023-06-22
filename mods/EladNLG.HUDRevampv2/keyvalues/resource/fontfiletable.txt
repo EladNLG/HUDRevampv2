@@ -1,7 +1,14 @@
 FontFileTable
 {
-	"OxaniumLight"				"resource/Oxanium-Regular.ttf"
-	"OxaniumBold"				"resource/Oxanium-SemiBold.ttf"
+	"ChakraLight"				"resource/ChakraPetch-Regular.ttf"
+	"ChakraBold"				"resource/ChakraPetch-Bold.ttf"
 	"DestinyMedium"				"resource/DontSueMe_M.ttf"
 	"DestinyLight"				"resource/DontSueMe_R.ttf"
+	
+	// northstar shit
+	"lucida console"			"resource/NorthstarMono.ttf"			[$PC]
+	"lucida console"			"resource/MetronicPro-Regular.vfont"	[$GAMECONSOLE]
+	"arial"						"resource/Lato-Regular.ttf"
+	"arial bold"				"resource/Lato-Regular.ttf"
+	"arial narrow"				"resource/Lato-Regular.ttf"
 }

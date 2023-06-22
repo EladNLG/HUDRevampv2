@@ -766,9 +766,9 @@ entity function Create_Hud( string cockpitType, entity cockpit, entity player )
 
 	origin += AnglesToForward( angles ) * COCKPIT_UI_XOFFSET
 	warpSettings = {
-		xWarp = 34
-		xScale = 1.15
-		yWarp = 34 / 1.7778
+		xWarp = 25
+		xScale = 1.1
+		yWarp = 0 / 1.7778
 		yScale = 1.0
 		viewDist = 0.0
 	}

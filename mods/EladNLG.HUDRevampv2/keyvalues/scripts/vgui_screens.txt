@@ -1,23 +1,11 @@
 VGUI_Screens
 {
-    // "name" of layout - this is what you type into HudRevamp_AddLayout.
-    // RECOMMENDED - keep the same as the .res file name.
-    hud_revamp
+    HudRevamp
     {
         type            vgui_screen_panel
-        // this is the "resolution" of your menu.
-        // KEEP THIS THE SAME, UNLESS YOU KNOW WHAT YOU'RE DOING.
+
         pixelswide      1920
         pixelshigh      1080
-        resfile         "scripts/screens/hud_revamp.res"
-    }
-    destiny2
-    {
-        type            vgui_screen_panel
-        // this is the "resolution" of your menu.
-        // KEEP THIS THE SAME, UNLESS YOU KNOW WHAT YOU'RE DOING.
-        pixelswide      1920
-        pixelshigh      1080
-        resfile         "scripts/screens/destiny2.res"
+        resfile         "resource/ui/menus/panels/hud_panels.res"
     }
 }

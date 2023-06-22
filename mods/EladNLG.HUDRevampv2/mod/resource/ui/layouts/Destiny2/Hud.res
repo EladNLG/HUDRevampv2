@@ -1,9 +1,11 @@
 // This is the layout of the HUD. Works the same way as any other menu file.
-// You need to RESTART YOUR GAME to see changes.
+// To preview your changes in-game, you need to restart :(
+// However, you can preview changes by using the `uiscript_reset` command and
+// going to the 
 // Unfortunately, this makes editing quite annoying, but I can't do anything.
 // sorry :(
 
-hud_revamp.res
+resource/ui/layouts/Destiny2/Hud.res
 {
 	Screen
 	{
@@ -18,31 +20,18 @@ hud_revamp.res
 		visible			1
 	}
 
-	Destiny_GameStatePanel
-	{
-		"ControlName"				"CNestedPanel"
-		"classname"					"ModButton"
-		"tall"						"200"
-		"wide"						"1400"
-		"xpos"						"260"
-		"ypos"						"0"
-		"pin_corner_to_sibling"		"TOP_LEFT"
-		"pin_to_sibling_corner"		"TOP_LEFT"
-		"controlSettingsFile"		"resource/ui/destiny_gamestate.res"
-	}
-
 
 	// HEALTHBAR //
 
 	HealthBarBG
 	{
 		"ControlName" "ImagePanel"
-		"image" "vgui/hud/white"
+		"image" "ui/destiny2/health_16"
 		"scaleImage" "1"
 		"drawColor" "0 0 0 50" // vanilla label color
 		"visible" "1"
 		"wide" "500"
-		"tall" "18"
+		"tall" "20"
 		"enabled"	"1"
 
 		"xpos"			"710" // can't use rXXX, is relative to screen resolution and not parent panel.
@@ -97,8 +86,8 @@ hud_revamp.res
 		"tall" "200"
 		"enabled"	"1"
 
-		"xpos"			"070" // can't use rXXX, is relative to screen resolution and not parent panel.
-		"ypos"			"880" // can't use rXXX, is relative to screen resolution and not parent panel.
+		"xpos"			"000" // can't use rXXX, is relative to screen resolution and not parent panel.
+		"ypos"			"900" // can't use rXXX, is relative to screen resolution and not parent panel.
 	}
 
 	DestinyPrimarySlot
@@ -409,40 +398,39 @@ hud_revamp.res
 	{
 		"ControlName"				"CNestedPanel"
 		"classname"					"ModButton"
-		"tall"						"75"
+		"tall"						"115"
 		"wide"						"60"
 		"pin_to_sibling"			"DestinyPrimarySlot"
 		"xpos"						"8"
-		"ypos"						"15"
-		"pin_corner_to_sibling"		"BOTTOM_RIGHT"
-		"pin_to_sibling_corner"		"BOTTOM_LEFT"
-		"controlSettingsFile"		"resource/ui/destiny_offhand.res"
+		"pin_corner_to_sibling"		"TOP_RIGHT"
+		"pin_to_sibling_corner"		"TOP_LEFT"
+		"controlSettingsFile"		"resource/ui/layouts/Destiny2/Offhand.res"
 	}
 
 	OffhandCenter
 	{
 		"ControlName"				"CNestedPanel"
 		"classname"					"ModButton"
-		"tall"						"75"
+		"tall"						"115"
 		"wide"						"60"
 		"pin_to_sibling"			"OffhandRight"
 		"xpos"						"8"
 		"pin_corner_to_sibling"		"BOTTOM_RIGHT"
 		"pin_to_sibling_corner"		"BOTTOM_LEFT"
-		"controlSettingsFile"		"resource/ui/destiny_offhand.res"
+		"controlSettingsFile"		"resource/ui/layouts/Destiny2/Offhand.res"
 	}
 
 	OffhandLeft
 	{
 		"ControlName"				"CNestedPanel"
 		"classname"					"ModButton"
-		"tall"						"75"
+		"tall"						"115"
 		"wide"						"60"
 		"pin_to_sibling"			"OffhandCenter"
 		"xpos"						"8"
 		"pin_corner_to_sibling"		"BOTTOM_RIGHT"
 		"pin_to_sibling_corner"		"BOTTOM_LEFT"
-		"controlSettingsFile"		"resource/ui/destiny_offhand.res"
+		"controlSettingsFile"		"resource/ui/layouts/Destiny2/Offhand.res"
 	}
 
 	SuperImageBG //the part that will turn yellow
@@ -511,7 +499,7 @@ hud_revamp.res
 		"enabled"	"1"
 
 		"xpos"			"-78"
-		"ypos"			"-31.75"
+		"ypos"			"-32"
 		pin_to_sibling  			DestinyLoadoutPanel
 		pin_corner_to_sibling	TOP_LEFT
 		pin_to_sibling_corner	TOP_LEFT
@@ -540,7 +528,7 @@ hud_revamp.res
 		CircularClockwise		1
 
 		xpos				-78
-		ypos				-31.75
+		ypos				-32
 		wide				482
 		tall				16
 		visible				1
@@ -552,122 +540,6 @@ hud_revamp.res
 		pin_to_sibling  			DestinyLoadoutPanel
 		pin_corner_to_sibling	TOP_LEFT
 		pin_to_sibling_corner	TOP_LEFT
-	}
-
-	SHBar
-	{
-		ControlName			CHudProgressBar
-		bg_image			"vgui/hud/white"
-		fg_image			"vgui/hud/white"
-		//change_image		vgui/HUD/white
-
-		fgcolor_override	"75 255 255 255"
-		bgcolor_override	"0 0 0 0"
-		Inset				1
-		Margin				1
-		ProgressDirection			0
-		SegmentFill			1
-		SegmentSize			1000
-		ChangeStyle			0
-		//ChangeTime			0.5
-		//ChangeDir			2
-		//ChangeColor			"255 128 64 255"
-
-		CircularEnabled 		0
-		CircularClockwise		1
-
-		wide				384
-		tall				8
-		visible				1
-		//		image				vgui/HUD/white
-		scaleImage			1
-
-		//drawColor			"160 160 160 128"
-
-		pin_to_sibling			Bar
-		pin_corner_to_sibling	TOP
-		pin_to_sibling_corner	TOP
-	}
-
-	HDBar
-	{
-		ControlName			CHudProgressBar
-		bg_image			"vgui/hud/white"
-		fg_image			"vgui/hud/white"
-		//change_image		vgui/HUD/white
-
-		fgcolor_override	"175 175 175 255"
-		bgcolor_override	"0 0 0 0"
-		Inset				1
-		Margin				1
-		ProgressDirection			1
-		SegmentFill			1
-		SegmentSize			1000
-		ChangeStyle			0
-		//ChangeTime			0.5
-		//ChangeDir			2
-		//ChangeColor			"255 128 64 255"
-
-		CircularEnabled 		0
-		CircularClockwise		1
-
-		xpos				-8
-		ypos				0
-		wide				384
-		tall				32
-		visible				1
-		//image				vgui/HUD/white
-		//scaleImage			1
-
-		//drawColor			"160 160 160 128"
-
-		pin_to_sibling			BarBG
-		pin_corner_to_sibling	LEFT
-		pin_to_sibling_corner	LEFT
-	}
-
-	Health
-	{
-		ControlName				Label
-		xpos					-8
-		ypos					0
-		wide					72
-		tall					72
-		visible					1
-		enabled					1
-		labelText				"100"
-		textAlignment			west
-		auto_wide_tocontents	1
-		auto_tall_tocontents	1
-		font					OxaniumBold_56
-
-		pin_to_sibling			BarBG
-		pin_corner_to_sibling	BOTTOM_LEFT
-		pin_to_sibling_corner	TOP_LEFT
-	}
-
-	MaxHealth
-	{
-		ControlName				Label
-		xpos					8
-		ypos					5
-		wide					72
-		tall					72
-		//auto_tall_tocontents	1
-		visible					1
-		enabled					1
-		//auto_wide_tocontents	1
-		labelText				"100"
-		textAlignment			west
-		auto_wide_tocontents	1
-		auto_tall_tocontents	1
-		fgcolor_override 		"200 200 200 255"
-		//bgcolor_override 		"0 0 0 200"
-		font					OxaniumBold_43_DropShadow
-
-		pin_to_sibling			Health
-		pin_corner_to_sibling	LEFT
-		pin_to_sibling_corner	RIGHT
 	}
 
 	AnnouncementIcon
@@ -835,7 +707,7 @@ hud_revamp.res
 		auto_tall_tocontents	1
 		fgcolor_override 		"255 255 255 255"
 		//bgcolor_override 		"0 0 0 200"
-		font					OxaniumLight_27_ShadowGlow
+		font					ChakraLight_27_ShadowGlow
 
 		pin_to_sibling			AnnouncementTitleBG
 		pin_to_sibling_corner	BOTTOM

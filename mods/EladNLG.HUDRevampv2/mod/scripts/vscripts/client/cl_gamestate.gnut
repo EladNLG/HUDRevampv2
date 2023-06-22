@@ -1115,7 +1115,7 @@ void function DisplayPostMatchTop3()
 
 void function TakeScoreboardScreenshot_Delayed()
 {
-	wait 1.5
+	wait 1.54
 	GetLocalClientPlayer().ClientCommand( "jpeg" )
 }
 

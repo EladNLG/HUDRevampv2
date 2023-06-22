@@ -11,8 +11,10 @@ struct
 void function HudRevamp_Init()
 {
     AddCallback_OnSelectedWeaponChanged( OnSelectedWeaponChanged )
-    HudRevamp_AddLayout( "hud_revamp",
+    HudRevamp_AddLayout( "HudRevamp",
+    null,
     HudRevamp_Update,
+    null,
     Announcement )
     OffhandCooldownData data
     file.cooldownData.append(data)
@@ -135,12 +137,7 @@ void function HudRevamp_Update( var panel )
         Hud_SetBarProgress( HudElement("SHBar", panel), float(shield) / float(maxShield) )
     }
     else Hud_SetBarProgress( HudElement("SHBar", panel), 0.0 )
-    try
-    {
-        Hud_SetBarProgress( HudElement("HDBar", panel), player.GetPlayerNetFloat("hardDamage") / 100.0 )
-    }
-    catch (ex)
-    {}
+
     Hud_SetText( HudElement("Health", panel), (player.GetHealth() + shield).tostring() )
     Hud_SetText( HudElement("MaxHealth", panel), player.GetMaxHealth().tostring() )
     int weaponIndex = 0
@@ -152,69 +149,36 @@ void function HudRevamp_Update( var panel )
             break
         }
 
-    var weaponIcon1 = HudElement("WeaponIcon1", panel)
-    var weaponIcon2 = HudElement("WeaponIcon2", panel)
-    if (weaponIndex == 0)
-    {
-        if (weapons.len() > 1) {
-            weaponIcon1.SetColor( 0, 0, 0, 175 )
-            weaponIcon1.SetImage(
-                GetWeaponInfoFileKeyFieldAsset_WithMods_Global( weapons[1].GetWeaponClassName(), weapons[1].GetMods(), "hud_icon" )
-            )
-        }
-        else weaponIcon1.SetColor( 0, 0, 0, 0 )
-        if (weapons.len() > 2) {
-            weaponIcon2.SetColor( 0, 0, 0, 175 )
-            weaponIcon2.SetImage(
-                GetWeaponInfoFileKeyFieldAsset_WithMods_Global( weapons[2].GetWeaponClassName(), weapons[2].GetMods(), "hud_icon" )
-            )
-        }
-        else weaponIcon2.SetColor( 0, 0, 0, 0 )
-    }
-    else if (weaponIndex == 1)
-    {
-        weaponIcon1.SetColor( 0, 0, 0, 175 )
-        weaponIcon1.SetImage(
-            GetWeaponInfoFileKeyFieldAsset_WithMods_Global( weapons[0].GetWeaponClassName(), weapons[0].GetMods(), "hud_icon" )
-        )
-        if (weapons.len() > 2) {
-            weaponIcon2.SetColor( 0, 0, 0, 175 )
-            weaponIcon2.SetImage(
-                GetWeaponInfoFileKeyFieldAsset_WithMods_Global( weapons[2].GetWeaponClassName(), weapons[2].GetMods(), "hud_icon" )
-            )
-        }
-        else weaponIcon2.SetColor( 0, 0, 0, 0 )
-    }
-    else if (weaponIndex == 2)
-    {
-        weaponIcon1.SetColor( 0, 0, 0, 175 )
-        weaponIcon2.SetColor( 0, 0, 0, 175 )
-        weaponIcon1.SetImage(
-            GetWeaponInfoFileKeyFieldAsset_WithMods_Global( weapons[0].GetWeaponClassName(), weapons[0].GetMods(), "hud_icon" )
-        )
-        weaponIcon2.SetImage(
-            GetWeaponInfoFileKeyFieldAsset_WithMods_Global( weapons[1].GetWeaponClassName(), weapons[1].GetMods(), "hud_icon" )
-        )
-    }
-
     var ammoCount = HudElement("AmmoCount", panel)
-    var ammoCountLarge = HudElement("AmmoCountLarge", panel)
     var stockpileCount = HudElement("AmmoStockpile", panel)
 
-    bool displayStockpile = (!file.selectedWeapon.GetWeaponSettingBool(eWeaponVar.ammo_no_remove_from_stockpile) &&
-    file.selectedWeapon.GetWeaponSettingInt(eWeaponVar.ammo_clip_size) > 0) ||
-    file.selectedWeapon.GetLifetimeShotsRemaining() > -1
-
-    Hud_SetVisible( stockpileCount, displayStockpile )
-    Hud_SetVisible( ammoCount, displayStockpile )
-    Hud_SetVisible( ammoCountLarge, !displayStockpile )
-    if (displayStockpile)
+    array<var> weaponLabels = [HudElement("Weapon3Label", panel), 
+        HudElement("Weapon2Label", panel), HudElement("Weapon1Label", panel)]
+    int j = weapons.len() - 1
+    for (int i = 0; i < 3; i++)
     {
-        Hud_SetText( stockpileCount, GetStockpileString(file.selectedWeapon) )
-
-        Hud_SetText( ammoCount, GetAmmoString(file.selectedWeapon) )
+        if (j >= 0)
+        {
+            
+            switch (weapons[j].GetInventoryIndex())
+            {
+                case 3:
+                    Hud_SetText( weaponLabels[i], "C" )
+                    break
+                default:
+                    Hud_SetText( weaponLabels[i], (weapons[j].GetInventoryIndex() + 1).tostring() )
+                    break
+            }
+            if (file.selectedWeapon == weapons[j])
+                Hud_SetColor(weaponLabels[i], 200, 200, 200, 255)
+            else Hud_SetColor(weaponLabels[i], 200, 200, 200, 127)
+            j--
+        }
+        else Hud_SetText( weaponLabels[i], "" )
     }
-    else Hud_SetText( ammoCountLarge, GetAmmoString(file.selectedWeapon) )
+
+    Hud_SetText( stockpileCount, GetStockpileString(file.selectedWeapon) )
+    Hud_SetText( ammoCount, GetAmmoString(file.selectedWeapon) )
 
     array<entity> offhands = [ player.GetOffhandWeapon(0), player.GetOffhandWeapon(1), player.GetOffhandWeapon(2) ]
     for (int i = 0; i < offhands.len(); i++)
@@ -246,6 +210,7 @@ void function UpdateOffhand( var panel, entity weapon, int index )
 {
     GetOffhandCooldownData( file.cooldownData[index], weapon )
     var BG = Hud_GetChild( panel, "BGFill" )
+    var BG2 = Hud_GetChild( panel, "BGFill2" )
     //var BG = Hud_GetChild( panel, "BG" )
     var icon = Hud_GetChild( panel, "Icon" )
     var circleBar = Hud_GetChild( panel, "Bar" )
@@ -260,12 +225,26 @@ void function UpdateOffhand( var panel, entity weapon, int index )
     }
     if (file.cooldownData[index].readyCharges < 1)
     {
-        Hud_SetBarProgress( BG, file.cooldownData[index].nextChargeFrac )
+        if (file.cooldownData[index].nextChargeFrac > 0.0)
+        {
+            CropBar_SetProgress( BG, GraphCapped( 
+                file.cooldownData[index].nextChargeFrac - 0.05, 0, 1, 0.25, 0.75 ) )
+            CropBar_SetColor( BG2, 255, 255, 255, 255)
+            CropBar_SetProgress( BG2, GraphCapped( 
+                file.cooldownData[index].nextChargeFrac, 0, 1, 0.25, 0.75 ),
+                GraphCapped( file.cooldownData[index].nextChargeFrac, 0.05, 0.1, 0.25, 0.275 ) )
+        }
+        else
+        {
+            CropBar_SetProgress( BG, 0.0 )
+            CropBar_SetProgress( BG2, 0.0 )
+        }
         Hud_SetColor( icon, 150, 150, 150, 127 )
     }
     else
     {
-        Hud_SetBarProgress( BG, 0.0 )
+        CropBar_SetProgress( BG, 0.0 )
+        CropBar_SetProgress( BG2, 0.0 )
         Hud_SetColor( icon, 255, 255, 255, 255 )
     }
 }
@@ -277,7 +256,7 @@ string function GetAmmoString( entity weapon )
     if (weapon.GetWeaponSettingBool(eWeaponVar.ammo_no_remove_from_clip) ||
         weapon.GetWeaponSettingBool(eWeaponVar.ammo_no_remove_from_stockpile) &&
         weapon.GetWeaponSettingInt(eWeaponVar.ammo_clip_size) < 1)
-        return "--"
+        return "∞"
 
     if (weapon.GetWeaponSettingInt(eWeaponVar.ammo_clip_size) < 1)
     {
@@ -299,10 +278,18 @@ string function GetStockpileString( entity weapon )
 {
 	string result
 
+    if (weapon.GetWeaponSettingBool(eWeaponVar.ammo_no_remove_from_clip))
+        return "∞"
 		//if (file.selectedWeapon == weapon) RuiSetFloat(file.ruis["stockpile"], "msgAlpha", 0.0)
     if (weapon.GetWeaponSettingFloat(eWeaponVar.regen_ammo_refill_rate) > 0.0)
     {
         return weapon.GetLifetimeShotsRemaining().tostring()
+    }
+    if (weapon.GetWeaponSettingInt(eWeaponVar.ammo_clip_size) <= 0)
+    {
+        if (weapon.GetWeaponSettingBool(eWeaponVar.ammo_no_remove_from_stockpile))
+            return "∞"
+        return weapon.GetWeaponSettingInt(eWeaponVar.ammo_stockpile_max).tostring()
     }
 	return weapon.GetWeaponPrimaryAmmoCount().tostring()
 }

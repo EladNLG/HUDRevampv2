@@ -1,6 +1,6 @@
 "Basic"
 {
-	"$basetexture" "proto_at_turret.txt"
+	"$basetexture" "ui/hudrevamp/baraa"
 	"$translucent" 1
 	"$vertexcolor" 1
 	"$vertexalpha" 1

@@ -3,35 +3,105 @@ untyped
 global function HudRevampLayouts_Init
 global function HudRevamp_AddLayout
 global function HudRevamp_Announcement
+global function HUDMenuOpenState
+
+struct HUDLayout
+{
+	var panel = null
+	var flatPanel = null
+	void functionref( var ) initCallback
+	void functionref( var ) updateCallback
+	void functionref( var ) updateFlatCallback
+	void functionref( var, AnnouncementData ) announcementCallback
+}
 
 struct
 {
-    array<string> layouts = []
-	array<entity> screens = []
-	array<void functionref( var )> updateCallbacks
-	array<void functionref( var, AnnouncementData )> announcementCallbacks
+	entity screen
+    table<string, HUDLayout> layouts
 } file
 
 void function HudRevamp_AddLayout( string name,
+	void functionref( var ) initCallback,
 	void functionref( var ) updateCallback,
+	void functionref( var ) updateFlatCallback,
 	void functionref( var, AnnouncementData ) announcementCallback )
 {
-	file.layouts.append(name)
-	file.updateCallbacks.append(updateCallback)
-	file.announcementCallbacks.append(announcementCallback)
+	HUDLayout layout
+	layout.initCallback = initCallback
+	layout.updateCallback = updateCallback
+	layout.updateFlatCallback = updateFlatCallback
+	layout.announcementCallback = announcementCallback
+	file.layouts[name] <- layout
 }
 
 void function HudRevampLayouts_Init()
 {
+	RegisterSignal( "FrameUpdate" )
     AddCreateCallback( "titan_cockpit", InitHUD )
+
+	thread FlatPanelUpdate()
+}
+
+void function HUDMenuOpenState( int state )
+{
+	clGlobal.isMenuOpen = (state == 1)
+	clGlobal.isSoloDialogMenuOpen = (state == 2)
+	if (IsValid(clGlobal.levelEnt))
+		clGlobal.levelEnt.Signal( "FrameUpdate" )
+}
+
+void function FlatPanelUpdate()
+{
+	WaitFrame()
+	var fullscreenVGUI = HudElement("HUDRevamp_panels")
+	
+	foreach (string name, HUDLayout layout in file.layouts)
+	{
+		if (Hud_HasChild(fullscreenVGUI, name + "_Hud"))
+		{
+			Hud_SetVisible(Hud_GetChild(fullscreenVGUI, name + "_Hud"), false)
+		}
+		if (Hud_HasChild(fullscreenVGUI, name + "_Fullscreen"))
+		{
+			layout.flatPanel = Hud_GetChild(fullscreenVGUI, name + "_Fullscreen")
+			Hud_SetVisible(Hud_GetChild(fullscreenVGUI, name + "_Fullscreen"), false)
+		}
+	}
+
+	while ( true )
+	{
+		int ceFlags = GetLocalClientPlayer().GetCinematicEventFlags()
+		bool hideHud = ( ceFlags & CE_FLAG_HIDE_MAIN_HUD ) > 0 // MAIN_HUD hide event flag
+			|| !GetConVarBool("r_drawvgui") 
+			|| !GetConVarBool("rui_drawEnable")
+			|| clGlobal.isMenuOpen || clGlobal.isSoloDialogMenuOpen // these are often used to hide hud 
+		
+		if (!IsValid(GetLocalViewPlayer()))
+			hideHud = true
+		foreach (string name, HUDLayout layout in file.layouts)
+		{
+			string selectedLayout = GetConVarString("comp_hud_layout")
+			bool showHud = name == selectedLayout && !hideHud
+			if (layout.flatPanel == null)
+				continue
+			Hud_SetVisible(layout.flatPanel, showHud)
+			//print(index)
+			if (showHud && layout.updateFlatCallback != null)
+			{
+				layout.updateFlatCallback( layout.flatPanel )
+			}
+		}
+		WaitSignalTimeout( clGlobal.levelEnt, 0.001, "FrameUpdate" )
+	}
 }
 
 void function HudRevamp_Announcement( AnnouncementData data )
 {
-	int layout = GetConVarInt("comp_hud_layout")
+	string layout = GetConVarString("comp_hud_layout")
 	try
 	{
-		file.announcementCallbacks[layout]( file.screens[layout].GetPanel(), data )
+		file.layouts[layout].announcementCallback( file.layouts[layout].panel.GetPanel(), data )
 	}
 	catch (ex)
 	{
@@ -42,20 +112,31 @@ void function HudRevamp_Announcement( AnnouncementData data )
 void function InitHUD( entity cockpit )
 {
     entity player = GetLocalViewPlayer()
-	foreach (int index, string layout in file.layouts)
+	entity mainVGUI = Create_Hud( "HudRevamp", cockpit, player )
+	mainVGUI.s.panel.WarpEnable()
+	file.screen = mainVGUI
+
+	foreach (string name, HUDLayout layout in file.layouts)
 	{
-		entity mainVGUI = Create_Hud( file.layouts[index], cockpit, player )
-
-		local panel = mainVGUI.s.panel
-		local warpSettings = mainVGUI.s.warpSettings
-		printt("XWARP:", warpSettings.xWarp)
-		mainVGUI.s.panel.WarpGlobalSettings( 34, 0, 34 / 1.7665, 0, warpSettings.viewDist )
-		mainVGUI.s.panel.WarpEnable()
-
-		file.screens.append(mainVGUI)
+		// hide all the elements.
+		try
+		{
+			layout.panel = mainVGUI.s.panel.HudElement(name + "_Hud")
+			Hud_SetVisible(HudElement(name + "_Hud", mainVGUI.s.panel), false)
+			if (layout.initCallback != null)
+				layout.initCallback(HudElement(name + "_Hud", mainVGUI.s.panel))
+		}
+		catch (ex)
+		{
+			layout.panel = null
+		}
+		try
+		{
+			Hud_SetVisible(HudElement(name + "_Fullscreen", mainVGUI.s.panel), false)
+		}
+		catch (ex2)
+		{}
 	}
-
-
 
     thread DestroyOnCockpitEnd( cockpit )
 }
@@ -65,30 +146,37 @@ void function DestroyOnCockpitEnd( entity cockpit )
     OnThreadEnd(
         function() : ()
         {
-			foreach (entity screen in file.screens)
-				screen.Destroy()
-			file.screens = []
+			file.screen.Destroy()
+				file.screen = null
+			
         }
     )
 
     cockpit.EndSignal("OnDestroy")
 	int ceFlags = GetLocalClientPlayer().GetCinematicEventFlags()
-	bool hideHud = !IsAlive(GetLocalClientPlayer()) || ( ceFlags & CE_FLAG_HIDE_MAIN_HUD ) > 0 || GetLocalViewPlayer() != GetLocalClientPlayer()
+	bool hideHud = !IsAlive(GetLocalClientPlayer()) || // player not alive (sp)
+		( ceFlags & CE_FLAG_HIDE_MAIN_HUD ) > 0 || // MAIN_HUD hide event flag
+		GetLocalViewPlayer() != GetLocalClientPlayer() || // Kill replay (no access to ammo, etc.)
+		!GetConVarBool("r_drawvgui") || !GetConVarBool("rui_drawEnable") // these are often used to hide hud 
+	
 	if (!IsValid(GetLocalViewPlayer()))
         hideHud = true
 	while ( 1 )
 	{
-		foreach (int index, entity screen in file.screens)
+		string selectedLayout = GetConVarString("comp_hud_layout")
+		foreach (string name, HUDLayout layout in file.layouts)
 		{
+			bool showHud = name == selectedLayout && !hideHud
+			if (layout.panel == null)
+				continue
+			Hud_SetVisible(layout.panel, showHud)
 			//print(index)
-			if (index == GetConVarInt("comp_hud_layout") && !hideHud)
+			if (showHud && layout.updateCallback != null)
 			{
-				screen.SetAttachOffsetOrigin( screen.s.baseOrigin )
-				file.updateCallbacks[index]( screen.s.panel )
+				layout.updateCallback( layout.panel )
 			}
-			else screen.SetAttachOffsetOrigin( <170, 0, 1000 > )
 		}
-		WaitFrame()
+		WaitSignalTimeout( clGlobal.levelEnt, 0.0001, "FrameUpdate" )
 	}
 }
 
@@ -99,16 +187,8 @@ entity function Create_Hud( string cockpitType, entity cockpit, entity player )
 
 	vector origin = < 40, 0, 0 >
 	vector angles = < 0, 0, 0 >
-	var warpSettings
 
 	origin += AnglesToForward( angles ) * COCKPIT_UI_XOFFSET
-	warpSettings = {
-		xWarp = 30
-		xScale = 1.1
-		yWarp = 34 / 1.7665
-		yScale = 1.0
-		viewDist = 1.0
-	}
 
 	float COCKPIT_UI_WIDTH = 100
 	float COCKPIT_UI_HEIGHT = 100 / 1.7665
@@ -121,21 +201,12 @@ entity function Create_Hud( string cockpitType, entity cockpit, entity player )
 		VGUI_SCREEN_PASS_HUD, origin, angles, COCKPIT_UI_WIDTH, COCKPIT_UI_HEIGHT )
 	vgui.s.panel <- vgui.GetPanel()
 	vgui.s.baseOrigin <- origin
-	vgui.s.warpSettings <- warpSettings
 
 	vgui.SetParent( cockpit, attachment )
 	vgui.SetAttachOffsetOrigin( origin )
 	vgui.SetAttachOffsetAngles( angles )
 
 	local panel = vgui.GetPanel()
-
-	//Create_CommonHudElements( vgui, panel )
-
-	/*HudElement( "Screen", panel ).SetColor( 0, 0, 0, 0 )
-	HudElement( "AmmoBarr", panel ).SetSize( 32, 32 )
-	HudElement( "AmmoBarr", panel ).SetPos( 0, 0)
-	Hud_MoveOverTime( HudElement( "AmmoBarr", panel ), 1920 / 2 - 32, 1080 - 64, 10 )
-	HudElement("AmmoBarr", panel).SetBarProgressAndRate(0.0, 0.1)*/
 
 	return vgui
 }
