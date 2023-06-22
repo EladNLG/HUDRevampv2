@@ -145,6 +145,17 @@ Scheme
 				antialias 		1
 			}
 		}
+
+		ChakraBold_120
+		{
+			isproportional only
+			1
+			{
+				name			ChakraBold
+				tall			120
+				antialias 		1
+			}
+		}
 		
 		ChakraBold_56_Outline
 		{

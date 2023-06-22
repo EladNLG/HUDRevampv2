@@ -21,7 +21,6 @@ struct
     int eliteHealthbarIndex = 0
     int titanHealthbarIndex = 0
     entity hitEnt
-    bool isMenuOpen
     EarnObject& earnGoal
     EarnObject& earnReward
     int goalId = 0
@@ -99,10 +98,12 @@ void function Announcement( var panel, AnnouncementData data )
     // announcement of higher priority is called directly after.
     clGlobal.levelEnt.EndSignal( "AnnoucementPurge" )
 
-    Hud_SetText(title, ExpandString(Localize(data.messageText).toupper()))
+    array<string> args = data.optionalTextArgs
+    Hud_SetText(title, ExpandString(Localize(data.messageText, args[0], args[1], args[2], args[3], args[4]).toupper()))
     Hud_EnableKeyBindingIcons(desc)
     //Hud_EnableKeyBindingIcons(title)
-    Hud_SetText(desc, CleanString(Localize(data.subText)))
+    array<string> args = data.optionalSubTextArgs
+    Hud_SetText(desc, CleanString(Localize(data.subText, args[0], args[1], args[2], args[3], args[4])))
 
     //Hud_SetVisible(bg, false)
 
@@ -475,7 +476,7 @@ void function Destiny2_FlatUpdate( var flatPanel )
     if (IsValid(player.GetActiveWeapon()) && player.GetActiveWeapon().GetWeaponOwner() == player)
         attackDir = player.GetActiveWeapon().GetAttackDirection()
     TraceResults results = TraceLine( player.CameraPosition(), player.CameraPosition() + attackDir * 8192, [ player ],
-        TRACE_MASK_SHOT, TRACE_COLLISION_GROUP_NONE )
+        TRACE_MASK_BLOCKLOS, TRACE_COLLISION_GROUP_NONE )
     
     file.hitEnt = results.hitEnt
     string entities = "ents: [ "
@@ -657,6 +658,32 @@ vector function WorldToScreenPos( vector position )
     return result
 }
 
+
+asset function HUDGetIconForAI( entity npc )
+{
+    string classname = ""
+    if (npc.IsNPC())
+        classname = npc.GetAISettingsName()
+    if (npc.IsPlayer())
+        classname = npc.GetPlayerSettings()
+	switch( classname )
+	{
+		case "npc_titan":
+			return $"rui/hud/gametype_icons/bounty_hunt/bh_titan"
+		case "npc_soldier":
+        return $"rui/hud/gametype_icons/bounty_hunt/bh_grunt"
+		case "npc_spectre":
+			return $"rui/hud/gametype_icons/bounty_hunt/bh_spectre"
+		case "npc_stalker":
+			return $"rui/hud/gametype_icons/bounty_hunt/bh_stalker"
+		case "npc_turret_mega":
+			return $"rui/hud/gametype_icons/bounty_hunt/bh_megaturret"
+		case "npc_super_spectre":
+			return $"rui/hud/gametype_icons/bounty_hunt/bh_reaper"
+	}
+	return $""
+}
+
 void function HealthBar( var flatPanel, entity ent )
 {
     ent.EndSignal( "EndTargetInfo" )
@@ -707,7 +734,7 @@ void function HealthBar( var flatPanel, entity ent )
             ent.Signal("EndTargetInfo")
         }
         
-        Hud_SetVisible( healthbar, !file.isMenuOpen )
+        Hud_SetVisible( healthbar, !clGlobal.isMenuOpen )
 
         // check team
         entity player = IsValid(GetLocalViewPlayer()) ? GetLocalViewPlayer() : GetLocalClientPlayer()
@@ -752,31 +779,6 @@ void function HealthBar( var flatPanel, entity ent )
         lastFrameTime = Time()
         wait 0
     }
-}
-
-asset function HUDGetIconForAI( entity npc )
-{
-    string classname = ""
-    if (npc.IsNPC())
-        classname = npc.GetAISettingsName()
-    if (npc.IsPlayer())
-        classname = npc.GetPlayerSettings()
-	switch( classname )
-	{
-		case "npc_titan":
-			return $"rui/hud/gametype_icons/bounty_hunt/bh_titan"
-		case "npc_soldier":
-        return $"rui/hud/gametype_icons/bounty_hunt/bh_grunt"
-		case "npc_spectre":
-			return $"rui/hud/gametype_icons/bounty_hunt/bh_spectre"
-		case "npc_stalker":
-			return $"rui/hud/gametype_icons/bounty_hunt/bh_stalker"
-		case "npc_turret_mega":
-			return $"rui/hud/gametype_icons/bounty_hunt/bh_megaturret"
-		case "npc_super_spectre":
-			return $"rui/hud/gametype_icons/bounty_hunt/bh_reaper"
-	}
-	return $""
 }
 
 void function TitanHealthBar( var flatPanel, entity ent )
@@ -826,7 +828,7 @@ void function TitanHealthBar( var flatPanel, entity ent )
             ent.Signal("EndTargetInfo")
         }
         
-        Hud_SetVisible( healthbar, !file.isMenuOpen )
+        Hud_SetVisible( healthbar, !clGlobal.isMenuOpen )
 
         // check team
         entity player = IsValid(GetLocalViewPlayer()) ? GetLocalViewPlayer() : GetLocalClientPlayer()

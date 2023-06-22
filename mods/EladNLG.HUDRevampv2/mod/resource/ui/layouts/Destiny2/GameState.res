@@ -134,7 +134,7 @@ resource/ui/layouts/Destiny2/Gamestate.res
 		"xpos"			"0"
 		"ypos"			"10"
 
-    pin_to_sibling "Team0_Score"
+    	pin_to_sibling "Team0_Score"
 		pin_corner_to_sibling	BOTTOM_RIGHT
 		pin_to_sibling_corner	TOP_RIGHT
 	}

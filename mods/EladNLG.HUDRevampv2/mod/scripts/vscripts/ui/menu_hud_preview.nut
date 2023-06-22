@@ -117,34 +117,18 @@ void function HudRevamp_AddLayout(string name, string displayName, string author
     if (Hud_HasChild(file.panelHolder, name + "_Hud"))
     {
         file.panels.append(Hud_GetChild(file.panelHolder, name + "_Hud"))
-        if (name == "HudRevamp")
-        {
-            var hudpanel = Hud_GetChild(file.panelHolder, name + "_Hud")
-            CropBar_SetProgress( Hud_GetChild(Hud_GetChild(hudpanel, "OffhandRight"), "BGFill"), 
-                GraphCapped( 0.75, 0, 1, 0.25, 0.75 ) )
-            CropBar_SetColor( Hud_GetChild(Hud_GetChild(hudpanel, "OffhandRight"), "BGFill2"),
-                255, 255, 255, 255 )
-            CropBar_SetProgress( Hud_GetChild(Hud_GetChild(hudpanel, "OffhandRight"), "BGFill2"), 
-                GraphCapped( 0.8, 0, 1, 0.25, 0.75 ), 0.1 )
-            
-            CropBar_SetProgress( Hud_GetChild(Hud_GetChild(hudpanel, "OffhandCenter"), "BGFill"), 
-                GraphCapped( 0.75, 0, 1, 0.25, 0.75 ) )
-            CropBar_SetColor( Hud_GetChild(Hud_GetChild(hudpanel, "OffhandCenter"), "BGFill2"),
-                255, 255, 255, 255 )
-            CropBar_SetProgress( Hud_GetChild(Hud_GetChild(hudpanel, "OffhandCenter"), "BGFill2"), 
-                GraphCapped( 0.8, 0, 1, 0.25, 0.75 ), 0.1 )
-            
-            CropBar_SetProgress( Hud_GetChild(Hud_GetChild(hudpanel, "OffhandLeft"), "BGFill"), 
-                GraphCapped( 0.75, 0, 1, 0.25, 0.75 ) )
-            CropBar_SetColor( Hud_GetChild(Hud_GetChild(hudpanel, "OffhandLeft"), "BGFill2"),
-                255, 255, 255, 255 )
-            CropBar_SetProgress( Hud_GetChild(Hud_GetChild(hudpanel, "OffhandLeft"), "BGFill2"), 
-                GraphCapped( 0.8, 0, 1, 0.25, 0.75 ), GraphCapped( 0.1, 0, 1, 0.25, 0.75 ) )
-        }
     }
     if (Hud_HasChild(file.panelHolder, name + "_Fullscreen"))
     {
         file.panels.append(Hud_GetChild(file.panelHolder, name + "_Fullscreen"))
+        if (name == "HudRevamp")
+        {
+            var panel = Hud_GetChild(file.panelHolder, name + "_Fullscreen")
+            Hud_SetBarProgress( Hud_GetChild(panel, "ScoreBarFriendly"), 56.0 / 650.0)
+            Hud_SetBarProgress( Hud_GetChild(panel, "ScoreBarEnemy"), 32.0 / 650.0)
+            Hud_SetBarProgress( Hud_GetChild(panel, "TitanStatusFriendly"), 8.0 / 8.0)
+            Hud_SetBarProgress( Hud_GetChild(panel, "TitanStatusEnemy"), 4.0 / 8.0)
+        }
     }
     file.layouts.append(name)
     file.displayNames.append(displayName)

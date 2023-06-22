@@ -62,8 +62,8 @@
             "Flags": 16777216
         },
         {
-            "Name": "scale",
-            "DefaultValue": "1.0"
+            "Name": "hud_revamp_pip_rotation",
+            "DefaultValue": "-90.0"
         },
         {
             "Name": "comp_hud_damage_indicator",

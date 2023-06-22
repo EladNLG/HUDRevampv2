@@ -1,0 +1,32 @@
+"Basic"
+{
+	"$basetexture" "ui/hudrevamp/pip"
+	"$translucent" 1
+	"$vertexcolor" 1
+	"$vertexalpha" 1
+	"$ignorez" 1
+	"$no_fullbright" 1
+	"$nolod" 1
+
+    "$angle" 15.0
+	"$offset" "[0.0 0.0]"
+	"$scale"	"[0.5 0.5]"
+
+	"$SHADERSRGBREAD360" 1
+    "Proxies"
+    {
+        "ConVar"
+        {
+            "convar" "hud_revamp_pip_rotation"
+            "resultVar" "$angle"
+        }
+
+        "TextureTransform"
+        {
+			"translateVar" "$offset"
+			"scaleVar" "$scale"
+            "rotateVar" "$angle"
+            "resultVar" "$basetexturetransform"
+        }
+    }
+}

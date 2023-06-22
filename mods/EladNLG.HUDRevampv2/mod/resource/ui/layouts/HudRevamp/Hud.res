@@ -176,11 +176,11 @@ hud_revamp.res
 		"tall" "64"
 		"enabled"	"1"
 
-		"xpos"			"12"
+		"xpos"			"-12"
 		"ypos"			"0"
-		"pin_to_sibling"		"AmmoCount"
+		"pin_to_sibling"		"WeaponBG"
 		"pin_to_sibling_corner"	"LEFT"
-		"pin_corner_to_sibling"	"RIGHT"
+		"pin_corner_to_sibling"	"LEFT"
 	}
 
 	OffhandRight
@@ -436,4 +436,177 @@ hud_revamp.res
 		pin_to_sibling_corner	BOTTOM
 		pin_corner_to_sibling	TOP
 	}
+
+	TitanMeterBG
+	{
+		ControlName		ImagePanel
+		ypos		-24
+		tall		200
+		wide		200
+		//fillColor		"0 0 0 175"
+		image			"ui/hudrevamp/titan_meter_bg"
+		visible			1
+		scaleImage		1
+
+		pin_to_sibling	Screen
+		pin_to_sibling_corner	BOTTOM
+		pin_corner_to_sibling	BOTTOM
+	}
+
+	TitanEarnedMeter
+	{
+		ControlName			CHudProgressBar
+		bg_image			"vgui/hud/white"
+		fg_image			"ui/hudrevamp/circle"
+		//change_image		vgui/HUD/white
+
+		fgcolor_override	"250 200 50 255"
+		bgcolor_override	"0 0 0 0"
+		Inset				1
+		Margin				1
+		CircularEnabled		1
+		CircularClockwise	1
+		ProgressDirection			0
+		SegmentFill			1
+		SegmentSize			1000
+		ChangeStyle			0
+		//ChangeTime			0.5
+		//ChangeDir			2
+		//ChangeColor			"255 128 64 255"
+
+		CircularEnabled 		0
+		CircularClockwise		1
+
+		xpos				0
+		ypos				0
+		wide				200
+		tall				200
+		visible				1
+//		image				vgui/HUD/white
+		scaleImage			1
+
+		//drawColor			"160 160 160 128"
+
+		pin_to_sibling			TitanMeterBG
+		pin_corner_to_sibling	CENTER
+		pin_to_sibling_corner	CENTER
+	}
+
+	TitanOwnedMeter
+	{
+		ControlName			CHudProgressBar
+		bg_image			"vgui/hud/white"
+		fg_image			"ui/hudrevamp/circle"
+		//change_image		vgui/HUD/white
+
+		fgcolor_override	"50 155 255 255"
+		bgcolor_override	"0 0 0 0"
+		Inset				1
+		Margin				1
+		CircularEnabled		1
+		CircularClockwise	1
+		ProgressDirection			0
+		SegmentFill			1
+		SegmentSize			1000
+		ChangeStyle			0
+		//ChangeTime			0.5
+		//ChangeDir			2
+		//ChangeColor			"255 128 64 255"
+
+		CircularEnabled 		0
+		CircularClockwise		1
+
+		xpos				0
+		ypos				0
+		wide				200
+		tall				200
+		visible				1
+//		image				vgui/HUD/white
+		scaleImage			1
+
+		//drawColor			"160 160 160 128"
+
+		pin_to_sibling			TitanMeterBG
+		pin_corner_to_sibling	CENTER
+		pin_to_sibling_corner	CENTER
+	}
+
+	TitanPip
+	{
+		ControlName		ImagePanel
+		tall		200
+		wide		200
+		//fillColor		"0 0 0 175"
+		image			"ui/hudrevamp/pip"
+		visible			1
+		scaleImage		1
+
+		pin_to_sibling			TitanMeterBG
+		pin_corner_to_sibling	CENTER
+		pin_to_sibling_corner	CENTER
+	}
+
+	TitanPercent
+	{
+		ControlName				Label
+		xpos					0
+		ypos					0
+		wide					200
+		tall					200
+		visible					1
+		enabled					1
+		labelText				"100"
+		textAlignment			center
+		//auto_wide_tocontents	1
+		//auto_tall_tocontents	1
+		fgcolor_override 		"255 255 255 255"
+		font					ChakraBold_120
+
+		pin_to_sibling			TitanMeterBG
+		pin_to_sibling_corner	CENTER
+		pin_corner_to_sibling	CENTER
+	}
+
+	BoostStatus
+	{
+		ControlName				Label
+		xpos					8
+		ypos					0
+		wide					200
+		tall					64
+		visible					1
+		enabled					1
+		labelText				"2"
+		textAlignment			west
+		wrap					1
+		//auto_wide_tocontents	1
+		fgcolor_override 		"70 130 255 255"
+		font					ChakraBold_120
+
+		pin_to_sibling			TitanMeterBG
+		pin_to_sibling_corner	RIGHT
+		pin_corner_to_sibling	LEFT
+	}
+
+	BoostStatusLabel
+	{
+		ControlName				Label
+		xpos					0
+		ypos					-4
+		wide					200
+		auto_tall_tocontents	1
+		visible					1
+		enabled					1
+		labelText				"Boosts Ready"
+		textAlignment			west
+		wrap					0
+		//auto_wide_tocontents	1
+		fgcolor_override 		"70 130 255 255"
+		font					ChakraBold_27
+
+		pin_to_sibling			BoostStatus
+		pin_to_sibling_corner	TOP_LEFT
+		pin_corner_to_sibling	BOTTOM_LEFT
+	}
+
 }

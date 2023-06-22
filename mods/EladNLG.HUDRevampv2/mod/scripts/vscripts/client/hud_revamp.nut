@@ -1,11 +1,26 @@
 untyped
 global function HudRevamp_Init
 
+const int HEALTHBAR_INSTANCES = 7
+const array<int> INVULNERABLE_BAR_COLOR = [127, 127, 127, 255]
+const array<int> ENEMY_TITAN_BAR_COLOR = [200, 50, 50, 255]
+const array<int> ENEMY_BAR_COLOR = [200, 50, 50, 255]
+const array<int> FRIENDLY_BAR_COLOR = [70, 130, 255, 255]
+
 struct
 {
     entity selectedWeapon
     AnnouncementData toDisplay
     array<OffhandCooldownData&> cooldownData
+
+    array<entity> healthbarEntities = [ null, null, null, null, null, null, null, null ]
+    array<entity> titanHealthbarEntities = [ null, null, null, null, null, null, null, null ]
+    entity hitEnt
+    int healthbarIndex = 0
+    int titanHealthbarIndex = 0
+
+    EarnObject earnGoal
+    EarnObject earnReward
 } file
 
 void function HudRevamp_Init()
@@ -14,12 +29,316 @@ void function HudRevamp_Init()
     HudRevamp_AddLayout( "HudRevamp",
     null,
     HudRevamp_Update,
-    null,
+    HudRevamp_FlatUpdate,
     Announcement )
     OffhandCooldownData data
     file.cooldownData.append(data)
     file.cooldownData.append(clone data)
     file.cooldownData.append(clone data)
+}
+
+void function HudRevamp_FlatUpdate( var panel )
+{
+    entity player = GetLocalViewPlayer()
+
+    // GAMESTATE
+
+    int timeLeft = int(ceil(Time() - level.nv.gameEndTime))
+    Hud_SetText( HudElement("Timer", panel), format("%i:%02i", time / 60, time % 60))
+    // TEAM 1 STATUS
+    
+    Hud_SetBarProgress()
+
+    // HEALTHBAR CHECKS
+    // side note - mem leak. can't fix because traceline creates a new instance of
+    // the traceresults stack every time it's called :(
+    // TARGET INFO BULLSHIT SEND HELP PLEASE
+    // also this should be illegal
+    vector attackDir = AnglesToForward( player.CameraAngles() )
+    if (IsValid(player.GetActiveWeapon()) && player.GetActiveWeapon().GetWeaponOwner() == player)
+        attackDir = player.GetActiveWeapon().GetAttackDirection()
+    TraceResults results = TraceLine( player.CameraPosition(), player.CameraPosition() + attackDir * 8192, [ player ],
+        TRACE_MASK_BLOCKLOS | TRACE_MASK_SHOT, TRACE_COLLISION_GROUP_NONE )
+    
+    file.hitEnt = results.hitEnt
+    string entities = "ents: [ "
+    if (IsValid( results.hitEnt ))
+    {
+        if (results.hitEnt.IsNPC())
+        {
+            if (results.hitEnt.IsTitan())
+            {
+                if (!file.titanHealthbarEntities.contains(results.hitEnt))
+                {
+                    thread TitanHealthBar( panel, results.hitEnt )
+                }
+            }
+            else
+            {
+                if (!file.healthbarEntities.contains(results.hitEnt))
+                {
+                    thread HealthBar( panel, results.hitEnt )
+                }
+            }
+        }
+        else if (results.hitEnt.IsPlayer())
+        {
+            if (results.hitEnt.IsTitan())
+            {
+                if (!file.titanHealthbarEntities.contains(results.hitEnt))
+                {
+                    thread TitanHealthBar( panel, results.hitEnt )
+                }
+            }
+            else
+            {
+                if (!file.healthbarEntities.contains(results.hitEnt))
+                {
+                    thread HealthBar( panel, results.hitEnt )
+                }
+            }
+        }
+    }
+}
+
+vector function WorldToScreenPos( vector position )
+{
+    array pos = expect array( Hud.ToScreenSpace( position ) )
+
+    vector result = <float( pos[0] ), float( pos[1] ), 0 >
+    //print(result)
+    return result
+}
+
+void function HealthBar( var panel, entity ent )
+{
+    ent.EndSignal( "EndTargetInfo" )
+    ent.EndSignal( "OnDestroy" )
+
+    // allocate healthbar
+    int index = file.healthbarIndex++
+    if (file.healthbarIndex > HEALTHBAR_INSTANCES)
+        file.healthbarIndex = 0
+
+    if (IsValid(file.healthbarEntities[index]))
+    {
+        file.healthbarEntities[index].Signal("EndTargetInfo")
+    }
+    file.healthbarEntities[index] = ent
+
+    var healthbar = Hud_GetChild( panel, "Healthbar" + index )
+    Hud_SetVisible( healthbar, true )
+
+    OnThreadEnd(
+        function() : ( ent, index, healthbar )
+		{
+            Hud_SetVisible( healthbar, false )
+            file.healthbarEntities[index] = null
+		}
+    )
+
+    // set title
+    string title = GetHealthbarTitle( ent )
+    Hud_SetText( Hud_GetChild( healthbar, "Name" ), title )
+
+    // alpha vars
+    float alpha = 0.0
+    float lastLookTime = Time()
+    float lastFrameTime = Time()
+
+    // children
+    var bar = Hud_GetChild( healthbar, "Bar" )
+    while (true)
+    {
+        if (ent.IsTitan())
+        {
+            file.titanHealthbarEntities[index] = null
+            ent.Signal("EndTargetInfo")
+        }
+        
+        Hud_SetVisible( healthbar, !clGlobal.isMenuOpen )
+
+        // check team
+        entity player = IsValid(GetLocalViewPlayer()) ? GetLocalViewPlayer() : GetLocalClientPlayer()
+        bool isFriendly = player.GetTeam() == ent.GetTeam()
+
+        // check if we're being looked at
+        float delta = Time() - lastFrameTime
+        if (file.hitEnt == ent && IsAlive(ent))
+            lastLookTime = Time()
+
+        // set alpha
+        if (Time() - lastLookTime > 0.25)
+            alpha -= 8.0 * delta
+        else alpha += 8.0 * delta
+        alpha = clamp(alpha, 0, 0.8)
+        healthbar.SetPanelAlpha( alpha * 255.0 )
+
+        if (isFriendly)
+        {
+            bar.SetColor( FRIENDLY_BAR_COLOR )
+        }
+        else
+        {
+            bar.SetColor( ENEMY_BAR_COLOR )
+        }
+
+        // calculate screen pos
+        vector mins = ent.GetBoundingMins()
+        vector maxs = ent.GetBoundingMaxs()
+        vector worldPos = ent.GetOrigin() + <(mins.x + maxs.x) / 2, (mins.y + maxs.y) / 2, maxs.z + 8>
+
+        vector screenPos = WorldToScreenPos( worldPos )
+        vector size = <Hud_GetWidth( healthbar ), Hud_GetHeight( healthbar ), 0>
+
+        Hud_SetPos( healthbar, screenPos.x - size.x / 2, screenPos.y - size.y )
+
+        // set health frac
+        // TODO: set shield frac
+        Hud_SetBarProgress( bar, GetHealthFrac(ent) )
+
+        lastFrameTime = Time()
+        wait 0
+    }
+}
+
+void function TitanHealthBar( var panel, entity ent )
+{
+    ent.EndSignal( "EndTargetInfo" )
+    ent.EndSignal( "OnDestroy" )
+
+    // allocate healthbar
+    int index = file.titanHealthbarIndex++
+    if (file.titanHealthbarIndex > HEALTHBAR_INSTANCES)
+        file.titanHealthbarIndex = 0
+    if (IsValid(file.titanHealthbarEntities[index]))
+    {
+        file.titanHealthbarEntities[index].Signal("EndTargetInfo")
+    }
+    file.titanHealthbarEntities[index] = ent
+
+    var healthbar = Hud_GetChild( panel, "HealthbarTitan" + index )
+    Hud_SetVisible( healthbar, true )
+
+    OnThreadEnd(
+        function() : ( ent, index, healthbar )
+		{
+            Hud_SetVisible( healthbar, false )
+		}
+    )
+
+    // set title
+    string title = GetHealthbarTitle( ent )
+    Hud_SetText( Hud_GetChild( healthbar, "Name" ), title )
+
+    // alpha variables
+    float alpha = 0.0
+    float lastLookTime = Time()
+    float lastFrameTime = Time()
+
+    // children
+    var bar = Hud_GetChild( healthbar, "Bar" )
+    var shieldBar = Hud_GetChild( healthbar, "ShieldBar" )
+    var barBG = Hud_GetChild( healthbar, "BG" )
+    while (true)
+    {
+        if (!ent.IsTitan())
+        {
+            file.titanHealthbarEntities[index] = null
+            ent.Signal("EndTargetInfo")
+        }
+        
+        Hud_SetVisible( healthbar, !clGlobal.isMenuOpen )
+
+        // check team
+        entity player = IsValid(GetLocalViewPlayer()) ? GetLocalViewPlayer() : GetLocalClientPlayer()
+        bool isFriendly = player.GetTeam() == ent.GetTeam()
+
+        if (isFriendly)
+        {
+            bar.SetColor( FRIENDLY_BAR_COLOR )
+        }
+        else
+        {
+            bar.SetColor( ENEMY_TITAN_BAR_COLOR )
+        }
+        if (ent.IsInvulnerable())
+        {
+            bar.SetColor( INVULNERABLE_BAR_COLOR )
+        }
+
+        // check if we're being looked at
+        float delta = Time() - lastFrameTime
+        if (file.hitEnt == ent && IsAlive(ent))
+            lastLookTime = Time()
+
+        // alpha calculation
+        if (Time() - lastLookTime > 0.25)
+            alpha -= 8.0 * delta
+        else alpha += 8.0 * delta
+        alpha = clamp(alpha, 0, 0.8)
+        healthbar.SetPanelAlpha( alpha * 255.0 )
+
+        // calculate bar width with segment count
+        int baseBarWidth = 398
+        float healthPerSegment = 2500.0
+        if (IsSingleplayer())
+            healthPerSegment = 1500.0
+        float segments = ent.GetMaxHealth() / healthPerSegment
+        int width = int(segments) * 50
+        entity soul = ent.GetTitanSoul()
+        if (ent.GetMaxHealth() % healthPerSegment == 0)
+            width -= 2
+        else width += int((segments % 1.0) * 48)
+
+        Hud_SetWidth( bar, width )
+        Hud_SetWidth( shieldBar, width )
+        Hud_SetWidth( barBG, width )
+
+        // calculate screen pos
+        vector mins = ent.GetBoundingMins()
+        vector maxs = ent.GetBoundingMaxs()
+        vector worldPos = ent.GetOrigin() + <(mins.x + maxs.x) / 2, (mins.y + maxs.y) / 2, maxs.z + 8>
+
+        vector screenPos = WorldToScreenPos( worldPos )
+        vector size = <Hud_GetWidth( healthbar ), Hud_GetHeight( healthbar ), 0>
+
+        Hud_SetPos( healthbar, screenPos.x - (size.x - baseBarWidth + width) / 2, screenPos.y - size.y )
+
+        // set health frac
+        // TODO: set shield frac
+        Hud_SetBarProgress( bar, GetHealthFrac(ent) )
+        Hud_SetBarProgress( shieldBar, IsValid(soul) && soul.GetShieldHealthMax() > 0.0 ? 
+            float(soul.GetShieldHealth()) / float(soul.GetShieldHealthMax()) : 0.0 )
+
+        lastFrameTime = Time()
+        wait 0
+    }
+}
+string function GetHealthbarTitle( entity ent )
+{
+    if (!IsValid(ent))
+        return "\x1b[38;5;220mnull"
+    string title = ent.GetTitleForUI()
+    if (ent.IsNPC())
+    {
+        title = ent.GetTitleForUI()
+        if (title == "")
+            title = expect string( ent.Dev_GetAISettingByKeyField( "title" ) )
+        if (IsValid(ent.GetBossPlayer()))
+        {
+            return ent.GetBossPlayerName() + "'s " + Localize( title )
+        }
+    }
+    if (ent.IsPlayer())
+    {
+        if (ent.IsTitan())
+            return ent.GetPlayerName() + " (" + Localize( title ) + ")"
+
+        return ent.GetPlayerName()
+    }
+
+    return title
 }
 
 void function Announcement( var panel, AnnouncementData data )
@@ -64,10 +383,12 @@ void function Announcement( var panel, AnnouncementData data )
     // announcement of higher priority is called directly after.
     clGlobal.levelEnt.EndSignal( "AnnoucementPurge" )
 
-    Hud_SetText(title, ExpandString(Localize(data.messageText).toupper()))
+    array<string> args = data.optionalTextArgs
+    Hud_SetText(title, ExpandString(Localize(data.messageText, args[0], args[1], args[2], args[3], args[4]).toupper()))
     Hud_EnableKeyBindingIcons(desc)
     //Hud_EnableKeyBindingIcons(title)
-    Hud_SetText(desc, CleanString(Localize(data.subText)))
+    array<string> args = data.optionalSubTextArgs
+    Hud_SetText(desc, CleanString(Localize(data.subText, args[0], args[1], args[2], args[3], args[4])))
 
     float start = Time()
     float fadeInTime = 0.5
@@ -204,6 +525,22 @@ void function HudRevamp_Update( var panel )
     {
         UpdateOffhand( HudElement( "OffhandCenter", panel ), offhands[1], 1 )
     }
+
+    // boosts
+
+    float ownedFrac = PlayerEarnMeter_GetOwnedFrac( player )
+    float earnedFrac = PlayerEarnMeter_GetEarnedFrac( player )
+    float rewardFrac = PlayerEarnMeter_GetRewardFrac( player )
+    if (player.IsTitan())
+    {
+        ownedFrac = 0.0
+        earnedFrac = IsValid(player.GetTitanSoul()) ? 
+            player.GetTitanSoul().GetTitanSoulNetFloat( "coreAvailableFrac" ) : 0.0
+    }
+    SetConVarFloat( "hud_revamp_pip_rotation", rewardFrac * -360 )
+    Hud_SetBarProgress( HudElement("TitanOwnedMeter", panel), ownedFrac )
+    Hud_SetBarProgress( HudElement("TitanEarnedMeter", panel), earnedFrac )
+    Hud_SetText( HudElement("TitanPercent", panel), int( earnedFrac * 100.0 ).tostring() )
 }
 
 void function UpdateOffhand( var panel, entity weapon, int index )
@@ -278,8 +615,6 @@ string function GetStockpileString( entity weapon )
 {
 	string result
 
-    if (weapon.GetWeaponSettingBool(eWeaponVar.ammo_no_remove_from_clip))
-        return "∞"
 		//if (file.selectedWeapon == weapon) RuiSetFloat(file.ruis["stockpile"], "msgAlpha", 0.0)
     if (weapon.GetWeaponSettingFloat(eWeaponVar.regen_ammo_refill_rate) > 0.0)
     {
@@ -291,6 +626,8 @@ string function GetStockpileString( entity weapon )
             return "∞"
         return weapon.GetWeaponSettingInt(eWeaponVar.ammo_stockpile_max).tostring()
     }
+    if (weapon.GetWeaponSettingBool(eWeaponVar.ammo_no_remove_from_stockpile))
+        return weapon.GetWeaponSettingInt(eWeaponVar.ammo_clip_size).tostring()
 	return weapon.GetWeaponPrimaryAmmoCount().tostring()
 }
 
