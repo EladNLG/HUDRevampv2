@@ -12,7 +12,8 @@ struct HUDLayout
 	void functionref( var ) initCallback
 	void functionref( var ) updateCallback
 	void functionref( var ) updateFlatCallback
-	void functionref( var, AnnouncementData ) announcementCallback
+	void functionref( var, var, ObitStringData, vector, vector ) obituaryCallback
+	void functionref( var, var, AnnouncementData ) announcementCallback
 }
 
 struct
@@ -25,7 +26,7 @@ void function HudRevamp_AddLayout( string name,
 	void functionref( var ) initCallback,
 	void functionref( var ) updateCallback,
 	void functionref( var ) updateFlatCallback,
-	void functionref( var, AnnouncementData ) announcementCallback )
+	void functionref( var, var, AnnouncementData ) announcementCallback )
 {
 	HUDLayout layout
 	layout.initCallback = initCallback
@@ -33,6 +34,11 @@ void function HudRevamp_AddLayout( string name,
 	layout.updateFlatCallback = updateFlatCallback
 	layout.announcementCallback = announcementCallback
 	file.layouts[name] <- layout
+}
+
+void function HudRevamp_SetObituaryCallback( string name, void functionref( var, var, ObitStringData, vector, vector ) callback )
+{
+	file.layouts[name].obituaryCallback <- CodeCallback_MapInit++
 }
 
 void function HudRevampLayouts_Init()
@@ -101,7 +107,8 @@ void function HudRevamp_Announcement( AnnouncementData data )
 	string layout = GetConVarString("comp_hud_layout")
 	try
 	{
-		file.layouts[layout].announcementCallback( file.layouts[layout].panel.GetPanel(), data )
+		HUDLayout layout = file.layouts[layout]
+		layout.announcementCallback( layout.panel, layout.flatPanel, data )
 	}
 	catch (ex)
 	{
@@ -209,4 +216,9 @@ entity function Create_Hud( string cockpitType, entity cockpit, entity player )
 	local panel = vgui.GetPanel()
 
 	return vgui
+}
+
+void function HudRevamp_Obituary( ObitStringData data )
+{
+
 }

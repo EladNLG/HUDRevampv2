@@ -42,12 +42,12 @@ void function HudRevamp_FlatUpdate( var panel )
     entity player = GetLocalViewPlayer()
 
     // GAMESTATE
-
-    int timeLeft = int(ceil(Time() - level.nv.gameEndTime))
-    Hud_SetText( HudElement("Timer", panel), format("%i:%02i", time / 60, time % 60))
+    Hud_SetVisible( HudElement("GameState", panel), !IsSingleplayer() )
+    if (!IsSingleplayer())
+        GameState_Update( player, HudElement("GameState", panel) )
     // TEAM 1 STATUS
     
-    Hud_SetBarProgress()
+    //Hud_SetBarProgress()
 
     // HEALTHBAR CHECKS
     // side note - mem leak. can't fix because traceline creates a new instance of
@@ -99,6 +99,73 @@ void function HudRevamp_FlatUpdate( var panel )
             }
         }
     }
+}
+
+entity function GetTopCompetitor( int team )
+{
+	array<entity> players = GetPlayerArrayOfEnemies( team )
+
+	entity topCompetitor
+	foreach ( player in players )
+	{
+		if ( !topCompetitor || (GameRules_GetTeamScore( player.GetTeam()) ) > GameRules_GetTeamScore( topCompetitor.GetTeam()) )
+			topCompetitor = player
+	}
+
+	return topCompetitor
+}
+
+void function GameState_Update( entity player, var panel )
+{
+    int scoreLimit = GetScoreLimit_FromPlaylist()
+    int friendlyTeam = player.GetTeam()
+    entity topCompetitor = GetTopCompetitor( friendlyTeam )
+    int enemyTeam = friendlyTeam == TEAM_IMC ? TEAM_MILITIA : TEAM_IMC
+    if (IsValid(topCompetitor))
+        enemyTeam = topCompetitor.GetTeam()
+
+    int friendlyScore = GameRules_GetTeamScore( friendlyTeam )
+    int enemyScore    = GameRules_GetTeamScore( enemyTeam )
+    
+    Hud_SetText(HudElement("ScoreFriendly", panel), string(friendlyScore))
+    Hud_SetText(HudElement("ScoreEnemy", panel), string(enemyScore))
+    Hud_SetBarProgress(HudElement("ScoreBarFriendly", panel), float(friendlyScore) / scoreLimit)
+    Hud_SetBarProgress(HudElement("ScoreBarEnemy", panel), float(enemyScore) / scoreLimit)
+
+    Hud_SetVisible(HudElement("TitanStatusFriendly", panel), !IsFFAGame())
+    Hud_SetVisible(HudElement("TitanStatusEnemy", panel), !IsFFAGame())
+    if (!IsFFAGame())
+    {
+        array<entity> friends = GetPlayerArrayOfTeam( friendlyTeam )
+        array<entity> enemies = GetPlayerArrayOfTeam( enemyTeam )
+        int friendTitans = 0
+        foreach (entity friend in friends)
+        {
+            if ( friend.IsTitan() || IsValid( friend.GetPetTitan() ) )
+                friendTitans++
+        }
+        int enemyTitans = 0
+        foreach (entity enemy in enemies)
+        {
+            if ( enemy.IsTitan() || IsValid( enemy.GetPetTitan() ) )
+                enemyTitans++   
+        }
+        var friendlyTitanBar = HudElement("TitanStatusFriendly", panel)
+        var enemyTitanBar = HudElement("TitanStatusEnemy", panel)
+        Hud_SetWidth( friendlyTitanBar, friends.len() * 21 - 2 + 4 )
+        Hud_SetWidth( enemyTitanBar, enemies.len() * 21 - 2 + 4 )
+        Hud_SetVisible( friendlyTitanBar, friends.len() > 0 )
+        Hud_SetVisible( enemyTitanBar, enemies.len() > 0 )
+        Hud_SetBarProgress( friendlyTitanBar, float(friendTitans) / friends.len() )
+        Hud_SetBarProgress( enemyTitanBar, float(enemyTitans) / enemies.len() )
+    }
+
+    int timeLeft = int(ceil(level.nv.gameEndTime - Time()))
+    if ( IsRoundBased() )
+    {
+        timeLeft = int(ceil(level.nv.roundEndTime - Time()))
+    }
+    Hud_SetText( HudElement("Timer", panel), format("%i:%02i", timeLeft / 60, timeLeft % 60))
 }
 
 vector function WorldToScreenPos( vector position )
@@ -341,7 +408,7 @@ string function GetHealthbarTitle( entity ent )
     return title
 }
 
-void function Announcement( var panel, AnnouncementData data )
+void function Announcement( var panel, var flatPanel, AnnouncementData data )
 {
     if (panel == null)
     {
@@ -387,7 +454,7 @@ void function Announcement( var panel, AnnouncementData data )
     Hud_SetText(title, ExpandString(Localize(data.messageText, args[0], args[1], args[2], args[3], args[4]).toupper()))
     Hud_EnableKeyBindingIcons(desc)
     //Hud_EnableKeyBindingIcons(title)
-    array<string> args = data.optionalSubTextArgs
+    args = data.optionalSubTextArgs
     Hud_SetText(desc, CleanString(Localize(data.subText, args[0], args[1], args[2], args[3], args[4])))
 
     float start = Time()
@@ -531,16 +598,51 @@ void function HudRevamp_Update( var panel )
     float ownedFrac = PlayerEarnMeter_GetOwnedFrac( player )
     float earnedFrac = PlayerEarnMeter_GetEarnedFrac( player )
     float rewardFrac = PlayerEarnMeter_GetRewardFrac( player )
+    int goalId = player.GetPlayerNetInt( EARNMETER_GOALID )
     if (player.IsTitan())
     {
+        entity soul = player.GetTitanSoul()
         ownedFrac = 0.0
-        earnedFrac = IsValid(player.GetTitanSoul()) ? 
-            player.GetTitanSoul().GetTitanSoulNetFloat( "coreAvailableFrac" ) : 0.0
+        earnedFrac = 0.0
+        Hud_SetVisible( HudElement("TitanOwnedMeter", panel), IsValid(player.GetOffhandWeapon(3)) )
+        Hud_SetVisible( HudElement("TitanEarnedMeter", panel), IsValid(player.GetOffhandWeapon(3)) )
+        Hud_SetVisible( HudElement("TitanPercent", panel), IsValid(player.GetOffhandWeapon(3)) )
+        Hud_SetVisible( HudElement("TitanMeterBG", panel), IsValid(player.GetOffhandWeapon(3)) )
+        Hud_SetVisible( HudElement("TitanPip", panel), IsValid(player.GetOffhandWeapon(3)) )
+        if (IsValid(soul))
+        {
+            earnedFrac = soul.GetTitanSoulNetFloat( "coreAvailableFrac" )
+            if (soul.GetCoreChargeExpireTime() > Time() && soul.GetCoreChargeStartTime() < Time())
+            {
+                earnedFrac = GraphCapped(Time(), soul.GetCoreChargeStartTime(), soul.GetCoreChargeExpireTime(), 1, 0)
+            }
+        }
     }
+    else if (IsValid(player.GetPetTitan()))
+    {
+        ownedFrac = 0.0
+        earnedFrac = float(player.GetPetTitan().GetHealth()) / player.GetPetTitan().GetMaxHealth()
+    }
+    else
+    {
+        Hud_SetVisible( HudElement("TitanOwnedMeter", panel), goalId != 0 )
+        Hud_SetVisible( HudElement("TitanEarnedMeter", panel), goalId != 0 )
+        Hud_SetVisible( HudElement("TitanPercent", panel), goalId != 0 )
+        Hud_SetVisible( HudElement("TitanMeterBG", panel), goalId != 0 )
+        Hud_SetVisible( HudElement("TitanPip", panel), goalId != 0 )
+    }
+
     SetConVarFloat( "hud_revamp_pip_rotation", rewardFrac * -360 )
     Hud_SetBarProgress( HudElement("TitanOwnedMeter", panel), ownedFrac )
     Hud_SetBarProgress( HudElement("TitanEarnedMeter", panel), earnedFrac )
     Hud_SetText( HudElement("TitanPercent", panel), int( earnedFrac * 100.0 ).tostring() )
+
+    
+    bool hasBoosts = IsMultiplayer() && player.GetPlayerNetInt("itemInventoryCount") > 0
+    Hud_SetVisible(HudElement("BoostStatusLabel", panel), hasBoosts)
+    Hud_SetVisible(HudElement("BoostStatus", panel), hasBoosts)
+    if (hasBoosts)
+        Hud_SetText(HudElement("BoostStatus", panel), player.GetPlayerNetInt("itemInventoryCount").tostring())
 }
 
 void function UpdateOffhand( var panel, entity weapon, int index )

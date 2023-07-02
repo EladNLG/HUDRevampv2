@@ -3,4 +3,6 @@ npc_soldier
     ui_targetinfo ""
     ui_targetinfo "" [$mp]
     ui_targetinfo "" [$sp]
+
+    Health          100
 }

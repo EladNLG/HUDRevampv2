@@ -250,9 +250,9 @@ function Obituary( entity attacker, string attackerClass, entity victim, int scr
 	else
 		obitColor = OBITUARY_COLOR_WEAPON
 
-	string attackerString
-	string weaponString
-	string victimString
+	string attackerString = ""
+	string weaponString = ""
+	string victimString = ""
 
 	if ( attackerInfo.petDisplayName != "" )
 	{
@@ -272,19 +272,13 @@ function Obituary( entity attacker, string attackerClass, entity victim, int scr
 		victimString = Localize( "#OBIT_PLAYER_STRING", victimInfo.displayName )
 	}
 
-	string localizedObit = Localize( "#OBIT_ENT_WEAPON_ENT", attackerString, Localize( sourceDisplayName ), victimString )
+	string localizedObit = Localize( "#OBIT_ENT_WEAPON_ENT", attackerString, Localize( sourceDisplayName ), victimString );
 
-	bool displayBackground = attacker == GetLocalClientPlayer() || victim == GetLocalClientPlayer()
+	bool displayBackground = (attacker == GetLocalClientPlayer() || victim == GetLocalClientPlayer())
 
-	float backgroundAlpha = (attacker == GetLocalClientPlayer() || victim == GetLocalClientPlayer()) ? 0.5 : 0.0
-	vector backgroundColor = <0, 0, 0>
-	//bool displayBackground = false
+	vector backgroundColor = <0,0,0>
+	float backgroundAlpha = attacker == GetLocalClientPlayer() || victim == GetLocalClientPlayer() ? 0.5 : 0.0
 
-	//if ( attacker.IsPlayer() )
-	//	attackerInfo.displayColor = <255, 255, 255>
-	//else if ( victim.IsPlayer() )
-	//	attackerInfo.displayColor = <255, 255, 255>
-	//
 	Obituary_Print_Localized( localizedObit, attackerInfo.displayColor, victimInfo.displayColor, <255, 255, 255>, backgroundColor, backgroundAlpha )
 }
 
@@ -366,7 +360,7 @@ void function Obituary_Print( string attackerDisplayName, string weaponDisplayNa
 
 void function Obituary_Print_Localized( string localizedPrint, vector altColor1 = <255, 255, 255>, vector altColor2 = <255, 255, 255>, vector altColor3 = <255, 255, 255>, vector backgroundColor = <255, 255, 255>, float backgroundAlpha = 0.0 )
 {
-	if ( true )
+	if ( !file.obituariesEnabled )
 		return
 
 	var rui = CreateCockpitRui( $"ui/obituary_crawl_localized.rpak" )
@@ -437,9 +431,10 @@ void function UpdateObituaryQueue()
 
 void function AddObituary( ObitStringData obitStringData, vector string1Color, vector string2Color )
 {
-	if ( true )
+	if ( !file.obituariesEnabled )
 		return
-
+	if (HudRevamp_Obituary(obitStringData, string1Color, string2Color))
+		return
 	//	var rui = RuiCreate( $"ui/obituary_crawl.rpak", clGlobal.topoFullScreen, RUI_DRAW_HUD, 0 )
 	var rui = CreateCockpitRui( $"ui/obituary_crawl.rpak" )
 	RuiSetGameTime( rui, "startTime", Time() )

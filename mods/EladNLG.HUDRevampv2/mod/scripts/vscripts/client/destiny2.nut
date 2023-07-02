@@ -45,7 +45,7 @@ void function Destiny2_Init()
     //}
 }
 
-void function Announcement( var panel, AnnouncementData data )
+void function Announcement( var panel, var flatPanel, AnnouncementData data )
 {
     if (panel == null)
     {
@@ -102,7 +102,7 @@ void function Announcement( var panel, AnnouncementData data )
     Hud_SetText(title, ExpandString(Localize(data.messageText, args[0], args[1], args[2], args[3], args[4]).toupper()))
     Hud_EnableKeyBindingIcons(desc)
     //Hud_EnableKeyBindingIcons(title)
-    array<string> args = data.optionalSubTextArgs
+    args = data.optionalSubTextArgs
     Hud_SetText(desc, CleanString(Localize(data.subText, args[0], args[1], args[2], args[3], args[4])))
 
     //Hud_SetVisible(bg, false)
@@ -529,7 +529,6 @@ void function Destiny2_Update( var panel )
         file.earnGoal = PlayerEarnMeter_GetGoal( player )
         file.earnReward = PlayerEarnMeter_GetReward( player )
         file.goalId = player.GetPlayerNetInt( EARNMETER_GOALID )
-        print("!!! " + file.goalId)
     }
     
     // healthbar stuff
@@ -869,7 +868,6 @@ void function TitanHealthBar( var flatPanel, entity ent )
             healthPerSegment = 1500.0
         float segments = ent.GetMaxHealth() / healthPerSegment
         int width = int(segments) * 40
-        entity soul = ent.GetTitanSoul()
         if (ent.GetMaxHealth() % healthPerSegment == 0)
             width -= 2
         else width += int((segments % 1.0) * 38)
@@ -885,6 +883,7 @@ void function TitanHealthBar( var flatPanel, entity ent )
 
         vector screenPos = WorldToScreenPos( worldPos )
         vector size = <Hud_GetWidth( healthbar ), Hud_GetHeight( healthbar ), 0>
+        entity soul = ent.GetTitanSoul()
 
         Hud_SetPos( healthbar, screenPos.x - (size.x - baseBarWidth + width) / 2, screenPos.y - size.y )
 

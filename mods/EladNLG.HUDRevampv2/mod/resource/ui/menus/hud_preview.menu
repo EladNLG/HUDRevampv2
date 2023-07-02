@@ -107,7 +107,7 @@
 			pin_corner_to_sibling TOP
 			pin_to_sibling_corner BOTTOM
 			pin_to_sibling ControlsLine1
-			labelText "Modders: Avoid obstructing the area around this text."
+			labelText "Note: not a 100% accurate representation."
 			font		ChakraLight_27
         }
         ControlsLine3
@@ -120,7 +120,8 @@
 			pin_corner_to_sibling TOP
 			pin_to_sibling_corner BOTTOM
 			pin_to_sibling ControlsLine2
-			labelText "Note: not a 100% accurate representation."
+			labelText "Layout Updated!"
+			fgcolor_override	"255 159 50 0"
 			font		ChakraLight_27
         }
 		

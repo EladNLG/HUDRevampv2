@@ -609,4 +609,116 @@ hud_revamp.res
 		pin_corner_to_sibling	BOTTOM_LEFT
 	}
 
+
+	// KILLFEED I THINK
+
+	KillFeed0
+	{
+		ControlName				Label
+		xpos					-20
+		ypos					-24
+		tall					24
+		wide					180
+		auto_wide_tocontents	0
+		auto_tall_tocontents	0
+		visible					1
+		enabled					1
+		labelText				"^4682FF00Player ^[Weapon] ^FF860D00Enemy"
+		textAlignment			east
+		//auto_wide_tocontents	1
+		fgcolor_override 		"255 255 255 255"
+		font					ChakraBold_27
+
+		pin_to_sibling			Screen
+		pin_to_sibling_corner	TOP_RIGHT
+		pin_corner_to_sibling	TOP_RIGHT
+	}
+
+	KillFeed1
+	{
+		ControlName				Label
+		xpos					0
+		ypos					6
+		tall					24
+		wide					180
+		auto_wide_tocontents	0
+		auto_tall_tocontents	0
+		visible					1
+		enabled					1
+		labelText				"^4682FF00Player ^[Weapon] ^FF860D00Enemy"
+		textAlignment			east
+		//auto_wide_tocontents	1
+		fgcolor_override 		"255 255 255 255"
+		font					ChakraBold_27
+
+		pin_to_sibling			KillFeed0
+		pin_to_sibling_corner	BOTTOM_RIGHT
+		pin_corner_to_sibling	TOP_RIGHT
+	}
+
+	KillFeed2
+	{
+		ControlName				Label
+		xpos					0
+		ypos					6
+		tall					24
+		wide					180
+		auto_wide_tocontents	0
+		auto_tall_tocontents	0
+		visible					1
+		enabled					1
+		labelText				"^4682FF00Player ^[Weapon] ^FF860D00Enemy"
+		textAlignment			east
+		//auto_wide_tocontents	1
+		fgcolor_override 		"255 255 255 255"
+		font					ChakraBold_27
+
+		pin_to_sibling			KillFeed1
+		pin_to_sibling_corner	BOTTOM_RIGHT
+		pin_corner_to_sibling	TOP_RIGHT
+	}
+
+	KillFeed3
+	{
+		ControlName				Label
+		xpos					0
+		ypos					6
+		tall					24
+		wide					180
+		auto_wide_tocontents	0
+		auto_tall_tocontents	0
+		visible					1
+		enabled					1
+		labelText				"^4682FF00Player ^[Weapon] ^FF860D00Enemy"
+		textAlignment			east
+		//auto_wide_tocontents	1
+		fgcolor_override 		"255 255 255 255"
+		font					ChakraBold_27
+
+		pin_to_sibling			KillFeed2
+		pin_to_sibling_corner	BOTTOM_RIGHT
+		pin_corner_to_sibling	TOP_RIGHT
+	}
+
+	KillFeed4
+	{
+		ControlName				Label
+		xpos					0
+		ypos					6
+		tall					24
+		wide					180
+		auto_wide_tocontents	0
+		auto_tall_tocontents	0
+		visible					1
+		enabled					1
+		labelText				"^4682FF00Player ^[Weapon] ^FF860D00Enemy"
+		textAlignment			east
+		//auto_wide_tocontents	1
+		fgcolor_override 		"255 255 255 255"
+		font					ChakraBold_27
+
+		pin_to_sibling			KillFeed3
+		pin_to_sibling_corner	BOTTOM_RIGHT
+		pin_corner_to_sibling	TOP_RIGHT
+	}
 }

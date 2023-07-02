@@ -1,3 +1,4 @@
+untyped
 global function HudPreview_Init
 global function HudRevamp_AddLayout
 
@@ -70,12 +71,20 @@ void function OnOpen()
         printt( val + " = " + constant )
     }
     */
+    // left
     RegisterButtonPressedCallback( KEY_LEFT, OnLeft )
+    RegisterButtonPressedCallback( KEY_A, OnLeft )
     RegisterButtonPressedCallback( BUTTON_DPAD_LEFT, OnLeft )
     RegisterButtonPressedCallback( BUTTON_STICK_LEFT, OnLeft )
+    // right
     RegisterButtonPressedCallback( KEY_RIGHT, OnRight )
+    RegisterButtonPressedCallback( KEY_D, OnRight )
     RegisterButtonPressedCallback( BUTTON_DPAD_RIGHT, OnRight )
     RegisterButtonPressedCallback( BUTTON_STICK_RIGHT, OnRight )
+    // select
+    RegisterButtonPressedCallback( KEY_ENTER, OnEnter )
+    RegisterButtonPressedCallback( KEY_SPACE, OnEnter )
+    RegisterButtonPressedCallback( BUTTON_A, OnEnter )
     foreach (int index, string layout in file.layouts)
         if (layout == GetConVarString("comp_hud_layout"))
             file.curLayoutIndex = index
@@ -87,29 +96,43 @@ void function OnClose()
 {
     // left
     DeregisterButtonPressedCallback( KEY_LEFT, OnLeft )
+    DeregisterButtonPressedCallback( KEY_A, OnLeft )
     DeregisterButtonPressedCallback( BUTTON_DPAD_LEFT, OnLeft )
     DeregisterButtonPressedCallback( BUTTON_STICK_LEFT, OnLeft )
     // right
     DeregisterButtonPressedCallback( KEY_RIGHT, OnRight )
+    DeregisterButtonPressedCallback( KEY_D, OnRight )
     DeregisterButtonPressedCallback( BUTTON_DPAD_RIGHT, OnRight )
     DeregisterButtonPressedCallback( BUTTON_STICK_RIGHT, OnRight )
+    // select!
+    DeregisterButtonPressedCallback( KEY_ENTER, OnEnter )
+    DeregisterButtonPressedCallback( KEY_SPACE, OnEnter )
+    DeregisterButtonPressedCallback( BUTTON_A, OnEnter )
 }
 
 void function OnLeft( var button )
 {
-    print("left!")
     file.curLayoutIndex--
     if (file.curLayoutIndex < 0)
         file.curLayoutIndex = file.layouts.len() - 1
+    EmitUISound( "Menu.Focus" )
     UpdateLayouts()
 }
 void function OnRight( var button )
 {
-    print("right!")
     file.curLayoutIndex++
     if (file.curLayoutIndex >= file.layouts.len())
         file.curLayoutIndex = 0
+    EmitUISound( "Menu.Focus" )
     UpdateLayouts()
+}
+void function OnEnter( var button )
+{
+    SetConVarString("comp_hud_layout", file.layouts[file.curLayoutIndex])
+
+    Hud_SetAlpha( Hud_GetChild(file.menu, "ControlsLine3"), 255 )
+    Hud_GetChild(file.menu, "ControlsLine3").FadeOverTimeDelayed( 0, 0.1, 0.2 )
+    EmitUISound( "Menu.Accept" )
 }
 
 
@@ -121,14 +144,6 @@ void function HudRevamp_AddLayout(string name, string displayName, string author
     if (Hud_HasChild(file.panelHolder, name + "_Fullscreen"))
     {
         file.panels.append(Hud_GetChild(file.panelHolder, name + "_Fullscreen"))
-        if (name == "HudRevamp")
-        {
-            var panel = Hud_GetChild(file.panelHolder, name + "_Fullscreen")
-            Hud_SetBarProgress( Hud_GetChild(panel, "ScoreBarFriendly"), 56.0 / 650.0)
-            Hud_SetBarProgress( Hud_GetChild(panel, "ScoreBarEnemy"), 32.0 / 650.0)
-            Hud_SetBarProgress( Hud_GetChild(panel, "TitanStatusFriendly"), 8.0 / 8.0)
-            Hud_SetBarProgress( Hud_GetChild(panel, "TitanStatusEnemy"), 4.0 / 8.0)
-        }
     }
     file.layouts.append(name)
     file.displayNames.append(displayName)

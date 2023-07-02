@@ -53,7 +53,8 @@
     ],
     "Dependencies": {
         "PLAYER_HAS_MOD_SETTINGS": "Mod Settings",
-        "PLAYER_HAS_ROGUELIKE_MOD": "TF|Roguelike"
+        "PLAYER_HAS_ROGUELIKE_MOD": "TF|Roguelike",
+        "PLAYER_HAS_S2_CLIENT_KILL_CALLBACK": "S2.ClientKillCallback"
     },
     "ConVars": [
         {
