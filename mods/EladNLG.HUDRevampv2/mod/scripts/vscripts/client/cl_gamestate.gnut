@@ -88,8 +88,17 @@ function ClGameState_Init()
 
 	AddCallback_OnClientScriptInit( ClGameState_AddClient )
 
-	//var rui = CreatePermanentCockpitRui( GetGameStateAsset(), MINIMAP_Z_BASE - 1 )
-	//file.gamestate_info = rui
+	
+	if ( GAMETYPE == FORT_WAR || GAMETYPE == FD )
+	{
+		asset gamestateAsset
+		if ( GAMETYPE == FORT_WAR )
+			gamestateAsset = $"ui/gamestate_info_fw.rpak"
+		if ( GAMETYPE == FD )
+			gamestateAsset = $"ui/gamestate_info_fd.rpak"
+		var rui = CreatePermanentCockpitRui( gamestateAsset, MINIMAP_Z_BASE - 1 )
+		file.gamestate_info = rui
+	}
 
 	if ( file.gameModeScoreBarUpdateRules == null )
 		SetGameModeScoreBarUpdateRules( GameModeScoreBarUpdateRules_Default )
@@ -135,7 +144,6 @@ void function ClGameState_SetInfoStatusText( string statusText )
 {
 	//RuiSetString( file.gamestate_info, "statusText", Localize( statusText ) )
 }
-
 
 asset function GetGameStateAsset()
 {

@@ -556,8 +556,7 @@ void function Destiny2_FlatUpdate( var flatPanel )
     
     // update gamestate stuff :)
     var gamestate = HudElement("Destiny_GameStatePanel", flatPanel)
-    Hud_SetY( gamestate, 0 )
-    Hud_SetVisible( gamestate, !IsSingleplayer() )
+    Hud_SetVisible( gamestate, !(IsSingleplayer() || GAMETYPE == "fd" || GAMETYPE == FORT_WAR /* playing it safe with the fort war */) )
     HudRevamp_D2_Gamestate_Update(gamestate, player)
 
     // HEALTHBAR CHECKS

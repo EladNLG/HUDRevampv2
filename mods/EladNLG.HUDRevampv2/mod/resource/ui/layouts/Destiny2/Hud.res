@@ -716,4 +716,17 @@ resource/ui/layouts/Destiny2/Hud.res
 		pin_to_sibling_corner	BOTTOM
 		pin_corner_to_sibling	TOP
 	}
+
+	// i couldn't make it work. too many callbacks to native values and RUI, unless i found a way to elegantly poll all these values, it's not happening.
+	// left the layouts and xcf file in here though, in case anyone wants to try later on
+	//Destiny_FrontierDefensePanel
+	//{
+	//	"ControlName"				"CNestedPanel"
+	//	"tall"						f0
+	//	"wide"						f0
+	//	"xpos"						"0"
+	//	"ypos"						"300"
+	//	"enabled"					"0"
+	//	"controlSettingsFile"		"resource/ui/layouts/Destiny2/FrontierDefense_ShieldStatus.res"
+	//}
 }
