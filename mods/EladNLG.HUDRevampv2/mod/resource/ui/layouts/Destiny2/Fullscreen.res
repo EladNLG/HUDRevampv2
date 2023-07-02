@@ -1,16 +1,21 @@
 "resource/ui/layouts/Destiny2_Fullscreeen.res"
 {
+    Screen
+	{
+		ControlName Label
+		wide f0
+		tall f0
+		labelText ""
+		visible 0
+	}
 
 	Destiny_GameStatePanel
 	{
 		"ControlName"				"CNestedPanel"
-		"classname"					"ModButton"
-		"tall"						"200"
-		"wide"						"1400"
-		"xpos"						"260"
+		"tall"						f0
+		"wide"						f0
+		"xpos"						"0"
 		"ypos"						"0"
-		"pin_corner_to_sibling"		"TOP_LEFT"
-		"pin_to_sibling_corner"		"TOP_LEFT"
 		"controlSettingsFile"		"resource/ui/layouts/Destiny2/GameState.res"
 	}
     

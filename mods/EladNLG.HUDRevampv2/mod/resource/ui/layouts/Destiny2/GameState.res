@@ -1,5 +1,14 @@
 resource/ui/layouts/Destiny2/Gamestate.res
 {
+	Screen
+	{
+		ControlName Label
+		wide f0
+		tall f0
+		labelText ""
+		visible 0
+	}
+
 	BG
 	{
 		ControlName			ImagePanel
@@ -9,14 +18,14 @@ resource/ui/layouts/Destiny2/Gamestate.res
 		drawColor	"0 0 0 0"
 		scaleImage			1
 
-		wide				1400
-		tall				200
+		wide				1920
+		tall				130
 
 		"xpos"			"0"
 		"ypos"			"0"
-
-		pin_corner_to_sibling	TOP_LEFT
-		pin_to_sibling_corner	TOP_LEFT
+		pin_to_sibling          Screen
+		pin_corner_to_sibling	TOP
+		pin_to_sibling_corner	TOP
 	}
 	//This is mainly just here as a point of reference so i can draw stuff out in gimp
 	//DO NOT MOVE IT
@@ -59,7 +68,8 @@ resource/ui/layouts/Destiny2/Gamestate.res
 		pin_to_sibling_corner	TOP_LEFT
 	}
 
-	Round_Timer{
+	Round_Timer
+	{
 		ControlName				Label
 		xpos					100
 		ypos					0
@@ -692,6 +702,48 @@ resource/ui/layouts/Destiny2/Gamestate.res
 		pin_to_sibling_corner	TOP_RIGHT
 	}
 
+	// FFA //
+
+	FFA_You
+	{
+		ControlName			Label
+
+		auto_tall_tocontents	1
+		labelText				"YOU"
+		textAlignment			"EAST"
+		font					DestinyMedium_24
+
+		wide				500
+		tall				60
+
+		"xpos"			"0"
+		"ypos"			"0"
+
+		pin_to_sibling "Team0"
+		pin_corner_to_sibling	RIGHT
+		pin_to_sibling_corner	RIGHT
+	}
+
+	FFA_Leader
+	{
+		ControlName			Label
+
+		auto_tall_tocontents	1
+		labelText				"LEADER"
+		textAlignment			"WEST"
+		font					DestinyMedium_24
+
+		wide				500
+		tall				60
+
+		"xpos"			"0"
+		"ypos"			"0"
+
+		pin_to_sibling "Team1"
+		pin_corner_to_sibling	LEFT
+		pin_to_sibling_corner	LEFT
+	}
+
   Name
   {
 		ControlName				Label
@@ -702,9 +754,8 @@ resource/ui/layouts/Destiny2/Gamestate.res
 		visible					1
 		enabled					1
 		auto_tall_tocontents	1
-		labelText				"WORK IN PROGRESS"
+		labelText				"wip"
 		textAlignment			center
-    pin_to_sibling "BG"
 		font					ChakraLight_24
   }
 }

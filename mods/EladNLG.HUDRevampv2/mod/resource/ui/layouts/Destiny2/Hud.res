@@ -10,7 +10,7 @@ resource/ui/layouts/Destiny2/Hud.res
 	Screen
 	{
 		ControlName		ImagePanel
-		fillColor		"0 0 0 0"
+		fillColor		"0 0 0 50"
 		drawColor		"0 0 0 0"
 		image			"vgui/hud/white"
 		tall		"1080"
@@ -26,16 +26,19 @@ resource/ui/layouts/Destiny2/Hud.res
 	HealthBarBG
 	{
 		"ControlName" "ImagePanel"
-		"image" "ui/destiny2/health_16"
+		"image" "ui/destiny2/healthbar_bg"
 		"scaleImage" "1"
-		"drawColor" "0 0 0 50" // vanilla label color
+		"drawColor" "255 255 255 255" // vanilla label color
 		"visible" "1"
-		"wide" "500"
-		"tall" "20"
+		"wide" "512"
+		"tall" "64"
 		"enabled"	"1"
+			
+		"ypos"			"-140"
 
-		"xpos"			"710" // can't use rXXX, is relative to screen resolution and not parent panel.
-		"ypos"			"140" // can't use rXXX, is relative to screen resolution and not parent panel.
+		pin_to_sibling          Screen
+		pin_corner_to_sibling	TOP
+		pin_to_sibling_corner	TOP
 	}
 
 	HealthBar
@@ -60,10 +63,10 @@ resource/ui/layouts/Destiny2/Hud.res
 		CircularEnabled 		0
 		CircularClockwise		1
 
-		xpos				0
-		ypos				0
-		wide				494
-		tall				14
+		xpos				-12
+		ypos				-11
+		wide				488
+		tall				16
 		visible				1
 		//image				vgui/HUD/white
 		//scaleImage			1
@@ -71,8 +74,8 @@ resource/ui/layouts/Destiny2/Hud.res
 		//drawColor			"160 160 160 128"
 
 		pin_to_sibling			HealthBarBG
-		pin_corner_to_sibling	CENTER
-		pin_to_sibling_corner	CENTER
+		pin_corner_to_sibling	TOP_LEFT
+		pin_to_sibling_corner	TOP_LEFT
 	}
 
 	DestinyLoadoutPanel

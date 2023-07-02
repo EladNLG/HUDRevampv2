@@ -5,7 +5,9 @@ const array<int> INVULNERABLE_BAR_COLOR = [127, 127, 127, 255]
 const array<int> ENEMY_TITAN_BAR_COLOR = [200, 150, 50, 255]
 const array<int> ENEMY_BAR_COLOR = [200, 50, 50, 255]
 const array<int> FRIENDLY_BAR_COLOR = [70, 130, 255, 255]
-const array<int> SUBCLASS_COLOR = [255, 150, 50, 255] //Solar
+const array<int> SUBCLASS_COLOR = [230, 133, 64, 255] //Solar
+//connt array<int> SUBCLASS_COLOR = [84, 64, 113, 255] //Void
+//const array<int> SUBCLASS_COLOR = [114, 151, 170, 255] //Arc
 const array<int> SUPER_COL_RGB = [223, 194, 79]
 const int HEALTHBAR_INSTANCES = 7
 
@@ -341,6 +343,40 @@ void function HudRevamp_D2_SetGamestateClassIcon(entity player, var ui_object, b
     }
 }
 
+//RESPAWN FUNCTION, /vscripts/_utility_shared.nut
+int function GetWinningTeam_FFA2()
+{
+	if ( level.nv.winningTeam != null )
+		return expect int( level.nv.winningTeam )
+
+	int maxScore = 0
+	int playerTeam
+	int currentScore
+	int winningTeam = TEAM_UNASSIGNED
+
+	foreach( player in GetPlayerArray() )
+	{
+		playerTeam = player.GetTeam()
+		if ( IsRoundBased() )
+			currentScore = GameRules_GetTeamScore2( playerTeam )
+		else
+			currentScore = GameRules_GetTeamScore( playerTeam )
+
+		if ( currentScore == maxScore) //Treat multiple teams as having the same score as no team winning
+			winningTeam = TEAM_UNASSIGNED
+
+		if ( currentScore > maxScore )
+		{
+			maxScore = currentScore
+			winningTeam = playerTeam
+		}
+	}
+
+	return winningTeam
+
+}
+
+
 void function HudRevamp_D2_Gamestate_Update(var gamestate, entity player){
     //this logic is safe to run every frame, i know this because respawn does it
     var friendly_score_number = Hud_GetChild(gamestate, "Team0_ScoreCount")
@@ -349,6 +385,10 @@ void function HudRevamp_D2_Gamestate_Update(var gamestate, entity player){
     var enemy_score_box = Hud_GetChild(gamestate, "Team1_Score")
     var friendly_score_bar = Hud_GetChild(gamestate, "Team0_ScoreBar")
     var enemy_score_bar = Hud_GetChild(gamestate, "Team1_ScoreBar")
+
+    var ffa_you_name = Hud_GetChild(gamestate, "FFA_You")
+    var ffa_leader_name = Hud_GetChild(gamestate, "FFA_Leader")
+
     var clock = Hud_GetChild(gamestate, "Round_Timer")
 
     var friendly_score_bar_winning = Hud_GetChild(gamestate, "Team0_ScoreBar_Border_Winning")
@@ -371,7 +411,37 @@ void function HudRevamp_D2_Gamestate_Update(var gamestate, entity player){
 
     float score_limit = float(GetScoreLimit_FromPlaylist())
     int friendlyTeam = player.GetTeam()
-    int enemyTeam = friendlyTeam == TEAM_IMC ? TEAM_MILITIA : TEAM_IMC
+    int enemyTeam = 0
+
+    if ( IsFFAGame() ) 
+    {
+        int highestScore = 0
+        int playerTeam = 0
+        int playerCheckScore = 0
+        int playerTeamHighest = 0
+        foreach( player in GetPlayerArray() )
+        {
+            playerTeam = player.GetTeam()
+            if ( playerTeam != friendlyTeam ) {
+
+                if ( IsRoundBased() ) playerCheckScore = GameRules_GetTeamScore2( playerTeam )
+                else playerCheckScore = GameRules_GetTeamScore( playerTeam )
+                if ( playerCheckScore > highestScore || highestScore == 0) {
+                    highestScore = playerCheckScore
+                    playerTeamHighest = playerTeam
+                }
+            }
+        }
+        enemyTeam = playerTeamHighest
+        var enemies =  GetPlayerArrayOfTeam( enemyTeam )
+        if( enemies.len() > 0 )
+            Hud_SetText(ffa_leader_name,enemies[0].GetPlayerName())
+        Hud_SetText(ffa_you_name, player.GetPlayerName())
+
+    } else
+    {
+        enemyTeam = friendlyTeam == TEAM_IMC ? TEAM_MILITIA : TEAM_IMC
+    }
 
     int friendly_score = GameRules_GetTeamScore( friendlyTeam )
     int enemy_score    = GameRules_GetTeamScore( enemyTeam )
@@ -414,35 +484,58 @@ void function HudRevamp_D2_Gamestate_Update(var gamestate, entity player){
     Hud_SetBarProgress(friendly_score_bar, (float(friendly_score) / score_limit))
     Hud_SetBarProgress(enemy_score_bar, (float(enemy_score) / score_limit))
 
-    array<entity> friendly_players = GetPlayerArrayOfTeam( friendlyTeam )
-    array<entity> enemy_players    = GetPlayerArrayOfTeam( enemyTeam )
-
-    //disable UI for players that aren't joined
-    for(int i = friendly_players.len(); i < 8; i++){
-        string player_ui_target = "Team0_Player" + string(i)
-        var player_ui = Hud_GetChild(gamestate, player_ui_target)
-        Hud_SetVisible(player_ui, false)
+    if ( IsFFAGame() ) 
+    {
+        Hud_SetVisible(ffa_you_name, true)
+        Hud_SetVisible(ffa_leader_name, true)
+        //disable UI for ALL PLAYERS fuck you
+        for(int i = 0; i < 8; i++){
+            string player_ui_target = "Team0_Player" + string(i)
+            var player_ui = Hud_GetChild(gamestate, player_ui_target)
+            Hud_SetVisible(player_ui, false)
+        }
+        for(int i = 0; i < 8; i++){
+            string player_ui_target = "Team1_Player" + string(i)
+            var player_ui = Hud_GetChild(gamestate, player_ui_target)
+            Hud_SetVisible(player_ui, false)
+        }
     }
-    for(int i = enemy_players.len(); i < 8; i++){
-        string player_ui_target = "Team1_Player" + string(i)
-        var player_ui = Hud_GetChild(gamestate, player_ui_target)
-        Hud_SetVisible(player_ui, false)
-    }
 
-    //update UI for players that are joined
-    for(int i = 0; i < min(8,friendly_players.len()); i++){
-        string player_ui_target = "Team0_Player" + string(i)
-        var player_ui = Hud_GetChild(gamestate, player_ui_target)
-        Hud_SetVisible(player_ui, true)
+    else 
+    {
+        Hud_SetVisible(ffa_you_name, false)
+        Hud_SetVisible(ffa_leader_name, false)
 
-        HudRevamp_D2_SetGamestateClassIcon(friendly_players[i], player_ui, true)
-    }
-    for(int i = 0; i < min(8,enemy_players.len()); i++){
-        string player_ui_target = "Team1_Player" + string(i)
-        var player_ui = Hud_GetChild(gamestate, player_ui_target)
-        Hud_SetVisible(player_ui, true)
+        array<entity> friendly_players = GetPlayerArrayOfTeam( friendlyTeam )
+        array<entity> enemy_players    = GetPlayerArrayOfTeam( enemyTeam )
 
-        HudRevamp_D2_SetGamestateClassIcon(enemy_players[i], player_ui, false)
+        //disable UI for players that aren't joined
+        for(int i = friendly_players.len(); i < 8; i++){
+            string player_ui_target = "Team0_Player" + string(i)
+            var player_ui = Hud_GetChild(gamestate, player_ui_target)
+            Hud_SetVisible(player_ui, false)
+        }
+        for(int i = enemy_players.len(); i < 8; i++){
+            string player_ui_target = "Team1_Player" + string(i)
+            var player_ui = Hud_GetChild(gamestate, player_ui_target)
+            Hud_SetVisible(player_ui, false)
+        }
+
+        //update UI for players that are joined
+        for(int i = 0; i < min(8,friendly_players.len()); i++){
+            string player_ui_target = "Team0_Player" + string(i)
+            var player_ui = Hud_GetChild(gamestate, player_ui_target)
+            Hud_SetVisible(player_ui, true)
+
+            HudRevamp_D2_SetGamestateClassIcon(friendly_players[i], player_ui, true)
+        }
+        for(int i = 0; i < min(8,enemy_players.len()); i++){
+            string player_ui_target = "Team1_Player" + string(i)
+            var player_ui = Hud_GetChild(gamestate, player_ui_target)
+            Hud_SetVisible(player_ui, true)
+
+            HudRevamp_D2_SetGamestateClassIcon(enemy_players[i], player_ui, false)
+        }
     }
 
 
@@ -535,8 +628,14 @@ void function Destiny2_Update( var panel )
     var player_healthbar = HudElement("HealthBar", panel)
     var player_healthbar_bg = HudElement("HealthBarBG", panel)
 
-    Hud_SetPos(player_healthbar_bg, 710, 140)
-    Hud_SetHeight(player_healthbar_bg, 24)
+    /*if ( !IsSingleplayer() ) {
+        Hud_SetPos(player_healthbar_bg, 0, -140)
+
+    } else {
+        Hud_SetPos(player_healthbar_bg, 0, 0)
+    }*/
+
+    //Hud_SetHeight(player_healthbar_bg, 24)
 
     Hud_SetBarProgress( player_healthbar, GetHealthFrac(player) )
 
@@ -594,12 +693,13 @@ void function Destiny2_Update( var panel )
             var originalIcon = GetWeaponInfoFileKeyFieldAsset_WithMods_Global( 
                 coreWeapon.GetWeaponClassName(), coreWeapon.GetMods(), "hud_icon"
             )
+            var core_str = expect string( 
+                GetWeaponInfoFileKeyField_WithMods_Global(
+                    coreWeapon.GetWeaponClassName(), coreWeapon.GetMods(), "hud_icon"
+                ) 
+            ) + "_destiny2"
             var customIcon = StringToAsset( 
-                expect string( 
-                    GetWeaponInfoFileKeyField_WithMods_Global(
-                        coreWeapon.GetWeaponClassName(), coreWeapon.GetMods(), "hud_icon"
-                    ) 
-                ) + "_destiny2"
+                core_str
             )
             Hud_SetImage(SuperIcon, customIcon)
         }
@@ -617,7 +717,7 @@ void function Destiny2_Update( var panel )
     if (player.IsTitan())
         d2_healthbar_opacity = 0.0
     Hud_SetColor( player_healthbar, 255, 255, 255, d2_healthbar_opacity * 255 )
-    Hud_SetColor( player_healthbar_bg, 0, 0, 0, d2_healthbar_opacity * 120 )
+    Hud_SetColor( player_healthbar_bg, 255, 255, 255, d2_healthbar_opacity * 120 )
     UpdateMainWeapons( player, panel )
 
     array<entity> offhands = [ player.GetOffhandWeapon(0), player.GetOffhandWeapon(1), player.GetOffhandWeapon(2) ]
@@ -950,7 +1050,7 @@ void function UpdateOffhand( var panel, entity weapon, int index )
 
     Hud_SetVisible( chargeBox2, file.cooldownData[index].charges >= 3 )
     Hud_SetHeight( chargeBox2, 8 )
-    Hud_SetWidth( chargeBox2, 60)
+    //Hud_SetWidth( chargeBox2, 60) //these fuck with the width on higher resolutions
 
     if (file.cooldownData[index].readyCharges >= 3)
     {
@@ -963,7 +1063,7 @@ void function UpdateOffhand( var panel, entity weapon, int index )
 
     Hud_SetVisible( chargeBox3, file.cooldownData[index].charges >= 4 )
     Hud_SetHeight( chargeBox3, 8 )
-    Hud_SetWidth( chargeBox3, 60)
+    //Hud_SetWidth( chargeBox3, 60) //these fuck with the width on higher resolutions
 
     if (file.cooldownData[index].readyCharges >= 4)
     {
