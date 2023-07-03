@@ -59,7 +59,7 @@
     "ConVars": [
         {
             "Name":"comp_hud_layout",
-            "DefaultValue": "0",
+            "DefaultValue": "HudRevamp",
             "Flags": 16777216
         },
         {

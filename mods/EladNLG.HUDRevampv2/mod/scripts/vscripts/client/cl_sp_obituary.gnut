@@ -7,11 +7,6 @@ global function Obituary_Print_Generic
 global function Obituary
 global function Obituary_GetEntityInfo
 global function Obituary_Print_Localized
-global function Obituary_SetEnabled
-global function Obituary_SetIndexOffset
-
-global function ServerCallback_SquadLeaderBonus
-global function ServerCallback_SquadLeaderDoubleXP
 
 const NUM_OBITUARY_LINES = 4		// cant change arbitrarily, need to have matching entries in the .res file
 const obituaryTextBoxWidth = 500
@@ -28,8 +23,8 @@ struct ObituaryData
 struct
 {
 	array<ObituaryData>		obituaryQueue = []
-	bool obituariesEnabled = true
-	int indexOffest = 0
+	string lastlocalizedEvent
+	string lastEntityName
 } file
 
 struct ObitEntityInfo
@@ -58,36 +53,6 @@ function ClObituary_Init()
 
 void function EntitiesDidLoad()
 {
-}
-
-void function ServerCallback_SquadLeaderBonus( int playerEHandle )
-{
-	entity pilot = GetEntityFromEncodedEHandle( playerEHandle )
-
-	if ( !IsValid( pilot ) )
-		return
-
-	if ( !pilot.IsPlayer() )
-		return
-
-	if ( pilot == GetLocalClientPlayer() )
-		Obituary_Print_Generic( "#OBIT_SQUAD_LEADER_BONUS_YOU", pilot.GetPlayerName(), TEAM_COLOR_FRIENDLY, <255, 255, 255> )
-	else
-		Obituary_Print_Generic( "#OBIT_SQUAD_LEADER_BONUS", pilot.GetPlayerName(), TEAM_COLOR_FRIENDLY, <255, 255, 255> )
-}
-
-void function ServerCallback_SquadLeaderDoubleXP()
-{
-	AnnouncementData announcement = Announcement_Create( "#SQUAD_LEADER_BONUS_ANNOUNCE" )
-	bool displayNow = InitializeAnnouncement_ShouldDisplayNow( announcement, "#SQUAD_LEADER_BONUS_ANNOUNCE", "#SQUAD_LEADER_BONUS_ANNOUNCE_DESC", TEAM_COLOR_YOU )
-	announcement.announcementStyle = ANNOUNCEMENT_STYLE_SWEEP
-	announcement.icon = $"rui/menu/common/dbl_xp_icon"
-	announcement.iconAspect = <1, 1, 0>
-	announcement.soundAlias = SFX_HUD_ANNOUNCE_QUICK
-	announcement.duration = 4.0
-
-	if ( displayNow )
-		thread AnnouncementMessage_Display( GetLocalClientPlayer(), announcement )
 }
 
 ObitEntityInfo function Obituary_GetEntityInfo( entity ent, bool victimIsOwnedTitan = false, damageSourceId = null )
@@ -126,34 +91,28 @@ ObitEntityInfo function Obituary_GetEntityInfo( entity ent, bool victimIsOwnedTi
 	return info
 }
 
-function Obituary( entity attacker, string attackerClass, entity victim, int scriptDamageType, int damageSourceId, bool isHeadShot, bool victimIsOwnedTitan = false, bool forceDisplay = false )
+function Obituary( entity attacker, string attackerClass, entity victim, int scriptDamageType, int damageSourceId, bool isHeadShot, bool victimIsOwnedTitan = false )
 {
 	if ( IsSingleplayer() )
 		return
 
-	if ( GetConVarInt( "hud_setting_showObituary" ) == 0 )
-		return
-
-	if ( !forceDisplay )
+	if ( victim.IsPlayer() )
 	{
-		if ( victim.IsPlayer() )
-		{
-			// Players
-			if ( !OBITUARY_ENABLED_PLAYERS )
-				return
-		}
-		else if ( victim.IsTitan() )
-		{
-			// NPC Titans
-			if ( !OBITUARY_ENABLED_NPC_TITANS )
-				return
-		}
-		else
-		{
-			// NPC
-			if ( !OBITUARY_ENABLED_NPC )
-				return
-		}
+		// Players
+		if ( !OBITUARY_ENABLED_PLAYERS )
+			return
+	}
+	else if ( victim.IsTitan() )
+	{
+		// NPC Titans
+		if ( !OBITUARY_ENABLED_NPC_TITANS )
+			return
+	}
+	else
+	{
+		// NPC
+		if ( !OBITUARY_ENABLED_NPC )
+			return
 	}
 
 	if ( damageSourceId == eDamageSourceId.round_end )
@@ -250,9 +209,9 @@ function Obituary( entity attacker, string attackerClass, entity victim, int scr
 	else
 		obitColor = OBITUARY_COLOR_WEAPON
 
-	string attackerString = ""
-	string weaponString = ""
-	string victimString = ""
+	string attackerString
+	string weaponString
+	string victimString
 
 	if ( attackerInfo.petDisplayName != "" )
 	{
@@ -272,13 +231,19 @@ function Obituary( entity attacker, string attackerClass, entity victim, int scr
 		victimString = Localize( "#OBIT_PLAYER_STRING", victimInfo.displayName )
 	}
 
-	string localizedObit = Localize( "#OBIT_ENT_WEAPON_ENT", attackerString, Localize( sourceDisplayName ), victimString );
+	string localizedObit = Localize( "#OBIT_ENT_WEAPON_ENT", attackerString, Localize( sourceDisplayName ), victimString )
 
-	bool displayBackground = (attacker == GetLocalClientPlayer() || victim == GetLocalClientPlayer())
+	bool displayBackground = attacker == GetLocalClientPlayer() || victim == GetLocalClientPlayer()
 
-	vector backgroundColor = <0,0,0>
-	float backgroundAlpha = attacker == GetLocalClientPlayer() || victim == GetLocalClientPlayer() ? 0.5 : 0.0
+	float backgroundAlpha = (attacker == GetLocalClientPlayer() || victim == GetLocalClientPlayer()) ? 0.5 : 0.0
+	vector backgroundColor = <0, 0, 0>
+	//bool displayBackground = false
 
+	//if ( attacker.IsPlayer() )
+	//	attackerInfo.displayColor = <255, 255, 255>
+	//else if ( victim.IsPlayer() )
+	//	attackerInfo.displayColor = <255, 255, 255>
+	//
 	Obituary_Print_Localized( localizedObit, attackerInfo.displayColor, victimInfo.displayColor, <255, 255, 255>, backgroundColor, backgroundAlpha )
 }
 
@@ -327,13 +292,10 @@ void function Obituary_Print( string attackerDisplayName, string weaponDisplayNa
 	else
 	{
 		obitStringData.victimLocalizedString = "#OBIT_PLAYER_STRING"
-		victimString = Localize( "#OBIT_PLAYER_STRING", victimDisplayName )
+		victimString = Localize( "#OBIT_PLAYER_STRING", attackerDisplayName )
 	}
 
 	string localizedObit = Localize( "#OBIT_ENT_WEAPON_ENT", attackerString, Localize( weaponDisplayName ), victimString )
-
-	if (HudRevamp_Obituary( localizedObit, attackerColor, victimColor ))
-		return
 
 	AddObituary( obitStringData, attackerColor, victimColor )
 
@@ -363,12 +325,6 @@ void function Obituary_Print( string attackerDisplayName, string weaponDisplayNa
 
 void function Obituary_Print_Localized( string localizedPrint, vector altColor1 = <255, 255, 255>, vector altColor2 = <255, 255, 255>, vector altColor3 = <255, 255, 255>, vector backgroundColor = <255, 255, 255>, float backgroundAlpha = 0.0 )
 {
-	if ( !file.obituariesEnabled )
-		return
-
-	if (HudRevamp_Obituary( localizedPrint, altColor1, altColor2 ))
-		return
-
 	var rui = CreateCockpitRui( $"ui/obituary_crawl_localized.rpak" )
 	RuiSetGameTime( rui, "startTime", Time() )
 	RuiSetGameTime( rui, "updateTime", Time() )
@@ -394,12 +350,32 @@ void function Obituary_Print_Localized( string localizedPrint, vector altColor1 
 
 void function Obituary_Print_Generic( string localizedEvent, string entityName, vector eventColor, vector nameColor )
 {
-	if ( !file.obituariesEnabled )
+	if (HudRevamp_Obituary( localizedObit, eventColor, nameColor ))
 		return
+	var rui
 
-	var rui = CreateCockpitRui( $"ui/obituary_crawl_generic.rpak" )
-	RuiSetGameTime( rui, "startTime", Time() )
-	RuiSetGameTime( rui, "updateTime", Time() )
+	float time = Time()
+
+	if ( localizedEvent == file.lastlocalizedEvent && entityName == file.lastEntityName && file.obituaryQueue.len() > 0 )
+	{
+		time = Time() - 1
+		rui = file.obituaryQueue[0].rui
+		file.obituaryQueue[0].startTime = time
+	}
+	else
+	{
+		rui = CreateCockpitRui( $"ui/obituary_crawl_generic_center.rpak" )
+
+		ObituaryData newObituary
+		newObituary.rui = rui
+		newObituary.startTime = Time()
+		file.obituaryQueue.insert( 0, newObituary )
+
+		UpdateObituaryQueue()
+	}
+
+	RuiSetGameTime( rui, "startTime", time )
+	RuiSetGameTime( rui, "updateTime", time )
 	RuiSetFloat( rui, "duration", OBITUARY_DURATION )
 
 	RuiSetString( rui, "localizedString", localizedEvent )
@@ -408,12 +384,8 @@ void function Obituary_Print_Generic( string localizedEvent, string entityName, 
 	RuiSetFloat3( rui, "string1Color", eventColor / 255.0 )
 	RuiSetFloat3( rui, "string2Color", nameColor / 255.0 )
 
-	ObituaryData newObituary
-	newObituary.rui = rui
-	newObituary.startTime = Time()
-	file.obituaryQueue.insert( 0, newObituary )
-
-	UpdateObituaryQueue()
+	file.lastlocalizedEvent = localizedEvent
+	file.lastEntityName = entityName
 }
 
 
@@ -430,16 +402,18 @@ void function UpdateObituaryQueue()
 			continue
 		}
 
-		RuiSetInt( obitData.rui, "offset", index + file.indexOffest )
+		RuiSetInt( obitData.rui, "offset", index )
 		RuiSetGameTime( obitData.rui, "updateTime", Time() )
 	}
 }
 
 void function AddObituary( ObitStringData obitStringData, vector string1Color, vector string2Color )
 {
-	if ( !file.obituariesEnabled )
-		return
-	//	var rui = RuiCreate( $"ui/obituary_crawl.rpak", clGlobal.topoFullScreen, RUI_DRAW_HUD, 0 )
+//	var rui = RuiCreate( $"ui/obituary_crawl.rpak", clGlobal.topoFullScreen, RUI_DRAW_HUD, 0 )
+	var rui = CreateCockpitRui( $"ui/obituary_crawl.rpak" )
+	RuiSetGameTime( rui, "startTime", Time() )
+	RuiSetGameTime( rui, "updateTime", Time() )
+	RuiSetFloat( rui, "duration", OBITUARY_DURATION )
 
 	string attackerName = ""
 	string attackerPetName = ""
@@ -458,11 +432,6 @@ void function AddObituary( ObitStringData obitStringData, vector string1Color, v
 	Assert( typeof( obitStringData.victimLocalizedString ) == "string" )
 	Assert( typeof( obitStringData.weaponLocalizedName ) == "string" )
 	Assert( typeof( obitStringData.weaponLocalizedString ) == "string" )
-
-	var rui = CreateCockpitRui( $"ui/obituary_crawl.rpak" )
-	RuiSetGameTime( rui, "startTime", Time() )
-	RuiSetGameTime( rui, "updateTime", Time() )
-	RuiSetFloat( rui, "duration", OBITUARY_DURATION )
 
 	RuiSetString( rui, "attackerName", obitStringData.attackerName )
 	if ( obitStringData.attackerPetName.len() )
@@ -546,12 +515,3 @@ function Obituary_Display( obituaryData )
 }
 */
 
-void function Obituary_SetEnabled( bool state )
-{
-	file.obituariesEnabled = state
-}
-
-void function Obituary_SetIndexOffset( int offset )
-{
-	file.indexOffest = offset
-}

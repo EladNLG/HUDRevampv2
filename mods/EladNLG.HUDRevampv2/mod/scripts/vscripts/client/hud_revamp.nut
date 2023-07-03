@@ -6,6 +6,10 @@ const array<int> INVULNERABLE_BAR_COLOR = [127, 127, 127, 255]
 const array<int> ENEMY_TITAN_BAR_COLOR = [200, 50, 50, 255]
 const array<int> ENEMY_BAR_COLOR = [200, 50, 50, 255]
 const array<int> FRIENDLY_BAR_COLOR = [70, 130, 255, 255]
+const float KILLFEED_DURATION = 7.0
+const float KILLFEED_FADE_OUT = 1.0
+const float KILLFEED_FADE_IN = 0.2
+const int KILLFEED_SIZE = 5
 
 struct
 {
@@ -15,6 +19,8 @@ struct
 
     array<entity> healthbarEntities = [ null, null, null, null, null, null, null, null ]
     array<entity> titanHealthbarEntities = [ null, null, null, null, null, null, null, null ]
+    array<string> killfeedContents
+    array<float> killfeedTimes
     entity hitEnt
     int healthbarIndex = 0
     int titanHealthbarIndex = 0
@@ -31,6 +37,8 @@ void function HudRevamp_Init()
     HudRevamp_Update,
     HudRevamp_FlatUpdate,
     Announcement )
+    // P.S. WHY THE FUCK IS OBITUARY A GLOBAL FUNC
+    HudRevamp_SetObituaryCallback( "HudRevamp", ObituaryEvent )
     OffhandCooldownData data
     file.cooldownData.append(data)
     file.cooldownData.append(clone data)
@@ -504,11 +512,19 @@ string function ExpandString( string str )
 void function HudRevamp_Update( var panel )
 {
     entity player = GetLocalClientPlayer()
-    if (!IsValid(file.selectedWeapon) || file.selectedWeapon.GetWeaponOwner() != GetLocalClientPlayer())
+    if (!IsValid(file.selectedWeapon))
+    {
+        if (!IsValid(player.GetActiveWeapon()))
+            return
+        file.selectedWeapon = player.GetActiveWeapon()
+    }
+    else if (file.selectedWeapon.GetWeaponOwner() != GetLocalClientPlayer())
         return
-    HudElement("WeaponIcon", panel).SetImage(
-        GetWeaponInfoFileKeyFieldAsset_Global( file.selectedWeapon.GetWeaponClassName(), "hud_icon" )
-    )
+    asset icon = GetWeaponInfoFileKeyFieldAsset_Global( file.selectedWeapon.GetWeaponClassName(), "hud_icon" )
+    if (icon != $"")
+        HudElement("WeaponIcon", panel).SetImage(icon)
+    else
+        HudElement("WeaponIcon", panel).SetImage($"vgui/hud/empty")
 
     Hud_SetBarProgress( HudElement("Bar", panel), GetHealthFrac(player) )
     int shield = 0
@@ -593,7 +609,7 @@ void function HudRevamp_Update( var panel )
         UpdateOffhand( HudElement( "OffhandCenter", panel ), offhands[1], 1 )
     }
 
-    // boosts
+    // BOOSTS AND TITAN METER
 
     float ownedFrac = PlayerEarnMeter_GetOwnedFrac( player )
     float earnedFrac = PlayerEarnMeter_GetEarnedFrac( player )
@@ -618,7 +634,7 @@ void function HudRevamp_Update( var panel )
             }
         }
     }
-    else if (IsValid(player.GetPetTitan()))
+    else if (IsValid(player.GetPetTitan()) && IsMultiplayer())
     {
         ownedFrac = 0.0
         earnedFrac = float(player.GetPetTitan().GetHealth()) / player.GetPetTitan().GetMaxHealth()
@@ -643,6 +659,31 @@ void function HudRevamp_Update( var panel )
     Hud_SetVisible(HudElement("BoostStatus", panel), hasBoosts)
     if (hasBoosts)
         Hud_SetText(HudElement("BoostStatus", panel), player.GetPlayerNetInt("itemInventoryCount").tostring())
+
+    // KILL FEED
+
+    for (int i = 0; i < KILLFEED_SIZE; i++)
+    {
+        var label = HudElement("KillFeed" + i, panel)
+        if (i < file.killfeedContents.len())
+        {
+            string content = file.killfeedContents[file.killfeedContents.len() - i - 1]
+            float startTime = file.killfeedTimes[file.killfeedContents.len() - i - 1]
+            float alpha = min(GraphCapped(Time() - startTime, 0, KILLFEED_FADE_IN, 0, 255),
+                GraphCapped(Time() - startTime, KILLFEED_DURATION - KILLFEED_FADE_OUT, KILLFEED_DURATION, 255, 0))
+            if (i == 0)
+            {
+                Hud_SetY(label, GraphCapped(Time() - startTime, 0, KILLFEED_FADE_IN, 0, -20))
+            }
+            
+            Hud_SetText(label, content)
+            Hud_SetColor(label, 255, 255, 255, alpha)
+        }
+        else
+        {
+            Hud_SetText(label, "")
+        }
+    }
 }
 
 void function UpdateOffhand( var panel, entity weapon, int index )
@@ -733,3 +774,16 @@ string function GetStockpileString( entity weapon )
 	return weapon.GetWeaponPrimaryAmmoCount().tostring()
 }
 
+void function ObituaryEvent( var panel, var flatPanel, string data, vector color1, vector color2 )
+{
+    if (file.killfeedContents.len() >= KILLFEED_SIZE)
+    {
+        file.killfeedContents.remove(0)
+        file.killfeedTimes.remove(0)
+    }
+    data = StringReplace(data, "`1", "^" + ColorToHex(color1) + "00", true)
+    data = StringReplace(data, "`2", "^" + ColorToHex(color2) + "00", true)
+    data = StringReplace(data, "`3", "^" + ColorToHex(<255,255,255>) + "00", true)
+    file.killfeedContents.append(data)
+    file.killfeedTimes.append(Time())
+}

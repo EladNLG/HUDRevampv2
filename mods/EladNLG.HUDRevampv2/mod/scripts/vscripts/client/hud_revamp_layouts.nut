@@ -3,7 +3,10 @@ untyped
 global function HudRevampLayouts_Init
 global function HudRevamp_AddLayout
 global function HudRevamp_Announcement
+global function HudRevamp_SetObituaryCallback
 global function HUDMenuOpenState
+global function HudRevamp_Obituary
+global function ColorToHex
 
 struct HUDLayout
 {
@@ -12,7 +15,7 @@ struct HUDLayout
 	void functionref( var ) initCallback
 	void functionref( var ) updateCallback
 	void functionref( var ) updateFlatCallback
-	void functionref( var, var, ObitStringData, vector, vector ) obituaryCallback
+	void functionref( var, var, string, vector, vector ) obituaryCallback
 	void functionref( var, var, AnnouncementData ) announcementCallback
 }
 
@@ -36,9 +39,9 @@ void function HudRevamp_AddLayout( string name,
 	file.layouts[name] <- layout
 }
 
-void function HudRevamp_SetObituaryCallback( string name, void functionref( var, var, ObitStringData, vector, vector ) callback )
+void function HudRevamp_SetObituaryCallback( string name, void functionref( var, var, string, vector, vector ) callback )
 {
-	file.layouts[name].obituaryCallback <- CodeCallback_MapInit++
+	file.layouts[name].obituaryCallback = callback
 }
 
 void function HudRevampLayouts_Init()
@@ -218,7 +221,19 @@ entity function Create_Hud( string cockpitType, entity cockpit, entity player )
 	return vgui
 }
 
-void function HudRevamp_Obituary( ObitStringData data )
+bool function HudRevamp_Obituary( string data, vector string1Color, vector string2Color )
 {
+	string curLayout = GetConVarString("comp_hud_layout")
+	if (curLayout in file.layouts && file.layouts[curLayout].obituaryCallback != null)
+	{
+		HUDLayout layout = file.layouts[curLayout]
+		file.layouts[curLayout].obituaryCallback(layout.panel, layout.flatPanel, data, string1Color, string2Color)
+		return true
+	}
+	return false
+}
 
+string function ColorToHex( vector color )
+{
+	return format("%02X%02X%02X", int(color.x), int(color.y), int(color.z))
 }
