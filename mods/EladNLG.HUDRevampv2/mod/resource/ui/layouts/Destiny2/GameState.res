@@ -743,19 +743,4 @@ resource/ui/layouts/Destiny2/Gamestate.res
 		pin_corner_to_sibling	LEFT
 		pin_to_sibling_corner	LEFT
 	}
-
-  Name
-  {
-		ControlName				Label
-		xpos					0
-		ypos					0
-		wide					256
-		tall					64
-		visible					1
-		enabled					1
-		auto_tall_tocontents	1
-		labelText				"wip"
-		textAlignment			center
-		font					ChakraLight_24
-  }
 }
