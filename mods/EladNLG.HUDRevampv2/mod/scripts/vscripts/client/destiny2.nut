@@ -682,12 +682,11 @@ void function Destiny2_Update( var panel )
     if(player.IsTitan()){
         entity coreWeapon = player.GetOffhandWeapon(3)
         if(IsValid(coreWeapon)){
-            
-            Hud_SetVisible( SuperIcon, true )
-            Hud_SetVisible( SuperBorder, true )
-            Hud_SetVisible( SuperBar, true )
-            Hud_SetVisible( SuperBar_BG, true )
-            Hud_SetVisible( SuperIcon_BG, true )
+            Hud_SetVisible( SuperIcon, false )
+            Hud_SetVisible( SuperBorder, false )
+            Hud_SetVisible( SuperBar, false )
+            Hud_SetVisible( SuperBar_BG, false )
+            Hud_SetVisible( SuperIcon_BG, false )
 
             var originalIcon = GetWeaponInfoFileKeyFieldAsset_WithMods_Global( 
                 coreWeapon.GetWeaponClassName(), coreWeapon.GetMods(), "hud_icon"
@@ -697,6 +696,7 @@ void function Destiny2_Update( var panel )
                     coreWeapon.GetWeaponClassName(), coreWeapon.GetMods(), "hud_icon"
                 ) 
             ) + "_destiny2"
+            
             var customIcon = StringToAsset( 
                 core_str
             )

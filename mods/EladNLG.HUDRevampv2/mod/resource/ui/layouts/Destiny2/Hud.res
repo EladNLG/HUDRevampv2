@@ -10,7 +10,7 @@ resource/ui/layouts/Destiny2/Hud.res
 	Screen
 	{
 		ControlName		ImagePanel
-		fillColor		"0 0 0 50"
+		fillColor		"0 0 0 0"
 		drawColor		"0 0 0 0"
 		image			"vgui/hud/white"
 		tall		"1080"
